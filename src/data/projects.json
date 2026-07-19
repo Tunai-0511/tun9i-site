@@ -6,6 +6,13 @@
     "ipas-study"
   ],
   "overrides": {
+    "tun9i-site": {
+      "title": "tun9i.com",
+      "live": "https://tun9i.com",
+      "zh": "就是這個網站。六個主題、三種語言、AI 生成的背景——Vite 加 vanilla JS，部署成一個 Cloudflare Worker。",
+      "en": "This very site. Six themes, three languages, AI-generated backgrounds — Vite plus vanilla JS, deployed as a single Cloudflare Worker.",
+      "ja": "このサイトそのもの。6 つのテーマ、3 つの言語、AI 生成の背景——Vite と vanilla JS で、ひとつの Cloudflare Worker として動いています。"
+    },
     "ipas-study": {
       "title": "iPAS 備考學院",
       "live": "https://ipas.tun9i.com",

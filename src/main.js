@@ -126,14 +126,26 @@ onScroll();
 // 手機漢堡選單
 const burger = document.getElementById('nav-burger');
 if (burger && nav) {
+  const links = document.getElementById('nav-links-list');
+  // 手機收合態的 CSS 是 opacity:0 + 位移出畫面 + pointer-events:none ——
+  // 那擋得住滑鼠,擋不住鍵盤:七個看不見的連結還在 Tab 順序裡。
+  // 跟 theme-menu 當年同一個坑,解法也一樣:inert。
+  // inert 要跟「手機版 && 選單關著」連動,跨越 860px 斷點時也要重算,
+  // 否則手機開完選單轉成桌機,導覽會被 inert 卡死。
+  const mobile = matchMedia('(max-width: 860px)');
+  const syncInert = () => { links.inert = mobile.matches && !nav.classList.contains('menu-open'); };
   const closeMenu = () => {
     nav.classList.remove('menu-open');
     burger.setAttribute('aria-expanded', 'false');
+    syncInert();
   };
   burger.addEventListener('click', () => {
     const open = nav.classList.toggle('menu-open');
     burger.setAttribute('aria-expanded', String(open));
+    syncInert();
   });
   nav.querySelectorAll('.nav-links a').forEach((a) => a.addEventListener('click', closeMenu));
   addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
+  mobile.addEventListener('change', syncInert);
+  syncInert();
 }
