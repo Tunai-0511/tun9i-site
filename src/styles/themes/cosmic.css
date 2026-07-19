@@ -1,0 +1,80 @@
+/* ============================================================
+   cosmic — 黑洞:深空、serif、琥珀金吸積盤、紫色星雲點綴
+   ============================================================ */
+
+[data-theme='cosmic'] body {
+  background-image:
+    radial-gradient(1100px 600px at 78% 18%, rgba(232, 180, 92, 0.10), transparent 62%),
+    radial-gradient(760px 460px at 12% 62%, rgba(143, 140, 255, 0.07), transparent 60%);
+  background-attachment: fixed;
+}
+
+/* serif 標題義式細節 */
+[data-theme='cosmic'] .hero-title,
+[data-theme='cosmic'] .section-title,
+[data-theme='cosmic'] .contact-title {
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+/* 眉標用「提亮的金」(--accent-ink #f2c983,壓在 #05060b 上約 11:1)。
+   淺色版是完全相反的 —— 那時 --accent-ink 是 #8a5e10「加深的金」才壓得住白底。
+   翻主題時這個 token 忘了跟著反,眉標就會在黑底上隱形。 */
+[data-theme='cosmic'] .eyebrow,
+[data-theme='cosmic'] .section-eyebrow { color: var(--accent-ink); }
+
+[data-theme='cosmic'] .hero-title {
+  background: linear-gradient(100deg, var(--text) 38%, var(--accent) 72%, var(--accent-2));
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  /* 深色版要暗色投影撐住字緣。淺色版是 rgba(255,255,255,.55) 的白色外光暈,
+     直接沿用會在黑底上糊成一圈白霧。 */
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+}
+
+/* hero 文字的第二道保險。水平暗場已經擋掉大部分,但背景是 cover ——
+   極寬或極窄的視窗下吸積盤還是可能掃到文字。投影不管什麼比例都有效,
+   而且在純黑處幾乎看不出來,只在壓到亮處時才發揮作用。 */
+[data-theme='cosmic'] .tagline,
+[data-theme='cosmic'] .hero-sub,
+[data-theme='cosmic'] .eyebrow {
+  text-shadow: 0 1px 10px rgba(5, 6, 11, 0.9), 0 0 26px rgba(5, 6, 11, 0.7);
+}
+
+/* 玻璃卡片:深空裡的薄膜。深色主題靠金色細邊分離,不是靠陰影(黑底上看不到陰影) */
+[data-theme='cosmic'] .card {
+  background: var(--surface);
+  border-color: rgba(232, 180, 92, 0.14);
+  box-shadow: 0 18px 44px -26px rgba(0, 0, 0, 0.9);
+}
+[data-theme='cosmic'] .card:hover {
+  border-color: rgba(232, 180, 92, 0.34);
+}
+
+[data-theme='cosmic'] .tl-dot { background: var(--bg); }
+
+/* stats-strip 正好落在吸積盤最亮的那一段上。預設的 --surface 是
+   rgba(255,255,255,0.05) —— 一層「提亮膜」,壓在本來就過曝的地方等於沒有,
+   實測「6 網站主題」整個消失在白熱區裡。這裡要反過來:暗色霧玻璃壓住背景。 */
+[data-theme='cosmic'] .stats-strip {
+  background: rgba(5, 6, 11, 0.62);
+  border-color: rgba(232, 180, 92, 0.22);
+  backdrop-filter: blur(18px) saturate(0.9);
+  -webkit-backdrop-filter: blur(18px) saturate(0.9);
+}
+
+/* 主按鈕:淺色版是 background:var(--text) + color:#fff。--text 翻成近白之後
+   會變成「白底白字」,按鈕整個消失。深色版改用金色實心 + 深色字。 */
+[data-theme='cosmic'] .btn-primary {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  box-shadow: 0 14px 34px -14px rgba(232, 180, 92, 0.5);
+}
+[data-theme='cosmic'] .btn-primary:hover { background: #f2c983; }
+
+[data-theme='cosmic'] .lang-dot { background: var(--accent-2); }
+
+/* hero 圖:淺色版是 brightness(1.04) 把圖打亮 —— 對黑洞是反方向。
+   這裡壓一點亮度、拉一點對比,讓事件視界更沉、吸積盤更跳。 */
+[data-theme='cosmic'] .hero-bg-img { filter: saturate(1.08) brightness(0.94) contrast(1.06); }

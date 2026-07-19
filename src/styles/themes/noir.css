@@ -1,0 +1,97 @@
+/* ============================================================
+   noir — 黑白:雜誌編輯風、銳利直角、無圓角無光暈
+   ============================================================ */
+
+[data-theme='noir'] body {
+  background-image: none;
+}
+
+/* 標題:大寫、緊縮、強烈的編輯感。
+   白色細光暈在淺底上看不出來,壓到照片暗處時才發揮作用 —— 純賺,不損編輯感。 */
+[data-theme='noir'] .hero-title,
+[data-theme='noir'] .contact-title {
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.75);
+}
+
+/* 黑白主題不要漸層 shimmer:noir 的 --accent-2 是灰(#6b6b6b),
+   閃動時會把中灰刷過整個標題,壓在淺色混凝土上就糊掉。
+   實心純黑最銳利,也最符合編輯風。 */
+[data-theme='noir'] .hero-title,
+[data-theme='noir'] .hero-title.split,
+[data-theme='noir'] .hero-title.split .ch {
+  background: none;
+  -webkit-text-fill-color: var(--text);
+  color: var(--text);
+  animation-name: ch-rise; /* 保留逐字進場,拿掉 shimmer */
+}
+[data-theme='noir'] .hero-title.split { animation: none; }
+[data-theme='noir'] .section-title {
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.7);
+}
+/* 壓在 hero 照片上的正文也給同樣的保護 */
+[data-theme='noir'] .hero .tagline,
+[data-theme='noir'] .hero .hero-sub {
+  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.8);
+}
+
+/* 眉標:黑底白字的小方塊,像雜誌欄目標 */
+[data-theme='noir'] .eyebrow,
+[data-theme='noir'] .section-eyebrow {
+  display: inline-block;
+  background: var(--text);
+  color: var(--bg);
+  padding: 0.28em 0.7em;
+  letter-spacing: 0.16em;
+}
+
+/* 卡片:銳利直角、細黑框、無陰影 */
+[data-theme='noir'] .card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+[data-theme='noir'] .card:hover {
+  background: var(--surface-strong);
+  border-color: var(--text);
+}
+
+[data-theme='noir'] .repo-card:hover {
+  box-shadow: 6px 6px 0 0 var(--text);
+  border-color: var(--text);
+}
+
+[data-theme='noir'] .btn-primary {
+  background: var(--text);
+  color: var(--bg);
+  box-shadow: none;
+  border-radius: 0;
+}
+[data-theme='noir'] .btn-primary:hover { box-shadow: 4px 4px 0 0 rgba(13, 13, 13, 0.25); }
+[data-theme='noir'] .btn-ghost {
+  border-radius: 0;
+  border-color: var(--text);
+}
+
+[data-theme='noir'] .avatar-card {
+  border-radius: 0;
+  box-shadow: none;
+  border: 1px solid var(--border);
+}
+[data-theme='noir'] .hero-bg-img { filter: contrast(1.05); }
+
+[data-theme='noir'] .stats-strip { border-radius: 0; }
+[data-theme='noir'] .theme-switcher,
+[data-theme='noir'] .lang-toggle,
+[data-theme='noir'] .theme-menu { border-radius: 0; }
+
+[data-theme='noir'] .tl-dot {
+  border-radius: 0;
+  background: var(--text);
+  border-color: var(--text);
+  box-shadow: none;
+}
+[data-theme='noir'] .lang-dot { border-radius: 0; }

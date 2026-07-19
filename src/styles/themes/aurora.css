@@ -1,0 +1,42 @@
+/* ============================================================
+   aurora — 極光:冷冽深藍、翡翠綠光暈、冰面反射感
+   ============================================================ */
+
+[data-theme='aurora'] body {
+  background-image:
+    radial-gradient(900px 500px at 78% -6%, rgba(79, 224, 176, 0.12), transparent 62%),
+    radial-gradient(700px 460px at 10% 42%, rgba(98, 182, 232, 0.09), transparent 60%);
+  background-attachment: fixed;
+}
+
+/* 玻璃卡片帶極光冷光高亮邊 */
+[data-theme='aurora'] .card {
+  background:
+    linear-gradient(160deg, rgba(180, 255, 240, 0.1), rgba(255, 255, 255, 0.03) 40%),
+    var(--surface);
+  border-top-color: rgba(180, 255, 240, 0.26);
+}
+
+[data-theme='aurora'] .section-title {
+  text-shadow: 0 0 44px rgba(79, 224, 176, 0.3);
+}
+
+[data-theme='aurora'] .hero-title {
+  text-shadow: 0 2px 26px rgba(0, 8, 14, 0.45);
+}
+
+[data-theme='aurora'] .avatar-card {
+  box-shadow: var(--shadow-card), 0 0 58px -10px rgba(79, 224, 176, 0.5);
+}
+
+[data-theme='aurora'] .btn-primary {
+  background: linear-gradient(120deg, #4fe0b0, #62b6e8);
+  background-size: 160% 100%;
+}
+[data-theme='aurora'] .btn-primary:hover { background-position: 90% 0; }
+
+[data-theme='aurora'] .stats-strip {
+  background:
+    linear-gradient(160deg, rgba(180, 255, 240, 0.08), rgba(255, 255, 255, 0.02)),
+    var(--surface);
+}

@@ -1,0 +1,36 @@
+/* ============================================================
+   konami.css — ↑↑↓↓←→←→BA 彩蛋
+   ============================================================ */
+
+:root.konami #bg-stage { animation: konami-hue 2.4s linear infinite; }
+@keyframes konami-hue {
+  to { filter: hue-rotate(360deg) saturate(1.5); }
+}
+
+#konami-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 2rem;
+  transform: translate(-50%, 12px);
+  z-index: 140;
+  padding: 0.7rem 1.4rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-strong);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  box-shadow: var(--shadow-card);
+  color: var(--text);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.95rem;
+  opacity: 0;
+  pointer-events: none;   /* 純提示,絕不吃點擊 */
+  transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease-out);
+}
+#konami-toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+@media (prefers-reduced-motion: reduce) {
+  :root.konami #bg-stage { animation: none; }
+  #konami-toast { transition: none; }
+}

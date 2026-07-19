@@ -1,0 +1,227 @@
+/* ============================================================
+   tokens.css — 設計 token 合約(各主題只重新指派這些變數)
+   ============================================================ */
+
+:root {
+  /* 動態曲線(Apple 手感) */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-fast: 180ms;
+  --dur: 320ms;
+  --dur-slow: 640ms;
+
+  /* 版面 */
+  --container: 1140px;
+  --section-pad: clamp(6rem, 14vh, 10rem);
+  --radius-lg: 28px;
+  --radius-md: 18px;
+  --radius-sm: 12px;
+
+  /* 字體 */
+  --font-display: 'Space Grotesk', 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans TC', system-ui, sans-serif;
+  --font-serif: 'Playfair Display', 'Songti TC', 'Noto Serif TC', serif;
+  --font-body: -apple-system, 'PingFang TC', 'Segoe UI', 'Microsoft JhengHei', 'Noto Sans TC', system-ui, sans-serif;
+
+  /* z 軸 */
+  --z-nav: 100;
+  --z-progress: 110;
+  --z-fx: 1;
+}
+
+/* ---------- 主題:lavender(預設・薰衣草暮色) ---------- */
+:root,
+[data-theme='lavender'] {
+  color-scheme: dark;
+  --bg: #161022;
+  --bg-2: #1e1533;
+  --surface: rgba(255, 255, 255, 0.07);
+  --surface-strong: rgba(30, 21, 51, 0.72);
+  --text: #f3eefc;
+  --text-dim: rgba(243, 238, 252, 0.72);
+  --text-faint: rgba(243, 238, 252, 0.68);
+  --accent: #a78bfa;
+  --accent-2: #f0abfc;
+  --accent-contrast: #1a1028;
+  --border: rgba(255, 255, 255, 0.14);
+  --glass-blur: 16px;
+  --backdrop: blur(var(--glass-blur)) saturate(1.5);
+  --shadow-handoff: rgba(0, 0, 0, 0.45);
+  --shadow-card: 0 24px 60px -20px rgba(10, 4, 30, 0.65);
+  --shadow-glow: 0 0 42px -6px rgba(167, 139, 250, 0.45);
+  --nav-bg: rgba(22, 16, 34, 0.55);
+  --nav-scrim: rgba(15, 10, 25, 0.55);
+  --hero-img: url('/images/themes/lavender/hero-1920.webp');
+  --deep-img: url('/images/themes/lavender/deep-1920.webp');
+  --bg-veil: linear-gradient(180deg, rgba(22,16,34,0.55) 0%, rgba(22,16,34,0.78) 60%, rgba(22,16,34,0.9) 100%);
+  --hero-veil: linear-gradient(180deg, rgba(22, 16, 34, 0.18) 0%, rgba(22, 16, 34, 0.05) 45%, rgba(22, 16, 34, 0.92) 96%);
+  --font-title: var(--font-display);
+  --selection: rgba(167, 139, 250, 0.4);
+}
+
+/* ---------- 主題:cosmic(宇宙雲海・淺色) ---------- */
+/* cosmic — 黑洞。原本是雲海星球的淺色主題,整組翻成深色。
+   金色從次要 accent 升為主角 —— 吸積盤本來就是琥珀金,accent 跟著背景走。
+   注意 --accent-ink:淺色版是「加深的金」(#8a5e10) 好壓在白底上;
+   深色版必須反過來用「提亮的金」,否則眉標在黑底上等於隱形。 */
+[data-theme='cosmic'] {
+  color-scheme: dark;
+  --bg: #05060b;
+  --bg-2: #0b0d16;
+  --surface: rgba(255, 255, 255, 0.05);
+  --surface-strong: rgba(18, 20, 32, 0.78);
+  --text: #eef1f8;
+  --text-dim: rgba(238, 241, 248, 0.72);
+  --text-faint: rgba(238, 241, 248, 0.66);
+  --accent: #e8b45c;
+  --accent-2: #8f8cff;
+  --accent-ink: #f2c983;
+  --accent-contrast: #0a0806;
+  --border: rgba(232, 180, 92, 0.18);
+  --glass-blur: 16px;
+  --shadow-handoff: rgba(0, 0, 0, 0.6);
+  --shadow-card: 0 24px 60px -22px rgba(0, 0, 0, 0.8);
+  --shadow-glow: 0 0 46px -6px rgba(232, 180, 92, 0.45);
+  --nav-bg: rgba(5, 6, 11, 0.6);
+  --nav-scrim: rgba(3, 4, 8, 0.6);
+  --hero-img: url('/images/themes/cosmic/hero-1920.webp?v=2');
+  --deep-img: url('/images/themes/cosmic/deep-1920.webp?v=2');
+  --bg-veil: linear-gradient(180deg, rgba(5,6,11,0.62) 0%, rgba(5,6,11,0.82) 60%, rgba(5,6,11,0.94) 100%);
+  /* 兩層:水平暗場(上)+ 垂直交接(下)。
+     其他主題只需要垂直遮罩,但黑洞的吸積盤是「橫著」掃過畫面的,垂直遮罩完全擋不住 ——
+     實測標語與 hero-sub 直接糊死在盤子最亮的地方。這層水平暗場把左側(頭像+文字區)
+     壓暗、右側(黑洞本體)留乾淨。背景是 cover,不同視窗比例下盤子的落點會變,
+     所以遮罩要跟著「文字在哪」而不是「盤子在哪」。 */
+  --hero-veil:
+    linear-gradient(96deg,
+      rgba(5, 6, 11, 0.90) 0%,
+      rgba(5, 6, 11, 0.80) 32%,
+      rgba(5, 6, 11, 0.42) 52%,
+      rgba(5, 6, 11, 0.08) 68%,
+      rgba(5, 6, 11, 0) 78%),
+    linear-gradient(180deg, rgba(5, 6, 11, 0.15) 0%, rgba(5, 6, 11, 0.05) 50%, rgba(5, 6, 11, 0.95) 96%);
+  --font-title: var(--font-serif);
+  --selection: rgba(232, 180, 92, 0.35);
+}
+
+/* ---------- 主題:bento(深色便當格) ---------- */
+[data-theme='bento'] {
+  color-scheme: dark;
+  --bg: #15170f;
+  --bg-2: #1c1f14;
+  --surface: #21251a;
+  --surface-strong: #262a1e;
+  --text: #edeee6;
+  --text-dim: rgba(237, 238, 230, 0.68);
+  --text-faint: rgba(237, 238, 230, 0.66);
+  --accent: #d8c27a;
+  --accent-2: #9db08a;
+  --accent-contrast: #15170f;
+  --border: rgba(237, 238, 230, 0.1);
+  --glass-blur: 0px;
+  --backdrop: none;
+  --shadow-handoff: rgba(0, 0, 0, 0.45);
+  --shadow-card: 0 18px 44px -22px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 36px -10px rgba(216, 194, 122, 0.35);
+  --nav-bg: rgba(21, 23, 15, 0.72);
+  --nav-scrim: rgba(15, 17, 10, 0.6);
+  --hero-img: url('/images/themes/bento/hero-1920.webp');
+  --deep-img: url('/images/themes/bento/deep-1920.webp');
+  --bg-veil: linear-gradient(180deg, rgba(21,23,15,0.68) 0%, rgba(21,23,15,0.85) 60%, rgba(21,23,15,0.93) 100%);
+  --hero-veil: linear-gradient(180deg, rgba(21, 23, 15, 0.55) 0%, rgba(21, 23, 15, 0.35) 50%, rgba(21, 23, 15, 0.97) 96%);
+  --font-title: var(--font-display);
+  --selection: rgba(216, 194, 122, 0.35);
+}
+
+/* ---------- 主題:sakura(櫻花・日系柔光) ---------- */
+[data-theme='sakura'] {
+  color-scheme: light;
+  --bg: #fdf3f5;
+  --bg-2: #f8e8ec;
+  --surface: rgba(255, 255, 255, 0.6);
+  --surface-strong: rgba(255, 255, 255, 0.86);
+  --text: #3d2430;
+  --text-dim: rgba(61, 36, 48, 0.74);
+  --text-faint: rgba(61, 36, 48, 0.7);
+  --accent: #c2557a;
+  --accent-2: #e08fa8;
+  --accent-ink: #a13a5f;
+  --accent-contrast: #ffffff;
+  --border: rgba(61, 36, 48, 0.12);
+  --glass-blur: 14px;
+  --shadow-handoff: rgba(120, 60, 85, 0.14);
+  --shadow-card: 0 22px 52px -24px rgba(150, 70, 100, 0.3);
+  --shadow-glow: 0 0 40px -8px rgba(224, 143, 168, 0.5);
+  --nav-bg: rgba(253, 243, 245, 0.62);
+  --nav-scrim: rgba(253, 243, 245, 0.72);
+  --hero-img: url('/images/themes/sakura/hero-1920.webp');
+  --deep-img: url('/images/themes/sakura/deep-1920.webp');
+  --bg-veil: linear-gradient(180deg, rgba(253,243,245,0.7) 0%, rgba(253,243,245,0.85) 60%, rgba(253,243,245,0.93) 100%);
+  --hero-veil: linear-gradient(180deg, rgba(253, 243, 245, 0) 0%, rgba(253, 243, 245, 0.08) 50%, rgba(253, 243, 245, 0.96) 96%);
+  --font-title: var(--font-serif);
+  --selection: rgba(224, 143, 168, 0.4);
+}
+
+/* ---------- 主題:aurora(極光・冷冽夜) ---------- */
+[data-theme='aurora'] {
+  color-scheme: dark;
+  --bg: #08131f;
+  --bg-2: #0d1e2e;
+  --surface: rgba(255, 255, 255, 0.06);
+  --surface-strong: rgba(13, 30, 46, 0.75);
+  --text: #e9f6f8;
+  --text-dim: rgba(233, 246, 248, 0.72);
+  --text-faint: rgba(233, 246, 248, 0.68);
+  --accent: #4fe0b0;
+  --accent-2: #62b6e8;
+  --accent-contrast: #05161a;
+  --border: rgba(180, 240, 235, 0.16);
+  --glass-blur: 16px;
+  --shadow-handoff: rgba(0, 0, 0, 0.5);
+  --shadow-card: 0 24px 60px -20px rgba(2, 12, 22, 0.7);
+  --shadow-glow: 0 0 44px -6px rgba(79, 224, 176, 0.42);
+  --nav-bg: rgba(8, 19, 31, 0.58);
+  --nav-scrim: rgba(4, 12, 20, 0.55);
+  --hero-img: url('/images/themes/aurora/hero-1920.webp');
+  --deep-img: url('/images/themes/aurora/deep-1920.webp');
+  --bg-veil: linear-gradient(180deg, rgba(8,19,31,0.6) 0%, rgba(8,19,31,0.8) 60%, rgba(8,19,31,0.92) 100%);
+  --hero-veil: linear-gradient(180deg, rgba(8, 19, 31, 0.2) 0%, rgba(8, 19, 31, 0.06) 45%, rgba(8, 19, 31, 0.94) 96%);
+  --font-title: var(--font-display);
+  --selection: rgba(79, 224, 176, 0.35);
+}
+
+/* ---------- 主題:noir(黑白・雜誌編輯) ---------- */
+[data-theme='noir'] {
+  color-scheme: light;
+  --bg: #f4f4f2;
+  --bg-2: #e8e8e5;
+  --surface: rgba(255, 255, 255, 0.72);
+  --surface-strong: #ffffff;
+  --text: #0d0d0d;
+  --text-dim: rgba(13, 13, 13, 0.72);
+  --text-faint: rgba(13, 13, 13, 0.7);
+  --accent: #0d0d0d;
+  --accent-2: #6b6b6b;
+  --accent-ink: #0d0d0d;
+  --accent-contrast: #ffffff;
+  --border: rgba(13, 13, 13, 0.16);
+  --glass-blur: 10px;
+  --shadow-handoff: rgba(0, 0, 0, 0.14);
+  --shadow-card: 0 18px 44px -26px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 0 0 rgba(0, 0, 0, 0);
+  --nav-bg: rgba(244, 244, 242, 0.72);
+  --nav-scrim: rgba(244, 244, 242, 0.75);
+  --hero-img: url('/images/themes/noir/hero-1920.webp');
+  --deep-img: url('/images/themes/noir/deep-1920.webp');
+  --bg-veil: linear-gradient(180deg, rgba(244,244,242,0.74) 0%, rgba(244,244,242,0.88) 60%, rgba(244,244,242,0.95) 100%);
+  /* noir 的清水模照片反差極大(有純黑陰影),深色字需要夠強的白遮罩才讀得到。
+     實測 0.55 以上即使壓在最暗處仍有 4.5:1;取 0.62 留安全邊際。 */
+  --hero-veil: linear-gradient(180deg, rgba(244, 244, 242, 0.62) 0%, rgba(244, 244, 242, 0.56) 45%, rgba(244, 244, 242, 0.97) 96%);
+  --font-title: var(--font-serif);
+  --selection: rgba(13, 13, 13, 0.18);
+  --radius-lg: 4px;
+  --radius-md: 3px;
+  --radius-sm: 2px;
+}
+
+::selection { background: var(--selection); }

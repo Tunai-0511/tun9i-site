@@ -1,0 +1,14 @@
+{
+  "name": "Tunai — tun9i.com",
+  "short_name": "tun9i",
+  "description": "軟體工程 · AI Agents · Python 系統 — Tunai 的個人網站",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#161022",
+  "background_color": "#161022",
+  "icons": [
+    { "src": "/favicon-32.png", "type": "image/png", "sizes": "32x32" },
+    { "src": "/apple-touch-icon.png", "type": "image/png", "sizes": "180x180" },
+    { "src": "/favicon.svg", "type": "image/svg+xml", "sizes": "any", "purpose": "any" }
+  ]
+}

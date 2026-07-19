@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>404 — tun9i.com</title>
+  <meta name="robots" content="noindex" />
+  <style>
+    /* 獨立頁面,不載入主網站的 CSS —— 404 要在任何情況下都能顯示,
+       包括 JS 掛掉、資產抓不到的時候。所以顏色寫死成預設主題(lavender)。 */
+    body {
+      margin: 0;
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      background: #161022;
+      color: #f3eefc;
+      font-family: -apple-system, 'PingFang TC', 'Hiragino Sans', 'Segoe UI', 'Microsoft JhengHei', system-ui, sans-serif;
+      text-align: center;
+      padding: 1.5rem;
+    }
+    h1 {
+      font-size: clamp(4rem, 15vw, 8rem);
+      margin: 0 0 0.5rem;
+      background: linear-gradient(120deg, #a78bfa, #f0abfc);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+      line-height: 1;
+    }
+    p { color: rgba(243, 238, 252, 0.7); margin: 0 0 0.4rem; line-height: 1.6; }
+    p.sub { color: rgba(243, 238, 252, 0.42); font-size: 0.92rem; margin-bottom: 2rem; }
+    a {
+      display: inline-block;
+      color: #161022;
+      background: #a78bfa;
+      padding: 0.8rem 1.8rem;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    a:hover { background: #c4b0fd; }
+  </style>
+</head>
+<body>
+  <div>
+    <h1>404</h1>
+    <p>這一頁越過事件視界了。</p>
+    <p class="sub">This page crossed the event horizon. / このページは事象の地平線の向こうへ。</p>
+    <a href="/">回首頁 · Home · ホーム</a>
+  </div>
+</body>
+</html>

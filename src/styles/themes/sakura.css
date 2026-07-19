@@ -1,0 +1,37 @@
+/* ============================================================
+   sakura — 櫻花:柔光、日系、細緻粉調
+   ============================================================ */
+
+[data-theme='sakura'] body {
+  background-image:
+    radial-gradient(900px 520px at 50% -8%, rgba(255, 255, 255, 0.8), transparent 62%),
+    radial-gradient(760px 460px at 88% 35%, rgba(224, 143, 168, 0.1), transparent 60%);
+  background-attachment: fixed;
+}
+
+[data-theme='sakura'] .hero-title,
+[data-theme='sakura'] .section-title,
+[data-theme='sakura'] .contact-title {
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+[data-theme='sakura'] .hero-title {
+  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.6);
+}
+
+[data-theme='sakura'] .card {
+  border-color: rgba(61, 36, 48, 0.09);
+  box-shadow: 0 16px 40px -26px rgba(150, 70, 100, 0.34);
+}
+
+[data-theme='sakura'] .btn-primary {
+  background: linear-gradient(120deg, #c2557a, #e08fa8);
+  background-size: 160% 100%;
+  color: #fff;
+}
+[data-theme='sakura'] .btn-primary:hover { background-position: 90% 0; }
+
+[data-theme='sakura'] .tl-dot { background: var(--bg); }
+
+[data-theme='sakura'] .hero-bg-img { filter: saturate(1.04) brightness(1.02); }

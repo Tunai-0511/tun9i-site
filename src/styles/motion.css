@@ -1,0 +1,144 @@
+/* ============================================================
+   motion.css — 進場編排、scroll-driven、reduced-motion
+   ============================================================ */
+
+/* ---------- reveal 編排(IntersectionObserver 觸發) ---------- */
+.reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  filter: blur(8px);
+  transition:
+    opacity 0.9s var(--ease-out),
+    transform 0.9s var(--ease-out),
+    filter 0.9s var(--ease-out);
+  transition-delay: calc(var(--stagger-i, 0) * 75ms);
+}
+.reveal.in {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+/* hero 標題逐字進場
+   注意:預設態刻意保持「可見」,隱藏只存在於 keyframes 的 from。
+   搭配 fill-mode: both,動畫若因任何原因沒跑,標題仍看得見(不會整個隱形)。 */
+.hero-title .ch {
+  animation: ch-rise 0.85s var(--ease-out) both;
+  animation-delay: calc(var(--ch-i) * 60ms + 150ms);
+}
+@keyframes ch-rise {
+  from { opacity: 0; transform: translateY(0.55em) rotate(3deg); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* 頭像進場 + 漂浮 */
+.avatar-card {
+  animation:
+    avatar-in 1.1s var(--ease-out) both,
+    avatar-float 7s 1.3s ease-in-out infinite alternate;
+}
+@keyframes avatar-in {
+  from { opacity: 0; transform: translateY(30px) scale(0.92); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes avatar-float {
+  from { translate: 0 0; }
+  to   { translate: 0 -14px; }
+}
+
+/* ---------- scroll-driven(支援才啟用) ---------- */
+@supports (animation-timeline: scroll()) {
+  #scroll-progress {
+    animation: progress-grow linear both;
+    animation-timeline: scroll(root);
+  }
+  @keyframes progress-grow {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
+  }
+
+  /* hero 視差:背景比內容慢 */
+  .hero-bg-img {
+    animation: hero-parallax linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 100svh;
+  }
+  @keyframes hero-parallax {
+    to { transform: translateY(11%) scale(1.06); }
+  }
+
+  /* sticky hero 交接:內容縮小、變暗淡出 */
+  .hero-inner {
+    animation: hero-handoff linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 90svh;
+  }
+  @keyframes hero-handoff {
+    to { transform: translateY(-6svh) scale(0.95); opacity: 0; }
+  }
+}
+
+/* JS fallback 用 class(無 scroll-timeline 時) */
+.no-scroll-timeline .hero-bg-img { will-change: transform; }
+
+/* ---------- View Transition(主題切換圓形擴散) ---------- */
+::view-transition-old(root) {
+  animation: none;
+}
+::view-transition-new(root) {
+  animation: theme-wipe 0.55s var(--ease) forwards;
+}
+@keyframes theme-wipe {
+  from { clip-path: circle(0% at var(--vt-x, 90%) var(--vt-y, 5%)); }
+  to   { clip-path: circle(150% at var(--vt-x, 90%) var(--vt-y, 5%)); }
+}
+
+/* ---------- View Transition(語言切換:柔和交叉淡入,不用圓形擴散) ---------- */
+:root.lang-switching::view-transition-old(root) {
+  animation: lang-out 0.3s var(--ease) forwards;
+}
+:root.lang-switching::view-transition-new(root) {
+  animation: lang-in 0.34s var(--ease-out) forwards;
+}
+@keyframes lang-out {
+  to { opacity: 0; transform: translateY(-4px); }
+}
+@keyframes lang-in {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---------- tilt / magnetic ----------
+   JS 只在 pointermove 同步寫 transform,平滑一律交給這裡的 transition
+   在合成層跑(不用 rAF —— rAF 被節流時效果會整個停住)。 */
+.tilt {
+  transform-style: preserve-3d;
+  transition: transform 260ms var(--ease-out);
+  --mx: 50%;
+  --my: 50%;
+}
+.magnetic { transition: transform 320ms var(--ease-out); }
+.tilt .glare-layer {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(420px circle at var(--mx) var(--my), color-mix(in srgb, var(--accent) 16%, transparent), transparent 45%);
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease);
+  pointer-events: none;
+}
+.tilt:hover .glare-layer { opacity: 1; }
+
+/* ---------- reduced motion:全部關閉 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  html { scroll-behavior: auto; }
+  .reveal { opacity: 1; transform: none; filter: none; }
+  .hero-title .ch { opacity: 1; transform: none; }
+  .hero { position: relative; }
+  #fx-canvas { display: none; }
+}

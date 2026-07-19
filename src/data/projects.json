@@ -1,0 +1,35 @@
+{
+  "_comment": "專案區的策展資料。ipas-study 在 exclude 裡是因為它已升格成 index.html 裡的精選案例,不該在下面的 grid 再出現一次;它的 overrides 先留著,萬一取消精選就直接可用。GitHub 的 description 欄位不是唯一真相 —— 它可能空著(那四張『探索中的專案』就是這樣來的),也可能被改壞。這份檔案負責決定站上真正要說什麼。exclude 的 repo 完全不顯示。overrides 裡有的就用這裡的,沒有的才退回 GitHub 的 description。",
+  "exclude": [
+    "blockchain-campus-energy-teaching",
+    "AI-",
+    "ipas-study"
+  ],
+  "overrides": {
+    "ipas-study": {
+      "title": "iPAS 備考學院",
+      "live": "https://ipas.tun9i.com",
+      "zh": "一站搞定 iPAS 三張證照的備考:AI 應用規劃師(初級・中級)與營運智慧分析師 BI(初級)。題庫、後台、進度追蹤都在裡面,已上線。",
+      "en": "One place to prep for all three iPAS certifications — AI Application Planner (junior and intermediate) plus BI Analyst (junior). Question banks, admin panel, progress tracking. Live.",
+      "ja": "iPAS 三つの資格対策をひとまとめに:AI 応用プランナー(初級・中級)と営運智慧分析師 BI(初級)。問題バンク、管理画面、進捗管理。公開中。"
+    },
+    "aqi-tw-personal": {
+      "title": "AgentAQI",
+      "zh": "台灣空氣品質的個人化健康資訊服務。FastAPI 後端加定時抓取——就算後端沒開,前端仍讀得到排程產生的靜態 JSON。串接 Hermes agent、Supabase 與 Discord。",
+      "en": "A personalised air-quality health service for Taiwan. FastAPI backend with scheduled ingestion — the frontend still reads pre-generated JSON even when the backend is down. Wired up to a Hermes agent, Supabase and Discord.",
+      "ja": "台湾の大気質をもとにした、パーソナライズされた健康情報サービス。FastAPI と定期取得——バックエンドが落ちていても、フロントは生成済みの JSON を読める設計。Hermes エージェント、Supabase、Discord と連携。"
+    },
+    "vision_nav_agent": {
+      "title": "Vision-Aided AR Navigation Agent",
+      "zh": "視障輔助導航系統。OpenCV 即時偵測障礙物,OpenClaw agent 判斷後給出簡潔的語音指令。做給視障者與銀髮族用的。",
+      "en": "Assistive navigation for the visually impaired. OpenCV spots obstacles in real time, an OpenClaw agent decides, and it speaks one short instruction. Built for blind and elderly users.",
+      "ja": "視覚障害のある方のためのナビゲーション支援。OpenCV でリアルタイムに障害物を検知し、OpenClaw エージェントが判断して、短い音声で指示する。視覚障害のある方と高齢者のために。"
+    },
+    "agent-operating-system-skill": {
+      "title": "Agent Operating System",
+      "zh": "給 Claude Code 的長期操作制度 skill。把強模型的判斷力外化成可重複執行的制度,讓較小的模型也能穩定完成診斷、派工、驗證與交接。",
+      "en": "A long-horizon operating protocol packaged as a Claude Code skill. It externalises a strong model's judgement into a repeatable system, so smaller models can still run diagnosis, delegation, verification and handoff reliably.",
+      "ja": "Claude Code 向けの長期運用プロトコルを skill にしたもの。強いモデルの判断を再現可能な制度として外部化し、小さいモデルでも診断・割り振り・検証・引き継ぎを安定してこなせるようにする。"
+    }
+  }
+}

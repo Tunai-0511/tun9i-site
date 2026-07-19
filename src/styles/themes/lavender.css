@@ -1,0 +1,46 @@
+/* ============================================================
+   lavender — 薰衣草暮色:玻璃擬態、紫霧、星光
+   ============================================================ */
+
+[data-theme='lavender'] body {
+  background-image:
+    radial-gradient(900px 500px at 85% -5%, rgba(167, 139, 250, 0.14), transparent 60%),
+    radial-gradient(700px 480px at 8% 40%, rgba(240, 171, 252, 0.08), transparent 60%);
+  background-attachment: fixed;
+}
+
+/* 玻璃卡片強化:內光暈 + 頂部高光邊 */
+[data-theme='lavender'] .card {
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.035) 38%),
+    var(--surface);
+  border-top-color: rgba(255, 255, 255, 0.28);
+}
+
+[data-theme='lavender'] .section-title {
+  text-shadow: 0 0 46px rgba(167, 139, 250, 0.35);
+}
+
+/* hero 標題在照片上的可讀性護底(對漸層裁切文字仍有效) */
+[data-theme='lavender'] .hero-title {
+  text-shadow: 0 2px 26px rgba(0, 0, 0, 0.38);
+}
+
+[data-theme='lavender'] .avatar-card {
+  box-shadow:
+    var(--shadow-card),
+    0 0 60px -8px rgba(167, 139, 250, 0.55);
+}
+
+[data-theme='lavender'] .btn-primary {
+  background: linear-gradient(120deg, #a78bfa, #c084fc 60%, #f0abfc);
+  background-size: 160% 100%;
+  transition: background-position var(--dur-slow) var(--ease), transform var(--dur-fast) var(--ease-out), box-shadow var(--dur) var(--ease);
+}
+[data-theme='lavender'] .btn-primary:hover { background-position: 90% 0; }
+
+[data-theme='lavender'] .stats-strip {
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03)),
+    var(--surface);
+}

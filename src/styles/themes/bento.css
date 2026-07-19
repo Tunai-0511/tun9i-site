@@ -1,0 +1,52 @@
+/* ============================================================
+   bento — 深色便當格:炭綠底、金橄欖點綴
+   ============================================================ */
+
+[data-theme='bento'] body {
+  background-image:
+    radial-gradient(720px 420px at 12% -6%, rgba(216, 194, 122, 0.05), transparent 60%),
+    radial-gradient(640px 420px at 95% 55%, rgba(157, 176, 138, 0.05), transparent 60%);
+  background-attachment: fixed;
+}
+
+/* 標題全大寫小標 + 菱形裝飾(參考 Max Reed 卡片眉標) */
+[data-theme='bento'] .section-eyebrow::before,
+[data-theme='bento'] .section-eyebrow::after,
+[data-theme='bento'] .eyebrow::before,
+[data-theme='bento'] .eyebrow::after {
+  content: '◆';
+  font-size: 0.55em;
+  vertical-align: 0.25em;
+  margin-inline: 0.6em;
+  color: var(--accent);
+  opacity: 0.7;
+}
+
+/* 卡片:實色面板、微內陰影、hover 抬升 */
+[data-theme='bento'] .card {
+  background: var(--surface);
+  border-color: rgba(237, 238, 230, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), var(--shadow-card);
+}
+[data-theme='bento'] .card:hover {
+  background: var(--surface-strong);
+}
+
+[data-theme='bento'] .hero-title {
+  background: linear-gradient(100deg, var(--text) 45%, var(--accent) 80%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  text-shadow: 0 2px 26px rgba(0, 0, 0, 0.42);
+}
+
+[data-theme='bento'] .btn-primary {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border-radius: var(--radius-sm);
+}
+[data-theme='bento'] .btn-ghost { border-radius: var(--radius-sm); }
+
+/* 區塊在 bento 主題下更緊湊、格線感 */
+[data-theme='bento'] .repo-card,
+[data-theme='bento'] .interest-card { border-radius: var(--radius-md); }

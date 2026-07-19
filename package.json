@@ -1,0 +1,24 @@
+{
+  "name": "tun9i-site",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "images": "node scripts/optimize-images.mjs",
+    "preview:cf": "npm run build && wrangler dev",
+    "deploy": "npm run build && wrangler deploy"
+  },
+  "devDependencies": {
+    "@fontsource/playfair-display": "^5.1.0",
+    "@fontsource/space-grotesk": "^5.1.0",
+    "@iconify-json/logos": "^1.2.11",
+    "@iconify-json/simple-icons": "^1.2.90",
+    "sharp": "^0.34.0",
+    "simple-icons": "^16.26.0",
+    "vite": "^6.0.0",
+    "wrangler": "^4.0.0"
+  }
+}

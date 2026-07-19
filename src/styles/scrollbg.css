@@ -1,0 +1,85 @@
+/* ============================================================
+   scrollbg.css — 捲動式背景舞台(上滑覆蓋 + 交叉淡入 + 視差)
+   ============================================================ */
+
+#bg-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: clip;
+  background: var(--bg);
+}
+
+.bg-layer {
+  position: absolute;
+  inset: 0;
+  /* --p:0 = 尚未進場;--p:1 = 完全覆蓋。
+     用 mask 讓「由下往上覆蓋」的邊界帶柔化羽化,而不是硬切線。
+     羽化寬度隨 --p 收斂到 0,確保完全覆蓋時頂端不會透出下一層。 */
+  --edge: calc((1 - var(--p, 0)) * 100%);
+  --feather: calc(160px * (1 - var(--p, 0)));
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, transparent var(--edge), #000 calc(var(--edge) + var(--feather)), #000 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, transparent var(--edge), #000 calc(var(--edge) + var(--feather)), #000 100%);
+  /* 交叉淡入:前半段淡入,之後保持實心 */
+  opacity: calc(var(--p, 0) * 2);
+  will-change: mask-image, opacity;
+}
+.bg-layer.is-base {
+  -webkit-mask-image: none;
+  mask-image: none;
+  opacity: 1;
+}
+
+.bg-layer-img {
+  position: absolute;
+  inset: -6% 0;
+  background-size: cover;
+  background-position: center 35%;
+  will-change: transform;
+}
+
+/* a / b 兩組背景圖,交替出現形成切換感 */
+.bg-layer[data-variant='a'] .bg-layer-img { background-image: var(--hero-img); }
+.bg-layer[data-variant='b'] .bg-layer-img { background-image: var(--deep-img, var(--hero-img)); }
+
+.bg-layer-veil {
+  position: absolute;
+  inset: 0;
+}
+/* hero(底層)用輕透的 hero-veil,讓主視覺照片保持鮮豔 */
+.bg-layer.is-base .bg-layer-veil { background: var(--hero-veil); }
+/* 內容層才用比較重的 veil,確保文字可讀 */
+.bg-layer:not(.is-base) .bg-layer-veil { background: var(--bg-veil); }
+
+/* 內容浮在背景舞台之上。
+   注意:這裡絕對不能含 .site-nav —— 它在 components.css 是 position:fixed
+   + z-index:100,被這條同權重規則覆蓋成 relative/2 之後會掉到 main 底下,
+   導覽列不再固定,主題選單也會被 hero 吃掉點擊。 */
+main, .site-footer { position: relative; z-index: 2; }
+
+/* hero 原本自帶的背景層改由 bg-stage 接手 */
+.hero-bg { display: none; }
+
+/* 關鍵:hero 不能再 sticky。
+   舊設計靠「各區塊不透明底色」蓋住釘住的 hero;現在區塊必須透明才能看見
+   背景舞台,若 hero 仍 sticky 就會整個透出來疊在內容上。 */
+.hero {
+  position: relative;
+  background: transparent;
+}
+
+.section.about,
+.section.projects,
+.section.aistack,
+.section.interests,
+.section.contact {
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-layer { transition: none; }
+  .bg-layer-img { transform: none !important; }
+}

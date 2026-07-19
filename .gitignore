@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.assets-raw/
+.wrangler/
+.DS_Store
+.dev.vars
