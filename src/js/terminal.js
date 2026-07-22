@@ -1,13 +1,11 @@
 // 終端機彩蛋:按 ` 或 Ctrl+K 叫出,可以打指令
 import { t } from './i18n.js';
-import { THEMES } from './theme.js';
-import { themeForHour } from './autotheme.js';
 
 const BANNER = [
   "tun9i.com — type 'help' for commands, 'exit' to close.",
 ];
 
-export function initTerminal({ setTheme, setAuto, isAuto, fireKonami }) {
+export function initTerminal({ fireKonami } = {}) {
   const el = document.createElement('div');
   el.id = 'term';
   el.hidden = true;
@@ -69,7 +67,7 @@ export function initTerminal({ setTheme, setAuto, isAuto, fireKonami }) {
     help: () => [
       'help            這份說明',
       'whoami          我是誰',
-      'theme <name>    換主題 (' + THEMES.join(' | ') + ')',
+      'theme           看看現在住在哪個世界',
       'theme auto      依時間自動換主題',
       'theme list      列出所有主題',
       'games           在玩的遊戲',
@@ -114,20 +112,7 @@ export function initTerminal({ setTheme, setAuto, isAuto, fireKonami }) {
       if (arg === 'go') { fireKonami?.(); return ['✨'] ; }
       return ['↑ ↑ ↓ ↓ ← → ← → B A', "(或直接輸入 'konami go')"];
     },
-    theme: (arg) => {
-      if (!arg || arg === 'list') return ['  ' + THEMES.join('\n  ')];
-      if (arg === 'auto') {
-        setAuto(true);
-        // 報「要換成的」主題,不能讀 dataset.theme ——
-        // 換主題走 View Transition 是非同步的,這時候讀到的還是舊主題。
-        return ['已開啟:依時間自動換主題 → ' + themeForHour(new Date().getHours())];
-      }
-      if (arg === 'status') return ['auto: ' + (isAuto() ? 'on' : 'off'), 'current: ' + document.documentElement.dataset.theme];
-      if (!THEMES.includes(arg)) return [`theme: 沒有這個主題 '${arg}'`, '可用:' + THEMES.join(', ')];
-      setAuto(false);
-      setTheme(arg);
-      return ['主題 → ' + arg];
-    },
+    theme: () => ['這裡只有一個世界:黏土微縮世界 🏺', '(六主題時代已由捲動飛行取代)'],
   };
 
   form.addEventListener('submit', (e) => {

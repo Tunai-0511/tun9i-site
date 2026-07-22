@@ -8,12 +8,12 @@ const RAW = new URL('../.assets-raw/', import.meta.url).pathname.replace(/^\/([A
 const OUT = new URL('../public/images/', import.meta.url).pathname.replace(/^\/([A-Z]:)/i, '$1');
 
 // 命名慣例:<theme>-hero.<ext> → public/images/themes/<theme>/hero-{1920,960}.{webp,avif}
-//          avatar.<ext>       → public/images/avatar-v1.webp
+//          avatar.<ext>       → public/images/avatar-v2.webp
 const THEMES = ['lavender', 'cosmic', 'bento', 'sakura', 'aurora', 'noir'];
 const WIDTHS = [1920, 960];
 
 // 檔名帶版號:換頭像時把版號 +1,可繞過瀏覽器對舊 URL 的快取
-const AVATAR_FILE = 'avatar-v1.webp';
+const AVATAR_FILE = 'avatar-v2.webp';
 
 async function heroPipeline(file, theme, kind = 'hero') {
   const dir = join(OUT, 'themes', theme);

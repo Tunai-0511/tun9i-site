@@ -1,0 +1,121 @@
+/* ============================================================
+   world.css — 黏土世界捲動背景舞台(worldbg.js)
+   取代 scrollbg.css:11 段鏡頭鏈交叉淡化,單一淺色遮罩保可讀性。
+   ============================================================ */
+
+#bg-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: clip;
+  background: var(--bg);
+}
+
+.world-seg {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  will-change: opacity;
+}
+
+.world-seg-poster {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center 42%;
+}
+
+.world-seg video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 42%;
+  opacity: 0;
+  transition: opacity 0.5s var(--ease);
+}
+.world-seg.has-video video { opacity: 1; }
+.world-seg.has-video .world-seg-poster { opacity: 0; }
+
+/* 單一淺色遮罩:壓在所有段之上,讓深墨文字在亮底影片上維持對比。
+   世界本身是奶油亮底,遮罩保持輕透,只在底部稍強(文字多在內容流)。 */
+.world-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  background: linear-gradient(
+    180deg,
+    rgba(246, 239, 230, 0.34) 0%,
+    rgba(246, 239, 230, 0.26) 40%,
+    rgba(246, 239, 230, 0.5) 100%
+  );
+}
+
+/* ── 文字可讀性:亮底影片上的深墨字,標題與段落都給奶油光暈,
+     hero 文案再加一層局部亮紗(radial,不是卡片 —— 保持 Apple 式輕盈) ── */
+.hero-copy { position: relative; }
+.hero-copy::before {
+  content: '';
+  position: absolute;
+  inset: -2.5rem -3rem;
+  z-index: -1;
+  border-radius: 40px;
+  pointer-events: none;
+  background: radial-gradient(
+    72% 64% at 50% 46%,
+    rgba(246, 239, 230, 0.78),
+    rgba(246, 239, 230, 0.42) 62%,
+    transparent 100%
+  );
+}
+
+.hero-title { text-shadow: 0 2px 26px rgba(246, 239, 230, 0.95); }
+
+/* 玻璃調薄後,次要按鈕在花俏場景上會糊掉 —— 互動元件要看得出是「可按的東西」,
+   所以給它比一般卡片更實的底與更明確的邊框(仍保留玻璃質感)。 */
+.btn-ghost {
+  background: rgba(255, 255, 255, 0.72);
+  border-color: color-mix(in srgb, var(--accent) 32%, var(--border));
+}
+.btn-ghost:hover { background: rgba(255, 255, 255, 0.86); }
+.eyebrow,
+.tagline,
+.hero-sub,
+.section-title,
+.section-lead,
+.contact-title,
+.contact-sub {
+  text-shadow:
+    0 1px 2px rgba(246, 239, 230, 0.9),
+    0 2px 20px rgba(246, 239, 230, 0.95),
+    0 0 42px rgba(246, 239, 230, 0.8);
+}
+
+/* ── 以下移植自 scrollbg.css:內容浮在背景舞台之上的版面契約 ──
+   注意:不能把 .site-nav 捲進來(components.css 的 fixed + z-index:100)。 */
+main, .site-footer { position: relative; z-index: 2; }
+
+/* hero 原本自帶的背景層由世界舞台接手 */
+.hero-bg { display: none; }
+.hero { position: relative; background: transparent; }
+
+/* 區塊透明化,露出背景世界(journey/setup 原本的面板底也一併透明 ——
+   它們現在各自對應專屬場景:校園教室與主機房)。 */
+.section.about,
+.section.journey,
+.section.projects,
+.section.aistack,
+.section.interests,
+.section.setup,
+.section.contact {
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* worldbg.js 在 reduced 下不建影片;這裡再擋一層 */
+  .world-seg video { display: none; }
+}

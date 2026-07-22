@@ -52,6 +52,25 @@
 /* 內容層才用比較重的 veil,確保文字可讀 */
 .bg-layer:not(.is-base) .bg-layer-veil { background: var(--bg-veil); }
 
+/* hero 捲動影片:由 heroscrub.js 塞進 base 層的 .bg-layer-img 與 .bg-layer-veil 之間。
+   veil 仍蓋在影片上 → 各主題文字遮罩照舊;.bg-layer-img 當 poster/fallback。
+   定位對齊 .bg-layer-img(inset:-6% 0 / center 35%)→ poster 交接影片時不裁切跳動。
+   影片畫出首格後才加 .has-video,淡入影片並淡出 poster。 */
+.bg-layer.is-base .hero-video {
+  position: absolute;
+  top: -6%;
+  left: 0;
+  width: 100%;
+  height: 112%;
+  object-fit: cover;
+  object-position: center 35%;
+  opacity: 0;
+  transition: opacity 0.6s var(--ease);
+  pointer-events: none;
+}
+.bg-layer.is-base.has-video .hero-video { opacity: 1; }
+.bg-layer.is-base.has-video .bg-layer-img { opacity: 0; }
+
 /* 內容浮在背景舞台之上。
    注意:這裡絕對不能含 .site-nav —— 它在 components.css 是 position:fixed
    + z-index:100,被這條同權重規則覆蓋成 relative/2 之後會掉到 main 底下,
@@ -69,6 +88,24 @@ main, .site-footer { position: relative; z-index: 2; }
   background: transparent;
 }
 
+/* ── hero 捲動影片「跑道」──
+   影片飛入與 #about 的上滑轉場不能共用同一段捲動距離,否則鏡頭飛到一半
+   就被下一區背景蓋掉。解法:heroscrub 啟用時(html.heroscrub-on,由 JS 加,
+   reduced/省流量不加)把 hero 拉成 200svh、內容釘住 ——
+   前 100svh 專門給影片飛完,之後才輪到原本的上滑轉場,兩者不再打架。
+   .hero 的 overflow:clip 不會產生 scroll container,內層 sticky 可正常釘住。
+   motion.css 的 hero-handoff(內容淡出 0→90svh)剛好在釘住階段內完成。 */
+html.heroscrub-on .hero {
+  min-height: 200svh;
+  align-items: start;
+}
+html.heroscrub-on .hero-inner {
+  position: sticky;
+  top: 0;
+  min-height: 100svh;
+  align-content: center;
+}
+
 .section.about,
 .section.projects,
 .section.aistack,
@@ -82,4 +119,6 @@ main, .site-footer { position: relative; z-index: 2; }
 @media (prefers-reduced-motion: reduce) {
   .bg-layer { transition: none; }
   .bg-layer-img { transform: none !important; }
+  /* 保險:heroscrub.js 在 reduced 下已直接早退不建影片,這裡再擋一層 */
+  .bg-layer.is-base .hero-video { display: none; }
 }

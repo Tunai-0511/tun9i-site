@@ -8,27 +8,18 @@ import './styles/tokens.css';
 import './styles/base.css';
 import './styles/components.css';
 import './styles/motion.css';
-import './styles/scrollbg.css';
+import './styles/world.css';
 import './styles/terminal.css';
 import './styles/konami.css';
-import './styles/themes/lavender.css';
-import './styles/themes/cosmic.css';
-import './styles/themes/bento.css';
-import './styles/themes/sakura.css';
-import './styles/themes/aurora.css';
-import './styles/themes/noir.css';
-
-import { initTheme, setTheme } from './js/theme.js';
 import { initI18n } from './js/i18n.js';
 import { initReveal } from './js/reveal.js';
 import { initParallax } from './js/parallax.js';
 import { initPointer } from './js/pointer.js';
 import { initParticles } from './js/particles.js';
 import { initGithub } from './js/github.js';
-import { initScrollBg } from './js/scrollbg.js';
+import { initWorldBg } from './js/worldbg.js';
 import { initHeatmap } from './js/heatmap.js';
 import { initIcons } from './js/icons.js';
-import { initAutoTheme, bindAuto, setAuto, isAuto } from './js/autotheme.js';
 import { initTerminal } from './js/terminal.js';
 import { initKonami } from './js/konami.js';
 
@@ -76,22 +67,16 @@ function splitTitle() {
   }, 3000);
 }
 
-// 一定要在 initTheme() 之前判斷:initTheme 會把主題寫進 localStorage
-const firstVisit = localStorage.getItem('tun9i-theme') == null;
-
-initTheme();
-// 自動主題要在 initTheme 之後綁,才不會蓋掉使用者存的選擇
-bindAuto(setTheme);
-initAutoTheme({ firstVisit });
 initIcons();
-initScrollBg();
+// 黏土世界捲動背景(唯一主題)。reduced-motion / 省流量在模組內早退,退回海報圖。
+initWorldBg({ reduced });
 initI18n();
 if (!reduced) splitTitle();
 initReveal();
 initGithub();
 initHeatmap();
 const konami = initKonami();
-initTerminal({ setTheme, setAuto, isAuto, fireKonami: konami.fire });
+initTerminal({ fireKonami: konami.fire });
 
 // 終端機提示:第一次來的人不會知道有這東西,滑到最後時提一次
 if (matchMedia('(hover: hover) and (pointer: fine)').matches) {

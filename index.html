@@ -1,37 +1,28 @@
 <!doctype html>
-<html lang="zh-Hant-TW" data-theme="lavender" data-lang="zh">
+<html lang="zh-Hant-TW" data-theme="clay" data-lang="zh">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script>
-    // FOUC 防護:在任何 CSS 之前套用主題與語言,並 preload 對應 hero 圖
+    // FOUC 防護:語言在任何 CSS 之前套用;主題只剩「黏土世界」一個,寫死在 html 標籤。
     (function () {
-      var THEMES = ['lavender', 'cosmic', 'bento', 'sakura', 'aurora', 'noir'];
-      var t = localStorage.getItem('tun9i-theme');
-      if (THEMES.indexOf(t) === -1)
-        t = matchMedia('(prefers-color-scheme: light)').matches ? 'cosmic' : 'lavender';
-      document.documentElement.dataset.theme = t;
       var lang = localStorage.getItem('tun9i-lang');
       // 這份清單要跟 src/js/i18n.js 的 LANGS 一致 —— 漏掉哪個語言,
       // 選了它的訪客一重新整理就會被打回中文。
       if (['zh', 'en', 'ja'].indexOf(lang) === -1) lang = 'zh';
       document.documentElement.dataset.lang = lang;
       document.documentElement.lang = { zh: 'zh-Hant-TW', en: 'en', ja: 'ja' }[lang];
-      // 背景圖版號。/images/* 吃 7 天快取且檔名不帶版號 → 換過圖的主題要靠 ?v=
-      // 繞過舊快取,否則舊訪客整整一週都看到舊圖。
-      // 這份對照在三個地方要一致:這裡、src/js/theme.js、src/styles/tokens.css。
-      // (這段是 FOUC 防護,跑在模組載入前,沒辦法 import,只能重複一份。)
-      var BGV = { cosmic: 2 };
+      // 預載第一景海報(worldbg 的 hero 底圖,也是 LCP)
       var l = document.createElement('link');
       l.rel = 'preload'; l.as = 'image'; l.type = 'image/webp';
-      l.href = '/images/themes/' + t + '/hero-1920.webp' + (BGV[t] ? '?v=' + BGV[t] : '');
+      l.href = '/images/world/poster_1-v1.webp';
       document.head.appendChild(l);
     })();
   </script>
   <title>Tunai — tun9i.com</title>
   <meta name="description" content="Tunai 的個人網站 — 軟體工程、AI Agents、Python 系統。Personal site of Tunai: software engineering, AI agents, and Python systems." />
   <link rel="canonical" href="https://tun9i.com/" />
-  <meta name="theme-color" content="#161022" />
+  <meta name="theme-color" content="#F6EFE6" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="tun9i.com" />
   <meta property="og:title" content="Tunai — tun9i.com" />
@@ -78,28 +69,13 @@
       <ul class="nav-links" id="nav-links-list">
         <li><a href="#about" data-i18n="nav.about">關於</a></li>
         <li><a href="#journey" data-i18n="nav.journey">歷程</a></li>
-        <li><a href="#projects" data-i18n="nav.projects">專案</a></li>
         <li><a href="#ai" data-i18n="nav.ai">AI</a></li>
+        <li><a href="#projects" data-i18n="nav.projects">專案</a></li>
         <li><a href="#interests" data-i18n="nav.interests">興趣</a></li>
         <li><a href="#setup" data-i18n="nav.setup">配備</a></li>
         <li><a href="#contact" data-i18n="nav.contact">聯絡</a></li>
       </ul>
       <div class="nav-tools">
-        <div class="theme-picker" id="theme-picker">
-          <button type="button" class="theme-trigger" id="theme-trigger" aria-label="切換主題" data-i18n-aria="a11y.theme"
-                  aria-haspopup="true" aria-expanded="false" aria-controls="theme-menu">
-            <span class="orb" id="theme-current-orb"></span>
-            <svg class="theme-caret" width="10" height="6" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-          </button>
-          <div class="theme-menu is-closed" id="theme-menu" role="radiogroup" aria-label="主題" data-i18n-aria="a11y.theme" inert>
-            <button type="button" role="radio" data-set-theme="lavender"><span class="orb orb-lavender"></span><span class="theme-name">Lavender</span><span class="theme-hint" data-i18n="th.lavender">薰衣草暮色</span></button>
-            <button type="button" role="radio" data-set-theme="cosmic"><span class="orb orb-cosmic"></span><span class="theme-name">Cosmic</span><span class="theme-hint" data-i18n="th.cosmic">黑洞</span></button>
-            <button type="button" role="radio" data-set-theme="bento"><span class="orb orb-bento"></span><span class="theme-name">Bento</span><span class="theme-hint" data-i18n="th.bento">暗夜便當格</span></button>
-            <button type="button" role="radio" data-set-theme="sakura"><span class="orb orb-sakura"></span><span class="theme-name">Sakura</span><span class="theme-hint" data-i18n="th.sakura">櫻花柔光</span></button>
-            <button type="button" role="radio" data-set-theme="aurora"><span class="orb orb-aurora"></span><span class="theme-name">Aurora</span><span class="theme-hint" data-i18n="th.aurora">極光雪原</span></button>
-            <button type="button" role="radio" data-set-theme="noir"><span class="orb orb-noir"></span><span class="theme-name">Noir</span><span class="theme-hint" data-i18n="th.noir">黑白編輯</span></button>
-          </div>
-        </div>
         <button type="button" class="lang-toggle" id="lang-toggle" aria-label="切換語言 / Switch language">EN</button>
         <button type="button" class="nav-burger" id="nav-burger" aria-label="選單 / Menu" data-i18n-aria="a11y.menu" aria-expanded="false" aria-controls="nav-links-list">
           <span></span><span></span><span></span>
@@ -127,7 +103,7 @@
       <div class="hero-inner container">
         <div class="avatar-card tilt" id="avatar-card">
           <picture>
-            <img id="avatar-img" src="/images/avatar-v1.webp" alt="Tunai 的虛擬頭像" data-i18n-alt="a11y.avatar" width="280" height="280"
+            <img id="avatar-img" src="/images/avatar-v2.webp" alt="Tunai 的虛擬頭像" data-i18n-alt="a11y.avatar" width="280" height="280"
                  onerror="this.closest('.avatar-card').classList.add('avatar-fallback'); this.remove()" />
           </picture>
           <div class="avatar-mono" aria-hidden="true">t9</div>
@@ -292,6 +268,47 @@
       </div>
     </section>
 
+    <!-- ============ AI STACK ============ -->
+    <section class="section aistack" id="ai" aria-labelledby="ai-h" data-bg>
+      <div class="container">
+        <p class="section-eyebrow reveal" data-i18n="ai.eyebrow">AI 工具</p>
+        <h2 class="section-title reveal" id="ai-h" data-i18n="ai.title">每天在用的 AI</h2>
+        <p class="section-sub reveal" data-i18n="ai.sub">這個網站從設計、程式到背景圖,全部都是和它們一起做出來的。</p>
+        <div class="ai-grid">
+          <div class="card glass ai-card tilt reveal">
+            <span class="ai-logo" data-brand="claude" aria-hidden="true">C</span>
+            <h3>Claude</h3>
+            <p data-i18n="ai.claude.d">主力。Claude Code 直接在終端機寫程式、除錯、部署——這整個網站就是這樣長出來的。</p>
+          </div>
+          <div class="card glass ai-card tilt reveal">
+            <span class="ai-logo" data-brand="chatgpt" aria-hidden="true">G</span>
+            <h3>ChatGPT</h3>
+            <p data-i18n="ai.gpt.d">拿來快速問答、腦力激盪、整理雜亂的想法,還有比對不同模型給的答案。</p>
+          </div>
+          <div class="card glass ai-card tilt reveal">
+            <span class="ai-logo" data-brand="gemini" aria-hidden="true">G</span>
+            <h3>Gemini</h3>
+            <p data-i18n="ai.gemini.d">長文本與多模態的好幫手,查資料、讀圖、跨來源比對時常常用到。</p>
+          </div>
+          <div class="card glass ai-card tilt reveal">
+            <span class="ai-logo has-img" aria-hidden="true"><img src="/images/brand/higgsfield-v2.webp" alt="" width="26" height="26" loading="lazy" /></span>
+            <h3>Higgsfield</h3>
+            <p data-i18n="ai.hf.d">生成式影像。你腳下這整個黏土微縮世界——每一景、每一段鏡頭都是用它產出的。</p>
+          </div>
+          <div class="card glass ai-card tilt reveal">
+            <span class="ai-logo has-img" aria-hidden="true"><img src="/images/brand/hermes-v2.webp" alt="" width="26" height="26" loading="lazy" /></span>
+            <h3>Hermes Agent</h3>
+            <p data-i18n="ai.hermes.d">Nous Research 的自我進化 agent,有持久記憶,還會把解過的難題寫成可重用的 skill。</p>
+          </div>
+          <div class="card glass ai-card tilt reveal">
+            <span class="ai-logo has-img" aria-hidden="true"><img src="/images/brand/openclaw-v2.webp" alt="" width="26" height="26" loading="lazy" /></span>
+            <h3>OpenClaw</h3>
+            <p data-i18n="ai.claw.d">跑在自己機器上的開源個人助理,接 Telegram/Discord 就能叫它做事,資料全留在本機。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- ============ PROJECTS ============ -->
     <section class="section projects" id="projects" aria-labelledby="projects-h" data-bg>
       <div class="container">
@@ -343,47 +360,6 @@
 
         <div class="section-more reveal">
           <a class="btn btn-ghost magnetic" href="https://github.com/Tunai-0511?tab=repositories" target="_blank" rel="noopener" data-i18n="proj.more">查看全部 →</a>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============ AI STACK ============ -->
-    <section class="section aistack" id="ai" aria-labelledby="ai-h" data-bg>
-      <div class="container">
-        <p class="section-eyebrow reveal" data-i18n="ai.eyebrow">AI 工具</p>
-        <h2 class="section-title reveal" id="ai-h" data-i18n="ai.title">每天在用的 AI</h2>
-        <p class="section-sub reveal" data-i18n="ai.sub">這個網站從設計、程式到背景圖,全部都是和它們一起做出來的。</p>
-        <div class="ai-grid">
-          <div class="card glass ai-card tilt reveal">
-            <span class="ai-logo" data-brand="claude" aria-hidden="true">C</span>
-            <h3>Claude</h3>
-            <p data-i18n="ai.claude.d">主力。Claude Code 直接在終端機寫程式、除錯、部署——這整個網站就是這樣長出來的。</p>
-          </div>
-          <div class="card glass ai-card tilt reveal">
-            <span class="ai-logo" data-brand="chatgpt" aria-hidden="true">G</span>
-            <h3>ChatGPT</h3>
-            <p data-i18n="ai.gpt.d">拿來快速問答、腦力激盪、整理雜亂的想法,還有比對不同模型給的答案。</p>
-          </div>
-          <div class="card glass ai-card tilt reveal">
-            <span class="ai-logo" data-brand="gemini" aria-hidden="true">G</span>
-            <h3>Gemini</h3>
-            <p data-i18n="ai.gemini.d">長文本與多模態的好幫手,查資料、讀圖、跨來源比對時常常用到。</p>
-          </div>
-          <div class="card glass ai-card tilt reveal">
-            <span class="ai-logo has-img" aria-hidden="true"><img src="/images/brand/higgsfield-v2.webp" alt="" width="26" height="26" loading="lazy" /></span>
-            <h3>Higgsfield</h3>
-            <p data-i18n="ai.hf.d">生成式影像。你現在看到的六組主題背景,每一張都是用它產出的。</p>
-          </div>
-          <div class="card glass ai-card tilt reveal">
-            <span class="ai-logo has-img" aria-hidden="true"><img src="/images/brand/hermes-v2.webp" alt="" width="26" height="26" loading="lazy" /></span>
-            <h3>Hermes Agent</h3>
-            <p data-i18n="ai.hermes.d">Nous Research 的自我進化 agent,有持久記憶,還會把解過的難題寫成可重用的 skill。</p>
-          </div>
-          <div class="card glass ai-card tilt reveal">
-            <span class="ai-logo has-img" aria-hidden="true"><img src="/images/brand/openclaw-v2.webp" alt="" width="26" height="26" loading="lazy" /></span>
-            <h3>OpenClaw</h3>
-            <p data-i18n="ai.claw.d">跑在自己機器上的開源個人助理,接 Telegram/Discord 就能叫它做事,資料全留在本機。</p>
-          </div>
         </div>
       </div>
     </section>

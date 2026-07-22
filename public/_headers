@@ -2,9 +2,14 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=()
-  Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self' https://api.github.com https://github-contributions-api.jogruber.de; manifest-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+  Content-Security-Policy: default-src 'self'; img-src 'self' data:; media-src 'self' blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self' https://api.github.com https://github-contributions-api.jogruber.de; manifest-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
 
 /assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# hero 捲動影片。檔名帶版號(-v1)→ 換片就改版號+改檔名,可安心 immutable。
+# 千萬別原地覆蓋同一 URL(會重蹈 /images/* 那個 7 天陳舊快取的坑)。
+/video/*
   Cache-Control: public, max-age=31536000, immutable
 
 # 兩條規則(都是被雷過才寫下來的):
