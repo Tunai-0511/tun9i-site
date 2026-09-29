@@ -10,6 +10,10 @@ const TTL = 6 * 60 * 60 * 1000; // 6h
 
 const LEVEL_ALPHA = [0.06, 0.3, 0.5, 0.72, 1];
 
+let heat = null;
+// 給 3D 場景用(04 章主機板上的 LED 陣列)
+export const getHeat = () => heat;
+
 export async function initHeatmap() {
   const wrap = document.getElementById('heatmap');
   if (!wrap) return;
@@ -34,6 +38,8 @@ export async function initHeatmap() {
     }
   }
 
+  heat = data;
+  dispatchEvent(new CustomEvent('heat:data'));
   render(wrap, data);
   onLang(() => render(wrap, data));
 }

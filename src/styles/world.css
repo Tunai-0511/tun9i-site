@@ -26,14 +26,6 @@
 }
 html.world-ready .world-canvas { opacity: 1; }
 
-/* 暗紗:城市整片會亮,要壓住一點,內容才讀得到;下半部更重 */
-.world-veil {
-  position: absolute;
-  inset: 0;
-  z-index: 60;
-  background: linear-gradient(180deg, rgba(5, 4, 7, 0.1) 0%, rgba(5, 4, 7, 0.24) 45%, rgba(5, 4, 7, 0.5) 100%);
-}
-
 /* ---------- HUD ---------- */
 .film-hud {
   position: absolute;
@@ -106,124 +98,101 @@ html.world-ready .film-hud { opacity: 1; }
   transition: color 0.6s linear, border-color 0.6s linear;
 }
 
-/* 場景標註:錨點在物件上,細線往上引到文字 */
-.film-labels { position: absolute; inset: 0; }
-.film-label {
+/* 窄螢幕的字幕:紀錄片式,下緣一層漸層,不是卡片 */
+.film-caption {
   position: absolute;
   left: 0;
-  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 80;
+  padding: 3.2rem max(16px, env(safe-area-inset-left)) calc(1.1rem + env(safe-area-inset-bottom));
+  max-height: 52svh;
+  overflow: auto;
+  pointer-events: auto;
+  color: rgba(244, 239, 231, 0.94);
+  background: linear-gradient(to top, rgba(5, 4, 7, 0.92) 0%, rgba(5, 4, 7, 0.78) 62%, rgba(5, 4, 7, 0) 100%);
   opacity: 0;
-  will-change: transform, opacity;
-  --dot: var(--era);
+  transform: translateY(8px);
+  visibility: hidden;
+  transition: opacity 0.35s var(--ease), transform 0.35s var(--ease), visibility 0s linear 0.35s;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
 }
-.film-label i {
-  position: absolute;
-  left: -3px;
-  top: -3px;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--dot);
-  box-shadow: 0 0 10px var(--dot);
-}
-.film-label::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: 3px;
-  width: 1px;
-  height: 34px;
-  background: linear-gradient(to top, color-mix(in srgb, var(--dot) 70%, transparent), transparent);
-}
-.film-label b,
-.film-label span {
-  position: absolute;
-  left: 8px;
-  white-space: nowrap;
-}
-.film-label b {
-  bottom: 44px;
-  font-family: var(--font-serif);
-  font-size: 0.86rem;
-  font-weight: 600;
-  color: rgba(244, 239, 231, 0.95);
-  letter-spacing: 0.04em;
-}
-.film-label span {
-  bottom: 32px;
-  font: 500 0.54rem/1 ui-monospace, 'SF Mono', Menlo, monospace;
-  letter-spacing: 0.26em;
-  color: rgba(244, 239, 231, 0.5);
-}
-.film-label.is-small::before { height: 24px; }
-/* 游標靠近時,標註亮起來 */
-.film-label.is-near b { color: #fff; text-shadow: 0 0 12px var(--dot); }
-.film-label.is-near span { color: rgba(244, 239, 231, 0.8); }
-.film-label.is-small b { bottom: 34px; font-size: 0.74rem; }
-.film-label.is-small span { bottom: 23px; }
+.film-caption.on { opacity: 1; transform: none; visibility: visible; transition-delay: 0s; }
+@media (min-width: 861px) { .film-caption { display: none; } }
+@media (min-width: 861px) and (max-aspect-ratio: 4/5) { .film-caption { display: block; } }
+.film-caption .cap-eyebrow { font: 600 0.62rem/1 ui-monospace, 'SF Mono', Menlo, monospace; letter-spacing: 0.28em; color: var(--era); margin: 0 0 0.45rem; }
+.film-caption h3 { font-family: var(--font-serif); font-size: 1.35rem; line-height: 1.25; margin: 0 0 0.5rem; }
+.film-caption p { margin: 0 0 0.45rem; }
+.film-caption ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.45rem; }
+.film-caption li b { display: block; font-weight: 700; color: #fff; }
+.film-caption li span { display: block; font-size: 0.82rem; color: rgba(244, 239, 231, 0.72); }
+.film-caption .cap-tags { grid-template-columns: 1fr 1fr; gap: 0.35rem 0.8rem; }
+.film-caption .cap-tags li { font-weight: 600; }
+.film-caption a { color: var(--era); text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--era) 50%, transparent); }
+.film-caption .cap-links { display: flex; gap: 1.2rem; margin-top: 0.6rem; font-weight: 700; }
 
-/* 手機:HUD 只留右上的大字,標註全部省掉(畫面太窄,會跟內容打架) */
+/* 手機:HUD 只留右上的大字 */
 @media (max-width: 860px) {
-  .film-chap, .film-labels { display: none; }
+  .film-chap { display: none; }
   .film-year { top: 70px; }
   .film-num { font-size: 2.2rem; opacity: 0.6; }
   .film-cap { display: none; }
 }
 
-/* ── 文字可讀性:黑底上的暖白字,標題給一圈暗色光暈,壓得住後面發光的東西 ── */
-.hero-copy { position: relative; }
-.hero-copy::before {
-  content: '';
-  position: absolute;
-  inset: -2.5rem -3rem;
-  z-index: -1;
-  border-radius: 40px;
-  pointer-events: none;
-  background: radial-gradient(72% 64% at 50% 46%, rgba(5, 4, 7, 0.62), rgba(5, 4, 7, 0.3) 62%, transparent 100%);
-}
-/* 標題是漸層鏤空字(background-clip:text),text-shadow 會蓋在漸層上面把字弄髒 ——
-   鏤空字改用 drop-shadow,一般文字才用 text-shadow。 */
-.eyebrow,
-.tagline,
-.hero-sub,
-.section-lead,
-.section-sub {
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7), 0 0 28px rgba(5, 4, 7, 0.85);
-}
-.hero-title,
-.section-title,
-.contact-title {
-  filter: drop-shadow(0 0 22px rgba(5, 4, 7, 0.9));
-}
-
-/* 次要按鈕:黑底上要看得出是「可按的東西」 */
-.btn-ghost {
-  background: rgba(20, 17, 26, 0.72);
-  border-color: color-mix(in srgb, var(--accent) 38%, var(--border));
-}
-.btn-ghost:hover { background: rgba(32, 27, 40, 0.86); }
-
-/* ── 內容浮在背景舞台之上的版面契約 ──
+/* ── 電影模式的版面契約 ──
+   有 WebGL 時,整個網站就是那部 3D 短片:內容刻在場景裡的物件上,不是字卡。
+   每個區塊變成一段「捲動跑道」,高度 = 這一章有幾個鏡頭(--beats,引擎填)× 一個鏡頭的長度。
+   原本的 HTML 內容還在(螢幕閱讀器、搜尋引擎、鍵盤都讀得到),只是視覺上藏起來;
+   鍵盤 Tab 進到某一區的連結時,那一區的內容會浮出來。
    注意:不能把 .site-nav 捲進來(components.css 的 fixed + z-index:100)。 */
 main, .site-footer { position: relative; z-index: 2; }
 .hero-bg { display: none; }
-.hero { position: relative; background: transparent; }
-.section.about,
-.section.journey,
-.section.projects,
-.section.aistack,
-.section.interests,
-.section.setup,
-.section.contact {
-  background: transparent;
+html.world-on main > section {
+  position: relative;
+  height: calc(var(--beats, 1) * 88svh);
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+  background: transparent !important; /* .section.about 之類的底色特異性比較高 */
+  pointer-events: none; /* 透明的跑道不能擋住下面的畫布(刻在物件上的連結、手機字幕)*/
+  border: 0 !important;
   border-radius: 0;
-  box-shadow: none;
+  box-shadow: none !important;
 }
-
-/* ── 結尾的「拉到很遠」需要捲動空間:聯絡區加長、文字釘住,
-     攝影機在這段跑道上退到整條訊號一次看完。沒有 WebGL 時版面維持原樣。 ── */
-html.world-on .section.contact { min-height: 175svh; }
-html.world-on .contact-inner { position: sticky; top: 26svh; }
+html.world-on main > section > * {
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap;
+}
+html.world-on main > section > *:focus-within {
+  pointer-events: auto;
+  position: fixed !important;
+  top: 84px;
+  left: 50%;
+  translate: -50% 0;
+  width: min(920px, calc(100vw - 32px)) !important;
+  height: auto !important;
+  max-height: calc(100svh - 110px);
+  overflow: auto !important;
+  clip-path: none !important;
+  white-space: normal;
+  z-index: 90;
+  padding: 28px;
+  border-radius: 22px;
+  background: rgba(8, 7, 12, 0.94);
+  border: 1px solid var(--border);
+}
+/* 滑到刻在物件上的連結 */
+html.world-hot, html.world-hot body { cursor: pointer; }
+html.world-on .site-footer { background: transparent; }
 
 /* ── 色調選單的色球:起點色 → 終點色 ── */
 .orb-tungsten, .orb-neon, .orb-circuit, .orb-sakura, .orb-platinum {

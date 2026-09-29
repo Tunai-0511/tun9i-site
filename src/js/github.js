@@ -83,6 +83,27 @@ let currentRepos = null;
 function show(repos) {
   currentRepos = repos;
   render(repos);
+  dispatchEvent(new CustomEvent('repos:data'));
+}
+
+// 給 3D 場景用(04 章主機板上的專案晶片):目前語言下,每個 repo 要顯示的內容
+export function repoCards() {
+  if (!currentRepos) return null;
+  const lang = document.documentElement.dataset.lang;
+  return currentRepos.map((r) => {
+    const o = curated.overrides[r.name];
+    const u = new Date(r.updated_at);
+    return {
+      name: r.name,
+      title: o?.title ?? r.name,
+      desc: o?.[lang] ?? o?.zh ?? r.description ?? (lang === 'zh' ? '(探索中的專案)' : '(work in progress)'),
+      url: r.html_url,
+      live: o?.live || null,
+      language: r.language,
+      stars: r.stargazers_count,
+      date: `${u.getFullYear()}.${String(u.getMonth() + 1).padStart(2, '0')}`,
+    };
+  });
 }
 
 export async function initGithub() {
