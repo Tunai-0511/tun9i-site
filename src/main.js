@@ -46,10 +46,14 @@ function splitTitle() {
 
   // 每個 .ch 自帶漸層,靠 --ch-x / --title-w 對齊成一條連續漸層
   // (offsetLeft/offsetWidth 不受 transform 影響,動畫進行中量測仍正確)
+  // 標題有 filter(drop-shadow)時它自己就是字的 offsetParent,offsetLeft 已經相對於標題,
+  // 不能再減 el.offsetLeft —— 置中版面(手機)會整條漸層左移,前幾個字變透明。
   const measure = () => {
     el.style.setProperty('--title-w', `${el.offsetWidth}px`);
-    const base = el.offsetLeft;
-    spans.forEach((s) => s.style.setProperty('--ch-x', `${s.offsetLeft - base}px`));
+    spans.forEach((s) => {
+      const x = s.offsetParent === el ? s.offsetLeft : s.offsetLeft - el.offsetLeft;
+      s.style.setProperty('--ch-x', `${x}px`);
+    });
   };
   measure();
   document.fonts?.ready.then(measure).catch(() => {});
