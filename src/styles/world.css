@@ -1,6 +1,8 @@
 /* ============================================================
-   world.css — 黏土世界捲動背景舞台(worldbg.js)
-   取代 scrollbg.css:11 段鏡頭鏈交叉淡化,單一淺色遮罩保可讀性。
+   world.css — 《訊號簡史》背景舞台(src/js/world/)
+   全黑舞台 + three.js 畫布 + 紀錄片式 HUD。
+   HUD 的語法:左上「編號方塊 + 中文章節 + 疏排英文」、右上「大字年份 + 疏排地點」、
+   場景裡用一根細線從物件引出中英雙語標註。它在背景層,內容卡片永遠蓋在上面。
    ============================================================ */
 
 #bg-stage {
@@ -9,52 +11,163 @@
   z-index: 0;
   pointer-events: none;
   overflow: clip;
-  background: var(--bg);
+  background: radial-gradient(120% 90% at 50% 40%, #0b0910 0%, #050407 70%);
+  --era: #e8b45c;
 }
 
-.world-seg {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  will-change: opacity;
-}
-
-.world-seg-poster {
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center 42%;
-}
-
-.world-seg video {
+.world-canvas {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: center 42%;
+  display: block;
   opacity: 0;
-  transition: opacity 0.5s var(--ease);
+  transition: opacity 1.2s var(--ease);
 }
-.world-seg.has-video video { opacity: 1; }
-.world-seg.has-video .world-seg-poster { opacity: 0; }
+html.world-ready .world-canvas { opacity: 1; }
 
-/* 單一淺色遮罩:壓在所有段之上,讓深墨文字在亮底影片上維持對比。
-   世界本身是奶油亮底,遮罩保持輕透,只在底部稍強(文字多在內容流)。 */
+/* 很輕的暗紗:只壓畫面下半,內容流大多在那裡 */
 .world-veil {
   position: absolute;
   inset: 0;
   z-index: 60;
-  background: linear-gradient(
-    180deg,
-    rgba(246, 239, 230, 0.34) 0%,
-    rgba(246, 239, 230, 0.26) 40%,
-    rgba(246, 239, 230, 0.5) 100%
-  );
+  background: linear-gradient(180deg, rgba(5, 4, 7, 0) 0%, rgba(5, 4, 7, 0.12) 45%, rgba(5, 4, 7, 0.4) 100%);
 }
 
-/* ── 文字可讀性:亮底影片上的深墨字,標題與段落都給奶油光暈,
-     hero 文案再加一層局部亮紗(radial,不是卡片 —— 保持 Apple 式輕盈) ── */
+/* ---------- HUD ---------- */
+.film-hud {
+  position: absolute;
+  inset: 0;
+  z-index: 70;
+  opacity: 0;
+  transition: opacity 1.2s var(--ease);
+  font-family: var(--font-body);
+}
+html.world-ready .film-hud { opacity: 1; }
+
+.film-chap,
+.film-year {
+  position: absolute;
+  transition: opacity 0.22s var(--ease), transform 0.22s var(--ease);
+}
+.film-hud.is-swapping .film-chap,
+.film-hud.is-swapping .film-year { opacity: 0; transform: translateY(-4px); }
+
+.film-chap {
+  top: 92px;
+  left: clamp(18px, 3vw, 40px);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.film-n {
+  font: 700 0.66rem/1 ui-monospace, 'SF Mono', Menlo, monospace;
+  color: #120c03;
+  background: var(--era);
+  padding: 0.28rem 0.42rem;
+  border-radius: 3px;
+  transition: background 0.6s linear;
+}
+.film-zh {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(244, 239, 231, 0.92);
+  letter-spacing: 0.06em;
+}
+.film-en {
+  font: 500 0.62rem/1 ui-monospace, 'SF Mono', Menlo, monospace;
+  letter-spacing: 0.32em;
+  color: rgba(244, 239, 231, 0.45);
+}
+
+.film-year {
+  top: 78px;
+  right: clamp(18px, 3vw, 40px);
+  display: grid;
+  justify-items: end;
+  gap: 0.35rem;
+}
+.film-num {
+  font-family: var(--font-serif);
+  font-size: clamp(2.6rem, 4.6vw, 4.2rem);
+  font-weight: 600;
+  line-height: 1;
+  color: rgba(244, 239, 231, 0.94);
+  letter-spacing: -0.01em;
+  text-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
+}
+.film-cap {
+  font: 600 0.6rem/1 ui-monospace, 'SF Mono', Menlo, monospace;
+  letter-spacing: 0.3em;
+  color: var(--era);
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--era) 45%, transparent);
+  transition: color 0.6s linear, border-color 0.6s linear;
+}
+
+/* 場景標註:錨點在物件上,細線往上引到文字 */
+.film-labels { position: absolute; inset: 0; }
+.film-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  will-change: transform, opacity;
+  --dot: var(--era);
+}
+.film-label i {
+  position: absolute;
+  left: -3px;
+  top: -3px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--dot);
+  box-shadow: 0 0 10px var(--dot);
+}
+.film-label::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 3px;
+  width: 1px;
+  height: 34px;
+  background: linear-gradient(to top, color-mix(in srgb, var(--dot) 70%, transparent), transparent);
+}
+.film-label b,
+.film-label span {
+  position: absolute;
+  left: 8px;
+  white-space: nowrap;
+}
+.film-label b {
+  bottom: 44px;
+  font-family: var(--font-serif);
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: rgba(244, 239, 231, 0.95);
+  letter-spacing: 0.04em;
+}
+.film-label span {
+  bottom: 32px;
+  font: 500 0.54rem/1 ui-monospace, 'SF Mono', Menlo, monospace;
+  letter-spacing: 0.26em;
+  color: rgba(244, 239, 231, 0.5);
+}
+.film-label.is-small::before { height: 24px; }
+.film-label.is-small b { bottom: 34px; font-size: 0.74rem; }
+.film-label.is-small span { bottom: 23px; }
+
+/* 手機:HUD 只留右上的大字,標註全部省掉(畫面太窄,會跟內容打架) */
+@media (max-width: 860px) {
+  .film-chap, .film-labels { display: none; }
+  .film-year { top: 70px; }
+  .film-num { font-size: 2.2rem; opacity: 0.6; }
+  .film-cap { display: none; }
+}
+
+/* ── 文字可讀性:黑底上的暖白字,標題給一圈暗色光暈,壓得住後面發光的東西 ── */
 .hero-copy { position: relative; }
 .hero-copy::before {
   content: '';
@@ -63,46 +176,35 @@
   z-index: -1;
   border-radius: 40px;
   pointer-events: none;
-  background: radial-gradient(
-    72% 64% at 50% 46%,
-    rgba(246, 239, 230, 0.78),
-    rgba(246, 239, 230, 0.42) 62%,
-    transparent 100%
-  );
+  background: radial-gradient(72% 64% at 50% 46%, rgba(5, 4, 7, 0.62), rgba(5, 4, 7, 0.3) 62%, transparent 100%);
 }
-
-.hero-title { text-shadow: 0 2px 26px rgba(246, 239, 230, 0.95); }
-
-/* 玻璃調薄後,次要按鈕在花俏場景上會糊掉 —— 互動元件要看得出是「可按的東西」,
-   所以給它比一般卡片更實的底與更明確的邊框(仍保留玻璃質感)。 */
-.btn-ghost {
-  background: rgba(255, 255, 255, 0.72);
-  border-color: color-mix(in srgb, var(--accent) 32%, var(--border));
-}
-.btn-ghost:hover { background: rgba(255, 255, 255, 0.86); }
+/* 標題是漸層鏤空字(background-clip:text),text-shadow 會蓋在漸層上面把字弄髒 ——
+   鏤空字改用 drop-shadow,一般文字才用 text-shadow。 */
 .eyebrow,
 .tagline,
 .hero-sub,
-.section-title,
 .section-lead,
-.contact-title,
-.contact-sub {
-  text-shadow:
-    0 1px 2px rgba(246, 239, 230, 0.9),
-    0 2px 20px rgba(246, 239, 230, 0.95),
-    0 0 42px rgba(246, 239, 230, 0.8);
+.section-sub {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7), 0 0 28px rgba(5, 4, 7, 0.85);
+}
+.hero-title,
+.section-title,
+.contact-title {
+  filter: drop-shadow(0 0 22px rgba(5, 4, 7, 0.9));
 }
 
-/* ── 以下移植自 scrollbg.css:內容浮在背景舞台之上的版面契約 ──
+/* 次要按鈕:黑底上要看得出是「可按的東西」 */
+.btn-ghost {
+  background: rgba(20, 17, 26, 0.72);
+  border-color: color-mix(in srgb, var(--accent) 38%, var(--border));
+}
+.btn-ghost:hover { background: rgba(32, 27, 40, 0.86); }
+
+/* ── 內容浮在背景舞台之上的版面契約 ──
    注意:不能把 .site-nav 捲進來(components.css 的 fixed + z-index:100)。 */
 main, .site-footer { position: relative; z-index: 2; }
-
-/* hero 原本自帶的背景層由世界舞台接手 */
 .hero-bg { display: none; }
 .hero { position: relative; background: transparent; }
-
-/* 區塊透明化,露出背景世界(journey/setup 原本的面板底也一併透明 ——
-   它們現在各自對應專屬場景:校園教室與主機房)。 */
 .section.about,
 .section.journey,
 .section.projects,
@@ -115,7 +217,7 @@ main, .site-footer { position: relative; z-index: 2; }
   box-shadow: none;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  /* worldbg.js 在 reduced 下不建影片;這裡再擋一層 */
-  .world-seg video { display: none; }
-}
+/* ── 結尾的「拉到很遠」需要捲動空間:聯絡區加長、文字釘住,
+     攝影機在這段跑道上退到整條訊號一次看完。沒有 WebGL 時版面維持原樣。 ── */
+html.world-on .section.contact { min-height: 175svh; }
+html.world-on .contact-inner { position: sticky; top: 26svh; }

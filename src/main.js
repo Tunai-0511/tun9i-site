@@ -17,7 +17,7 @@ import { initParallax } from './js/parallax.js';
 import { initPointer } from './js/pointer.js';
 import { initParticles } from './js/particles.js';
 import { initGithub } from './js/github.js';
-import { initWorldBg } from './js/worldbg.js';
+import { initWorld } from './js/world/index.js';
 import { initHeatmap } from './js/heatmap.js';
 import { initIcons } from './js/icons.js';
 import { initTerminal } from './js/terminal.js';
@@ -68,8 +68,8 @@ function splitTitle() {
 }
 
 initIcons();
-// 黏土世界捲動背景(唯一主題)。reduced-motion / 省流量在模組內早退,退回海報圖。
-initWorldBg({ reduced });
+// 程式碼世界背景:three.js 即時渲染、捲動驅動攝影機。沒有 WebGL 就停在 CSS 天空漸層。
+initWorld({ reduced });
 initI18n();
 if (!reduced) splitTitle();
 initReveal();

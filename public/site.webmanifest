@@ -4,8 +4,8 @@
   "description": "軟體工程 · AI Agents · Python 系統 — Tunai 的個人網站",
   "start_url": "/",
   "display": "standalone",
-  "theme_color": "#F6EFE6",
-  "background_color": "#F6EFE6",
+  "theme_color": "#050407",
+  "background_color": "#050407",
   "icons": [
     {
       "src": "/favicon-32.png",
