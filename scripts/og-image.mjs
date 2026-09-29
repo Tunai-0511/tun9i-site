@@ -35,21 +35,18 @@ await sharp(join(root, 'scripts', 'og-film-frame.jpg'))
   .toFile(join(root, 'public', 'og-image-v4.jpg'));
 console.log('OK og-image-v4.jpg');
 
-const icon = `
-<svg width="180" height="180" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#e8b45c"/>
-      <stop offset="1" stop-color="#a487ff"/>
-    </linearGradient>
-  </defs>
-  <rect width="180" height="180" rx="40" fill="#050407"/>
-  <text x="90" y="118" font-family="Segoe UI, Arial, sans-serif" font-size="72" font-weight="700" fill="url(#g)" text-anchor="middle">t9</text>
-  <circle cx="138" cy="48" r="10" fill="#a487ff"/>
-</svg>`;
+// 圖示:來源是 public/favicon-v2.svg(訊號:雜訊 → 正弦 → 亮點)。換設計就把版號 +1 ——
+// 瀏覽器的 favicon 快取比一般快取更頑固,同一個網址換內容,很多人會卡在舊圖好幾天。
+// apple-touch-icon 要滿版不透明:iOS 會自己裁圓角,透明的四角會變成黑邊。
+import { readFileSync } from 'node:fs';
+const iconSvg = readFileSync(join(root, 'public', 'favicon-v2.svg'));
 
-await sharp(Buffer.from(icon)).png().toFile(join(root, 'public', 'apple-touch-icon.png'));
-console.log('OK apple-touch-icon.png');
+// -v2 給 <link> 用;不帶版號的那份給沒讀 <link> 就直接要 /apple-touch-icon.png 的裝置
+for (const name of ['apple-touch-icon-v2.png', 'apple-touch-icon.png']) {
+  await sharp(iconSvg, { density: 600 }).resize(180, 180).flatten({ background: '#050407' }).png()
+    .toFile(join(root, 'public', name));
+  console.log('OK ' + name);
+}
 
-await sharp(Buffer.from(icon)).resize(32, 32).png().toFile(join(root, 'public', 'favicon-32.png'));
-console.log('OK favicon-32.png');
+await sharp(iconSvg, { density: 300 }).resize(32, 32).png().toFile(join(root, 'public', 'favicon-32-v2.png'));
+console.log('OK favicon-32-v2.png');

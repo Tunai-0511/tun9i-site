@@ -8,17 +8,17 @@
   "background_color": "#050407",
   "icons": [
     {
-      "src": "/favicon-32.png",
+      "src": "/favicon-32-v2.png",
       "type": "image/png",
       "sizes": "32x32"
     },
     {
-      "src": "/apple-touch-icon.png",
+      "src": "/apple-touch-icon-v2.png",
       "type": "image/png",
       "sizes": "180x180"
     },
     {
-      "src": "/favicon.svg",
+      "src": "/favicon-v2.svg",
       "type": "image/svg+xml",
       "sizes": "any",
       "purpose": "any"
