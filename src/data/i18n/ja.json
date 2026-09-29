@@ -147,5 +147,11 @@
   "gh.sub": "GitHub での 1 年間の公開の足あと。",
   "gh.less": "少",
   "gh.more": "多",
-  "gh.total": "コントリビューション"
+  "gh.total": "コントリビューション",
+  "a11y.palette": "カラーを切り替え",
+  "pal.tungsten": "タングステン → 紫",
+  "pal.neon": "ネオン · シアン → マゼンタ",
+  "pal.circuit": "回路基板 · 緑 → 青",
+  "pal.sakura": "夜桜 · ピンク → 薄紫",
+  "pal.platinum": "プラチナ · 暖白 → 氷青"
 }

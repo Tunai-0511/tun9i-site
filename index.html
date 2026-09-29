@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-Hant-TW" data-theme="film" data-lang="zh">
+<html lang="zh-Hant-TW" data-theme="film" data-palette="tungsten" data-lang="zh">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -10,6 +10,11 @@
       // 這份清單要跟 src/js/i18n.js 的 LANGS 一致 —— 漏掉哪個語言,
       // 選了它的訪客一重新整理就會被打回中文。
       if (['zh', 'en', 'ja'].indexOf(lang) === -1) lang = 'zh';
+      // 色調:這份清單要跟 src/js/world/palettes.js 的 PALETTE_KEYS 一致
+      var pal = null;
+      try { pal = localStorage.getItem('tun9i-palette'); } catch (e) {}
+      if (['tungsten', 'neon', 'circuit', 'sakura', 'platinum'].indexOf(pal) === -1) pal = 'tungsten';
+      document.documentElement.dataset.palette = pal;
       document.documentElement.dataset.lang = lang;
       document.documentElement.lang = { zh: 'zh-Hant-TW', en: 'en', ja: 'ja' }[lang];
     })();
@@ -71,6 +76,20 @@
         <li><a href="#contact" data-i18n="nav.contact">聯絡</a></li>
       </ul>
       <div class="nav-tools">
+        <div class="theme-picker" id="theme-picker">
+          <button type="button" class="theme-trigger" id="theme-trigger" aria-label="切換色調" data-i18n-aria="a11y.palette"
+                  aria-haspopup="true" aria-expanded="false" aria-controls="theme-menu">
+            <span class="orb" id="theme-current-orb"></span>
+            <svg class="theme-caret" width="10" height="6" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          </button>
+          <div class="theme-menu is-closed" id="theme-menu" role="radiogroup" aria-label="色調" data-i18n-aria="a11y.palette" inert>
+            <button type="button" role="radio" data-set-palette="tungsten"><span class="orb orb-tungsten"></span><span class="theme-name">Tungsten</span><span class="theme-hint" data-i18n="pal.tungsten">鎢絲 → 紫光</span></button>
+            <button type="button" role="radio" data-set-palette="neon"><span class="orb orb-neon"></span><span class="theme-name">Neon</span><span class="theme-hint" data-i18n="pal.neon">霓虹 · 青 → 洋紅</span></button>
+            <button type="button" role="radio" data-set-palette="circuit"><span class="orb orb-circuit"></span><span class="theme-name">Circuit</span><span class="theme-hint" data-i18n="pal.circuit">電路板 · 綠 → 青藍</span></button>
+            <button type="button" role="radio" data-set-palette="sakura"><span class="orb orb-sakura"></span><span class="theme-name">Sakura</span><span class="theme-hint" data-i18n="pal.sakura">櫻夜 · 粉 → 淡紫</span></button>
+            <button type="button" role="radio" data-set-palette="platinum"><span class="orb orb-platinum"></span><span class="theme-name">Platinum</span><span class="theme-hint" data-i18n="pal.platinum">白金 · 暖白 → 冰藍</span></button>
+          </div>
+        </div>
         <button type="button" class="lang-toggle" id="lang-toggle" aria-label="切換語言 / Switch language">EN</button>
         <button type="button" class="nav-burger" id="nav-burger" aria-label="選單 / Menu" data-i18n-aria="a11y.menu" aria-expanded="false" aria-controls="nav-links-list">
           <span></span><span></span><span></span>

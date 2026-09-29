@@ -13,23 +13,25 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
-import { buildFilm, fatLine, eraColor, signalY, noiseY, X } from './film.js';
+import { buildFilm, fatLine, paintLine, eraColor, signalY, noiseY, X, paletteColors, setPaletteColors } from './film.js';
+import { currentPalette } from './palettes.js';
+import { buildCity, makeCityUniforms, MAX_PULSES } from './city.js';
 
 // ---------- 關鍵影格 ----------
 // F:攝影機看的點;O:攝影機相對 F 的位置;hx:訊號頭的 x
 const KEYS = [
-  { id: 'hero', f: 0, hx: -1.6, F: [-4.6, 0.3, 0], O: [2.2, 1.2, 12.5] }, // 真空管落在畫面右側,雜訊從左邊流進去
-  { id: 'about', f: 0.5, hx: 8, F: [2.6, 0.45, 0], O: [-2.4, 0.9, 7.4] },
-  { id: 'journey', f: 0.5, hx: 44, F: [31, 1.5, 0], O: [-6.5, 3.0, 13] },
-  { id: 'ai', f: 0.5, hx: 66.5, F: [58.5, 0.2, -1.2], O: [-1, 7.8, 10.5] },
-  { id: 'projects', f: 0.2, hx: X.dieA + 2.5, F: [X.dieA, 0, 0], O: [-1.6, 6.2, 7.6] },
-  { id: 'projects', f: 0.5, hx: X.dieB + 2.5, F: [X.dieB, 0, 0], O: [0, 6.6, 7.6] },
-  { id: 'projects', f: 0.8, hx: X.dieC + 2.5, F: [X.dieC, 0, 0], O: [1.6, 6.2, 7.6] },
-  { id: 'interests', f: 0.5, hx: 147, F: [137, 0.6, -0.8], O: [0, 1.6, 12] },
-  { id: 'setup', f: 0.5, hx: 167, F: [X.rig, 0, 0], O: [3.2, 8.5, 7.5] },
-  { id: 'contact', f: 0.14, hx: 181.5, F: [X.lamp + 0.5, 1.25, 0], O: [-6.2, 1.9, 8.4] },
-  // 結尾:退到起點的上空往前看 —— 整條訊號從腳下的雜訊一路延伸到遠方的光束
-  { id: 'contact', f: 1, hx: X.end, F: [104, 0, 0], O: [-140, 40, 66] },
+  { id: 'hero', f: 0, hx: -1.6, F: [-4.6, 0.5, 0], O: [1.5, 4.8, 13.5] }, // 真空管在右,雜訊從左邊流進去,背後是還沒亮的城
+  { id: 'about', f: 0.5, hx: 8, F: [2.6, 0.6, 0], O: [-2.8, 2.7, 8.8] },
+  { id: 'journey', f: 0.5, hx: 44, F: [31, 1.4, -1], O: [-8, 7, 13.5] },
+  { id: 'ai', f: 0.5, hx: 66.5, F: [58.5, 0.3, -1.5], O: [-1, 13, 12] },
+  { id: 'projects', f: 0.2, hx: X.dieA + 2.5, F: [X.dieA, 0, 0], O: [-2.5, 8.5, 9] },
+  { id: 'projects', f: 0.5, hx: X.dieB + 2.5, F: [X.dieB, 0, 0], O: [0, 9, 9] },
+  { id: 'projects', f: 0.8, hx: X.dieC + 2.5, F: [X.dieC, 0, 0], O: [2.5, 8.5, 9] },
+  { id: 'interests', f: 0.5, hx: 147, F: [137, 0.8, -1], O: [0, 4, 13.5] },
+  { id: 'setup', f: 0.5, hx: 167, F: [X.rig, 0, 0], O: [4, 11, 9] },
+  { id: 'contact', f: 0.14, hx: 181.5, F: [X.lamp + 0.5, 1.4, 0], O: [-7.5, 3.8, 9.5] },
+  // 結尾:升到高空,整座城已經全亮 —— 從上面看就是整段歷程
+  { id: 'contact', f: 1, hx: X.end, F: [118, 0, -8], O: [-10, 190, 150] },
 ];
 // 紀錄片式 HUD:左上章節、右上大字(年份或計數)
 const HUD = [
@@ -59,7 +61,7 @@ const GradeShader = {
     void main(){
       vec4 c = texture2D(tDiffuse, vUv);
       vec2 d = (vUv - 0.5) * vec2(1.25, 1.0);
-      c.rgb *= mix(1.0 - uVig, 1.0, smoothstep(0.82, 0.18, length(d)));
+      c.rgb *= mix(1.0 - uVig, 1.0, 1.0 - smoothstep(0.18, 0.82, length(d))); // edge0 < edge1,反過來寫是未定義行為
       c.rgb += (h(vUv * 1733.0 + fract(uTime) * 91.0) - 0.5) * uGrain;
       gl_FragColor = c;
     }`,
@@ -104,9 +106,54 @@ export function mountWorld(stage, { reduced = false, hud = null } = {}) {
   scene.add(headLight);
 
   // ---------- 場景 ----------
+  setPaletteColors(paletteColors(currentPalette())); // 建場景前先定好色票
   const film = buildFilm({ mobile });
   scene.add(film.root);
   const A = film.anim;
+
+  // ---------- 晶片城市 + 互動 ----------
+  const U = makeCityUniforms();
+  const city = buildCity({ mobile, U });
+  scene.add(city.root);
+  const cursorLight = new THREE.PointLight(0xffe2b0, 0, 11, 1.4);
+  scene.add(cursorLight);
+
+  // 游標:投到地面(y=0)的位置 = 一盞光;沒在動就慢慢熄
+  const ptr = { ndc: new THREE.Vector2(), has: false, on: 0, target: 0, lastMove: -99, px: 0, py: 0, tx: 0, ty: 0 };
+  const ray = new THREE.Raycaster(), ground = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), hit = new THREE.Vector3();
+  let pulseSlot = 0;
+  const INTERACTIVE = 'a,button,input,textarea,select,label,summary,[role="button"],[contenteditable],.site-nav,#term';
+  function setPointer(e) {
+    ptr.ndc.set((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
+    ptr.tx = ptr.ndc.x; ptr.ty = ptr.ndc.y;
+    ptr.has = true; ptr.target = 1; ptr.lastMove = time;
+  }
+  function firePulse() {
+    if (!ptr.has) return;
+    ray.setFromCamera(ptr.ndc, camera);
+    if (!ray.ray.intersectPlane(ground, hit)) return;
+    U.uPulse.value[pulseSlot].set(hit.x, hit.z, time, 1);
+    pulseSlot = (pulseSlot + 1) % MAX_PULSES;
+    ptr.flash = 1;
+  }
+  if (!reduced) {
+    addEventListener('pointermove', (e) => { if (e.pointerType === 'mouse') setPointer(e); }, { passive: true });
+    document.addEventListener('pointerleave', () => { ptr.target = 0; });
+    document.documentElement.addEventListener('mouseleave', () => { ptr.target = 0; });
+    // 點擊空白處 → 從那裡發出一圈脈衝。連結、按鈕、輸入框照常,不觸發;拖曳(選字、捲動)也不算
+    let down = null;
+    addEventListener('pointerdown', (e) => { down = { x: e.clientX, y: e.clientY, t: performance.now() }; }, { passive: true });
+    addEventListener('pointerup', (e) => {
+      if (!down) return;
+      const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y), dt = performance.now() - down.t;
+      down = null;
+      if (moved > 8 || dt > 500) return;
+      if (e.target instanceof Element && e.target.closest(INTERACTIVE)) return;
+      if (String(getSelection() || '').length) return;
+      setPointer(e);
+      firePulse();
+    }, { passive: true });
+  }
 
   // ---------- 訊號:主線(會「長」)+ 原始雜訊(一直在、一直抖) ----------
   const STEP = mobile ? 0.08 : 0.05;
@@ -136,6 +183,34 @@ export function mountWorld(stage, { reduced = false, hud = null } = {}) {
       arr[i * 6 + 4] = noiseY(noisePts[i + 1].x, t);
     }
     noiseBuf.needsUpdate = true;
+  }
+
+  // ---------- 色票:套用 + 切換時的平滑過渡 ----------
+  const livePal = paletteColors(currentPalette());
+  function applyPalette(P) {
+    setPaletteColors(P); // 城市的著色器直接讀這批顏色(uStops),不用另外通知
+    for (const f of film.recolor) f();
+    paintLine(signal, (p, c) => eraColor(p.x, c), 2.6);
+    paintLine(beam, (p, c) => eraColor(p.x, c), 3.2);
+    paintLine(noise, (p, c) => eraColor(p.x, c), 2.2);
+  }
+  applyPalette(livePal);
+  let palTween = null;
+  addEventListener('palettechange', (e) => {
+    const to = paletteColors(e.detail);
+    const from = { stops: livePal.stops.map((c) => c.clone()), metal: livePal.metal.clone() };
+    palTween = { from, to, t0: time, dur: reduced ? 0 : 0.9 };
+    if (reduced) { stepPalette(); draw(0); }
+  });
+  function stepPalette() {
+    if (!palTween) return;
+    const { from, to, t0, dur } = palTween;
+    const t = dur ? clamp((time - t0) / dur) : 1;
+    const e2 = t * t * (3 - 2 * t);
+    livePal.stops.forEach((c, i) => c.copy(from.stops[i]).lerp(to.stops[i], e2));
+    livePal.metal.copy(from.metal).lerp(to.metal, e2);
+    applyPalette(livePal);
+    if (t >= 1) palTween = null;
   }
 
   // 訊號頭:一顆亮點 + 跟著走的點光源
@@ -218,6 +293,7 @@ export function mountWorld(stage, { reduced = false, hud = null } = {}) {
   }
 
   function draw(dt) {
+    stepPalette();
     const s = sView;
     const i = Math.min(K.length - 2, Math.floor(s));
     const e = easeK(clamp(s - i));
@@ -231,12 +307,44 @@ export function mountWorld(stage, { reduced = false, hud = null } = {}) {
     if (!reduced) { cam.x += Math.sin(time * 0.21) * 0.12; cam.y += Math.sin(time * 0.17 + 1) * 0.08; } // 手持的一點點呼吸
     camera.position.copy(cam);
     camera.lookAt(look);
+    // 滑鼠視差:鏡頭跟著游標微微偏轉
+    if (!reduced) {
+      ptr.px += (ptr.tx - ptr.px) * 0.05; ptr.py += (ptr.ty - ptr.py) * 0.05;
+      tmp.subVectors(look, cam).normalize();
+      const rgt = new THREE.Vector3().crossVectors(tmp, camera.up).normalize();
+      const k = Math.min(3, cam.distanceTo(look) * 0.08);
+      cam.addScaledVector(rgt, ptr.px * k).addScaledVector(camera.up, ptr.py * k * 0.5);
+      camera.position.copy(cam);
+      camera.lookAt(look);
+    }
     const dist = cam.distanceTo(look);
-    scene.fog.near = dist + 6;
-    scene.fog.far = dist + 75;
+    scene.fog.near = dist + 12;
+    scene.fog.far = dist + 120;
+    U.uFogNear.value = scene.fog.near;
+    U.uFogFar.value = scene.fog.far;
 
     // 訊號頭 + 主線生長
     const hx = lerp(k0.hx, k1.hx, e);
+    U.uHead.value = hx;
+    U.uTime.value = time;
+    // 游標光:投到地面、跟著走;兩秒沒動就慢慢熄掉
+    if (!reduced) {
+      if (time - ptr.lastMove > 2.5) ptr.target = 0;
+      ptr.on += (ptr.target - ptr.on) * 0.08;
+      ptr.flash = (ptr.flash || 0) * 0.9;
+      if (ptr.has) {
+        ray.setFromCamera(ptr.ndc, camera);
+        if (ray.ray.intersectPlane(ground, hit)) {
+          U.uCursor.value.set(hit.x, hit.z);
+          cursorLight.position.set(hit.x, 2.6, hit.z);
+          city.ring.position.set(hit.x, 0.05, hit.z);
+        }
+      }
+      U.uCursorOn.value = ptr.on;
+      cursorLight.intensity = (20 + ptr.flash * 30) * ptr.on;
+      city.ring.material.opacity = 0.45 * ptr.on + ptr.flash * 0.3;
+      city.ring.scale.setScalar(1 + ptr.flash * 0.6 + Math.sin(time * 3) * 0.04);
+    }
     const hy = hx < X.inlet ? 0 : signalY(hx);
     head.position.set(hx, hy, 0);
     eraColor(hx, c3);
@@ -291,7 +399,7 @@ export function mountWorld(stage, { reduced = false, hud = null } = {}) {
       const act = Math.exp(-Math.pow((hx - X.rig) / 9, 2));
       for (let j = 0; j < 16; j++) {
         const f = 0.35 + act * (0.9 + (reduced ? 0.4 : 0.9 * Math.max(0, Math.sin(time * (3 + (j % 4)) + j * 2.3))));
-        A.cores.setColorAt(j, c3.setHex(0x8d6cff).multiplyScalar(f * 0.62));
+        A.cores.setColorAt(j, eraColor(X.rig, c3).multiplyScalar(f * 0.62));
       }
       A.cores.instanceColor.needsUpdate = true;
     }
@@ -313,7 +421,10 @@ export function mountWorld(stage, { reduced = false, hud = null } = {}) {
         proj.copy(L.pos).project(camera);
         if (proj.z > 1 || Math.abs(proj.x) > 1.1 || Math.abs(proj.y) > 1.1) { el.style.opacity = '0'; it.shown = false; continue; }
         el.style.transform = `translate3d(${((proj.x + 1) / 2) * w}px, ${((1 - proj.y) / 2) * h}px, 0)`;
-        el.style.opacity = String(vis * 0.82);
+        const lx = ((proj.x + 1) / 2) * w, ly = ((1 - proj.y) / 2) * h;
+        const near = ptr.on * Math.exp(-(((lx - ((ptr.px + 1) / 2) * w) ** 2 + (ly - ((1 - ptr.py) / 2) * h) ** 2) / (180 * 180)));
+        el.style.opacity = String(vis * (0.62 + 0.38 * near));
+        el.classList.toggle('is-near', near > 0.5);
         it.shown = true;
       }
     }
@@ -357,7 +468,8 @@ export function mountWorld(stage, { reduced = false, hud = null } = {}) {
   if (/[?&]worlddebug\b/.test(location.search)) {
     // 截圖 QA:預覽窗格在背景時 rAF 會降頻,settle() 直接把狀態推到終點再畫一幀
     window.__world = {
-      get s() { return sView; }, anchors: () => anchors.slice(), K, scene, bloom, film, signal, beam, noise, head,
+      get s() { return sView; }, anchors: () => anchors.slice(), K, scene, bloom, film, signal, beam, noise, head, city, U,
+      pulseAt(nx, ny) { ptr.ndc.set(nx, ny); ptr.tx = nx; ptr.ty = ny; ptr.has = true; ptr.target = 1; ptr.lastMove = time; ptr.on = 1; firePulse(); },
       // 掃描場景輸出裡的 NaN / Inf(bloom 會把它們擴散成黑色方塊)
       scanBad() {
         const w = 360, h = Math.round(360 / camera.aspect);
@@ -371,6 +483,8 @@ export function mountWorld(stage, { reduced = false, hud = null } = {}) {
         return { bad, maxV, at };
       },
       settle() { readScroll(); sView = sTarget; time += 0.016; draw(0.016); },
+      tick(dt = 0.1) { time += dt; draw(dt); },
+      hover(nx, ny) { ptr.ndc.set(nx, ny); ptr.tx = nx; ptr.ty = ny; ptr.has = true; ptr.target = 1; ptr.on = 1; ptr.lastMove = time; },
     };
   }
 }

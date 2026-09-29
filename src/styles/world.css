@@ -26,12 +26,12 @@
 }
 html.world-ready .world-canvas { opacity: 1; }
 
-/* 很輕的暗紗:只壓畫面下半,內容流大多在那裡 */
+/* 暗紗:城市整片會亮,要壓住一點,內容才讀得到;下半部更重 */
 .world-veil {
   position: absolute;
   inset: 0;
   z-index: 60;
-  background: linear-gradient(180deg, rgba(5, 4, 7, 0) 0%, rgba(5, 4, 7, 0.12) 45%, rgba(5, 4, 7, 0.4) 100%);
+  background: linear-gradient(180deg, rgba(5, 4, 7, 0.1) 0%, rgba(5, 4, 7, 0.24) 45%, rgba(5, 4, 7, 0.5) 100%);
 }
 
 /* ---------- HUD ---------- */
@@ -156,6 +156,9 @@ html.world-ready .film-hud { opacity: 1; }
   color: rgba(244, 239, 231, 0.5);
 }
 .film-label.is-small::before { height: 24px; }
+/* 游標靠近時,標註亮起來 */
+.film-label.is-near b { color: #fff; text-shadow: 0 0 12px var(--dot); }
+.film-label.is-near span { color: rgba(244, 239, 231, 0.8); }
 .film-label.is-small b { bottom: 34px; font-size: 0.74rem; }
 .film-label.is-small span { bottom: 23px; }
 
@@ -221,3 +224,14 @@ main, .site-footer { position: relative; z-index: 2; }
      攝影機在這段跑道上退到整條訊號一次看完。沒有 WebGL 時版面維持原樣。 ── */
 html.world-on .section.contact { min-height: 175svh; }
 html.world-on .contact-inner { position: sticky; top: 26svh; }
+
+/* ── 色調選單的色球:起點色 → 終點色 ── */
+.orb-tungsten, .orb-neon, .orb-circuit, .orb-sakura, .orb-platinum {
+  background: radial-gradient(circle at 30% 28%, rgba(255, 255, 255, 0.55), transparent 42%),
+    linear-gradient(135deg, var(--o0) 18%, var(--o1) 86%);
+}
+.orb-tungsten { --o0: #ffb85c; --o1: #8d6cff; }
+.orb-neon { --o0: #21e6ff; --o1: #ff4fd8; }
+.orb-circuit { --o0: #3dff7a; --o1: #3a93ff; }
+.orb-sakura { --o0: #ff6f9f; --o1: #c3a6ff; }
+.orb-platinum { --o0: #fff1dc; --o1: #9fcaf5; }

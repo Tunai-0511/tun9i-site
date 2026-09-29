@@ -12,6 +12,7 @@ import * as THREE from 'three';
 import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js';
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
 import { Line2 } from 'three/examples/jsm/lines/Line2.js';
+import { STOP_X, PALETTES, DEFAULT_PALETTE } from './palettes.js';
 
 // ---------- 場景在 x 軸上的位置 ----------
 export const X = {
@@ -27,19 +28,27 @@ const STEPS = 5;
 const clamp = (x, a = 0, b = 1) => (x < a ? a : x > b ? b : x);
 const sstep = (a, b, x) => { const t = clamp((x - a) / (b - a)); return t * t * (3 - 2 * t); };
 
-// ---------- 色溫:x → 顏色(琥珀 → 金 → 玫瑰 → 薰衣草 → 紫 → 冷白紫) ----------
-const ERA = [
-  [-34, 0xffa94d], [14, 0xffb85c], [40, 0xf3c46e], [66, 0xff9ebd],
-  [100, 0xb69cff], [150, 0x8d6cff], [195, 0xa487ff], [262, 0xd8ccff],
-];
-const _a = new THREE.Color(), _b = new THREE.Color();
+// ---------- 色溫:x → 顏色。由目前的色票決定(palettes.js),換色票時整個世界跟著換 ----------
+const STOPS = STOP_X.map(() => new THREE.Color());
+const METAL = new THREE.Color();
+export const WHITE = new THREE.Color(1, 1, 1);
+export function paletteColors(key) {
+  const P = PALETTES[key] || PALETTES[DEFAULT_PALETTE];
+  return { stops: P.stops.map((h) => new THREE.Color(h)), metal: new THREE.Color(P.metal) };
+}
+export function setPaletteColors({ stops, metal }) {
+  stops.forEach((c, i) => STOPS[i].copy(c));
+  METAL.copy(metal);
+}
+setPaletteColors(paletteColors(DEFAULT_PALETTE));
+export const paletteStops = STOPS; // city.js 直接把它當 uniform 陣列用
+export const metalColor = (out = new THREE.Color()) => out.copy(METAL);
 export function eraColor(x, out = new THREE.Color()) {
-  if (x <= ERA[0][0]) return out.setHex(ERA[0][1]);
-  for (let i = 0; i < ERA.length - 1; i++) {
-    const [x0, c0] = ERA[i], [x1, c1] = ERA[i + 1];
-    if (x <= x1) return out.copy(_a.setHex(c0)).lerp(_b.setHex(c1), (x - x0) / (x1 - x0));
+  if (x <= STOP_X[0]) return out.copy(STOPS[0]);
+  for (let i = 0; i < STOP_X.length - 1; i++) {
+    if (x <= STOP_X[i + 1]) return out.copy(STOPS[i]).lerp(STOPS[i + 1], (x - STOP_X[i]) / (STOP_X[i + 1] - STOP_X[i]));
   }
-  return out.setHex(ERA[ERA.length - 1][1]);
+  return out.copy(STOPS[STOPS.length - 1]);
 }
 
 // ---------- 訊號的形狀:y(x)。原始雜訊那段另外處理(會隨時間抖動) ----------
@@ -154,24 +163,34 @@ export function fatLine(points, colorFn, width, { opacity = 1, k = 2.2 } = {}) {
   const m = new LineMaterial({ linewidth: width, vertexColors: true, transparent: opacity < 1, opacity, depthWrite: opacity >= 1, worldUnits: false });
   const l = new Line2(g, m);
   l.frustumCulled = false;
+  l.userData.pts = points;
   return l;
 }
+// 就地重寫線的顏色(不重建幾何):LineGeometry 每一段存 [起點色, 終點色]
+export function paintLine(l, colorFn, k) {
+  const pts = l.userData.pts;
+  const buf = l.geometry.attributes.instanceColorStart.data;
+  const arr = buf.array;
+  const c = new THREE.Color();
+  let pr = 0, pg = 0, pb = 0;
+  for (let i = 0; i < pts.length; i++) {
+    colorFn(pts[i], c);
+    const r = c.r * k, g = c.g * k, b = c.b * k;
+    if (i > 0) { const o = (i - 1) * 6; arr[o] = pr; arr[o + 1] = pg; arr[o + 2] = pb; arr[o + 3] = r; arr[o + 4] = g; arr[o + 5] = b; }
+    pr = r; pg = g; pb = b;
+  }
+  buf.needsUpdate = true;
+}
+const tint = (x, k, mixWhite = 0, out = new THREE.Color()) => eraColor(x, out).lerp(WHITE, mixWhite).multiplyScalar(k);
 
 // =====================================================================
 export function buildFilm({ mobile = false } = {}) {
   const root = new THREE.Group();
   const anim = {};
   const labels = []; // { pos, zh, en, s0, s1 }
+  const recolor = []; // 換色票時,依序重新上色
 
-  // ---- 量測網格(資料紀錄片的底) ----
-  {
-    const pairs = [];
-    const y = -1.6;
-    for (let x = -40; x <= 270; x += 2) pairs.push(x, y, -24, x, y, 8);
-    for (let z = -24; z <= 8; z += 2) pairs.push(-40, y, z, 270, y, z);
-    const grid = segLines(pairs, 0x6a5c86, 0.55, 0.35);
-    root.add(grid);
-  }
+  // (地面、方塊、走線由 city.js 的晶片城市負責)
 
   // ---- 01 真空管:雜訊從左邊進來,右邊出來是乾淨的正弦 ----
   {
@@ -184,10 +203,12 @@ export function buildFilm({ mobile = false } = {}) {
       prof.push(new THREE.Vector2(Math.max(0.05, r), y));
     }
     const bulb = new THREE.Mesh(new THREE.LatheGeometry(prof, 48), glassMat(0xffc27a, 1.6, 2.4));
+    recolor.push(() => tint(2, 1, 0.25, bulb.material.uniforms.uColor.value));
     g.add(bulb);
     const plate = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.62, 1.45, 36, 1, true, 0.5, 4.2), new THREE.MeshBasicMaterial({ color: new THREE.Color(0xffb35c).multiplyScalar(0.55), transparent: true, opacity: 0.55, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending }));
     plate.position.y = 0.15;
     g.add(plate);
+    recolor.push(() => tint(0, 0.55, 0, plate.material.color));
     // 燈絲:一個細細的倒 U
     const fil = [];
     for (let i = 0; i <= 40; i++) {
@@ -196,11 +217,14 @@ export function buildFilm({ mobile = false } = {}) {
     }
     const filament = fatLine(fil, (p, c) => c.setHex(0xffe2a8), mobile ? 2.2 : 3, { k: 6 });
     g.add(filament);
+    recolor.push(() => paintLine(filament, (p, c) => tint(0, 1, 0.6, c), 6));
     const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.46, 0.5, 0.55, 24), darkMetal);
     cap.position.y = -1.55;
     g.add(cap);
+    const ringMat = glow(0xffb35c, 0.9);
+    recolor.push(() => tint(0, 0.9, 0, ringMat.color));
     for (let i = 0; i < 4; i++) {
-      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.49, 0.025, 6, 32), glow(0xffb35c, 0.9));
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.49, 0.025, 6, 32), ringMat);
       ring.rotation.x = Math.PI / 2;
       ring.position.y = -1.72 + i * 0.12;
       g.add(ring);
@@ -227,6 +251,7 @@ export function buildFilm({ mobile = false } = {}) {
     const top = stairTop(i);
     const edge = segLines(rectPairs(x - w / 2, -d / 2, x + w / 2, d / 2, top), c.getHex(), 3.2);
     root.add(edge);
+    recolor.push(() => { tint(x, 1, 0, slab.material.uniforms.uColor.value); tint(x, 3.2, 0, edge.material.color); });
     const node = new THREE.Mesh(new THREE.SphereGeometry(0.11, 12, 8), glow(0xffffff, 3));
     node.position.set(x, top + 0.28, 0);
     root.add(node);
@@ -241,13 +266,17 @@ export function buildFilm({ mobile = false } = {}) {
     const base = new THREE.Mesh(new THREE.BoxGeometry(x1 - x0, 0.22, 6.5), darkPlate);
     base.position.set((x0 + x1) / 2, -0.12, -1.2);
     root.add(base);
-    root.add(segLines(rectPairs(x0, -4.45, x1, 2.05, 0.0), 0xff9ebd, 1.4, 0.8));
+    const aiRect = segLines(rectPairs(x0, -4.45, x1, 2.05, 0.0), 0xff9ebd, 1.4, 0.8);
+    root.add(aiRect);
+    recolor.push(() => tint(58, 1.4, 0, aiRect.material.color));
     const hub = new THREE.Vector3((x0 + x1) / 2, 0, -3.3);
     // 中樞:一塊暗色晶片 + 發光外框(整塊發白會把畫面炸掉)
     const hubM = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.3, 1.2), darkMetal);
     hubM.position.copy(hub).setY(0.1);
     root.add(hubM);
-    root.add(segLines(rectPairs(hub.x - 1.1, hub.z - 0.6, hub.x + 1.1, hub.z + 0.6, 0.27), 0xffd9e6, 2.2));
+    const hubEdge = segLines(rectPairs(hub.x - 1.1, hub.z - 0.6, hub.x + 1.1, hub.z + 0.6, 0.27), 0xffd9e6, 2.2);
+    root.add(hubEdge);
+    recolor.push(() => tint(58, 2.2, 0.5, hubEdge.material.color));
     anim.aiNodes = [];
     TOOLS.forEach(([name, col], i) => {
       const x = X.ai0 + i * X.aiStep;
@@ -264,7 +293,9 @@ export function buildFilm({ mobile = false } = {}) {
         const t = j / 32;
         pts.push(new THREE.Vector3(x + (hub.x - x) * t, 0.1 + Math.sin(t * Math.PI) * (1.1 + (i % 3) * 0.25), 0 + (hub.z - 0) * t));
       }
-      root.add(fatLine(pts, (p, c) => c.setHex(0xf6c56b), mobile ? 1.2 : 1.6, { k: 1.8, opacity: 0.9 }));
+      const bond = fatLine(pts, (p, c) => c.setHex(0xf6c56b), mobile ? 1.2 : 1.6, { k: 1.8, opacity: 0.9 });
+      root.add(bond);
+      recolor.push(() => paintLine(bond, (p, c) => metalColor(c), 1.8));
       labels.push({ pos: new THREE.Vector3(x, -0.55, 0.9), zh: name, en: '', s0: 2.5, s1: 3.6, small: true, col });
     });
   }
@@ -303,8 +334,10 @@ export function buildFilm({ mobile = false } = {}) {
     }
     const traces = segLines(pairs, c.getHex(), 2.4);
     root.add(traces);
+    recolor.push(() => tint(D.x, 2.4, 0, traces.material.color));
     // 四周的焊墊
     const padM = glow(0xf6c56b, 0.42);
+    recolor.push(() => metalColor(padM.color).multiplyScalar(0.42));
     const padG = new THREE.BoxGeometry(0.26, 0.05, 0.26);
     for (let k = 0; k < 7; k++) {
       const t = -s / 2 + 0.45 + k * ((s - 0.9) / 6);
@@ -319,6 +352,7 @@ export function buildFilm({ mobile = false } = {}) {
       sweep = segLines([0, 0, 0, 2.1, 0, 0], 0xc9b8ff, 4);
       sweep.position.set(D.x, y + 0.01, 0);
       root.add(sweep);
+      recolor.push(() => tint(D.x, 4, 0.4, sweep.material.color));
     }
     anim.dies.push({ traces, sweep, x: D.x });
     labels.push({ pos: new THREE.Vector3(D.x, 0.2, -X.dieHalf - 1.2), zh: D.zh, en: D.en, s0: 3.4 + di, s1: 4.6 + di });
@@ -333,12 +367,16 @@ export function buildFilm({ mobile = false } = {}) {
         const env = sstep(X.play0, X.play0 + 3, x) * (1 - sstep(X.play1 - 3, X.play1, x));
         pts.push(new THREE.Vector3(x, 0.8 + Math.sin((x - X.play0) * f + hi) * 0.45 * env, z));
       }
-      harm.push(fatLine(pts, (p, c) => c.setHex(col), mobile ? 1.4 : 2, { k: 2, opacity: 0.85 }));
+      const hl = fatLine(pts, (p, c) => c.setHex(col), mobile ? 1.4 : 2, { k: 2, opacity: 0.85 });
+      const hx = [70, 137, 215][hi]; // 三道諧波各取色票的不同段,同一組色票裡也有三種顏色
+      recolor.push(() => paintLine(hl, (p, c) => tint(hx, 1, 0.1, c), 2));
+      harm.push(hl);
     });
     harm.forEach((h) => root.add(h));
     const N = 22;
     const bars = new THREE.InstancedMesh(new THREE.BoxGeometry(0.22, 1, 0.22), glow(0xb69cff, 0.38), N);
-    for (let i = 0; i < N; i++) bars.setMatrixAt(i, new THREE.Matrix4().makeTranslation(X.play0 + 1 + i * 0.8, -1.6, -5));
+    for (let i = 0; i < N; i++) bars.setMatrixAt(i, new THREE.Matrix4().makeTranslation(X.play0 + 1 + i * 0.8, 0, -5));
+    recolor.push(() => tint(137, 0.38, 0, bars.material.color));
     root.add(bars);
     anim.bars = { mesh: bars, N };
     labels.push({ pos: new THREE.Vector3(X.play0 + 3, 2.2, -1.6), zh: '遊戲', en: 'GAMES · APEX / 原神 / SF6', s0: 5.6, s1: 7.6, small: true });
@@ -351,7 +389,9 @@ export function buildFilm({ mobile = false } = {}) {
     const plate = new THREE.Mesh(new THREE.BoxGeometry(S + 1.6, 0.3, S + 1.6), darkMetal);
     plate.position.set(cx, -0.25, 0);
     root.add(plate);
-    root.add(segLines(rectPairs(cx - S / 2, -S / 2, cx + S / 2, S / 2, -0.05), 0x8d6cff, 1.8));
+    const rigRect = segLines(rectPairs(cx - S / 2, -S / 2, cx + S / 2, S / 2, -0.05), 0x8d6cff, 1.8);
+    root.add(rigRect);
+    recolor.push(() => tint(cx, 1.8, 0, rigRect.material.color));
     const cores = new THREE.InstancedMesh(new THREE.BoxGeometry(1.35, 0.14, 1.35), new THREE.MeshBasicMaterial({ color: 0xffffff }), 16);
     const fan = [];
     const inX = cx - S / 2 - 1.2, outX = cx + S / 2 + 1.2;
@@ -362,7 +402,9 @@ export function buildFilm({ mobile = false } = {}) {
       fan.push(inX, 0.25, 0, gx, 0.1, gz, gx, 0.1, gz, outX, 0.25, 0);
     }
     root.add(cores);
-    root.add(segLines(fan, 0xa487ff, 1.1, 0.5));
+    const fanLines = segLines(fan, 0xa487ff, 1.1, 0.5);
+    root.add(fanLines);
+    recolor.push(() => tint(170, 1.1, 0, fanLines.material.color));
     anim.cores = cores;
     labels.push({ pos: new THREE.Vector3(cx - 2.7, 0.6, -4.8), zh: '16 核心', en: 'RYZEN 9 9950X3D', s0: 6.6, s1: 8.6 });
     labels.push({ pos: new THREE.Vector3(cx + 2.9, 0.6, 4.8), zh: '32 執行緒 · 64GB', en: 'RTX 5080 · DDR5-6000', s0: 6.6, s1: 8.6, small: true });
@@ -375,10 +417,12 @@ export function buildFilm({ mobile = false } = {}) {
     lens.scale.set(0.32, 1, 1);
     lens.position.set(lx, ly, 0);
     root.add(lens);
+    recolor.push(() => tint(lx, 1, 0.15, lens.material.uniforms.uColor.value));
     const ring = new THREE.Mesh(new THREE.TorusGeometry(1.32, 0.05, 8, 64), glow(0xa487ff, 2.2));
     ring.rotation.y = Math.PI / 2;
     ring.position.set(lx, ly, 0);
     root.add(ring);
+    recolor.push(() => tint(190, 2.2, 0, ring.material.color));
     const mount = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.16, ly + 1.6, 10), darkMetal);
     mount.position.set(lx, (ly - 1.6) / 2, 0);
     root.add(mount);
@@ -391,6 +435,7 @@ export function buildFilm({ mobile = false } = {}) {
     beamGlow.position.set(lx, ly, 0);
     beamGlow.rotation.z = Math.atan(0.055);
     root.add(beamGlow);
+    recolor.push(() => tint(175, 0.9, 0, beamGlow.material.color));
     anim.beamGlow = beamGlow;
     labels.push({ pos: new THREE.Vector3(lx + 7, ly + 2.2, 0), zh: '訊號送出', en: 'SIGNAL OUT · TUN9I.COM', s0: 8.4, s1: 10.2 });
   }
@@ -414,6 +459,7 @@ export function buildFilm({ mobile = false } = {}) {
       sp.scale.set(s, s * 0.6, 1);
       sp.position.set(hx, 1, -18);
       root.add(sp);
+      recolor.push(() => tint(hx, k, 0, m.color));
     }
   }
 
@@ -424,19 +470,27 @@ export function buildFilm({ mobile = false } = {}) {
     let a = 11;
     const rnd = () => ((a = (a * 16807) % 2147483647) / 2147483647);
     const cc = new THREE.Color();
+    const bright = new Float32Array(N);
     for (let i = 0; i < N; i++) {
       const x = -40 + rnd() * 310;
       pos.set([x, -3 + rnd() * 12, -22 + rnd() * 30], i * 3);
-      eraColor(x, cc).lerp(_a.setRGB(1, 1, 1), 0.4).multiplyScalar(0.5 + rnd() * 0.8);
-      col.set([cc.r, cc.g, cc.b], i * 3);
+      bright[i] = 0.5 + rnd() * 0.8;
     }
+    const paintDust = () => {
+      for (let i = 0; i < N; i++) {
+        tint(pos[i * 3], bright[i], 0.4, cc);
+        col.set([cc.r, cc.g, cc.b], i * 3);
+      }
+    };
+    paintDust();
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     g.setAttribute('color', new THREE.BufferAttribute(col, 3));
     const dust = new THREE.Points(g, new THREE.PointsMaterial({ size: 0.16, sizeAttenuation: true, map: anim.softTex, vertexColors: true, transparent: true, opacity: 0.8, depthWrite: false, blending: THREE.AdditiveBlending }));
     root.add(dust);
     anim.dust = dust;
+    recolor.push(() => { paintDust(); g.attributes.color.needsUpdate = true; });
   }
 
-  return { root, anim, labels };
+  return { root, anim, labels, recolor };
 }

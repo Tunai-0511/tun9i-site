@@ -18,6 +18,7 @@ import { initPointer } from './js/pointer.js';
 import { initParticles } from './js/particles.js';
 import { initGithub } from './js/github.js';
 import { initWorld } from './js/world/index.js';
+import { initPalette, setPalette } from './js/palette.js';
 import { initHeatmap } from './js/heatmap.js';
 import { initIcons } from './js/icons.js';
 import { initTerminal } from './js/terminal.js';
@@ -68,6 +69,7 @@ function splitTitle() {
 }
 
 initIcons();
+initPalette();
 // 程式碼世界背景:three.js 即時渲染、捲動驅動攝影機。沒有 WebGL 就停在 CSS 天空漸層。
 initWorld({ reduced });
 initI18n();
@@ -76,7 +78,7 @@ initReveal();
 initGithub();
 initHeatmap();
 const konami = initKonami();
-initTerminal({ fireKonami: konami.fire });
+initTerminal({ fireKonami: konami.fire, setPalette });
 
 // 終端機提示:第一次來的人不會知道有這東西,滑到最後時提一次
 if (matchMedia('(hover: hover) and (pointer: fine)').matches) {

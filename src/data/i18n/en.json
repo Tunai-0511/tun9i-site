@@ -147,5 +147,11 @@
   "gh.sub": "A year of public footprints on GitHub.",
   "gh.less": "Less",
   "gh.more": "More",
-  "gh.total": "contributions"
+  "gh.total": "contributions",
+  "a11y.palette": "Change colour palette",
+  "pal.tungsten": "Tungsten → violet",
+  "pal.neon": "Neon · cyan → magenta",
+  "pal.circuit": "Circuit · green → azure",
+  "pal.sakura": "Sakura · pink → lilac",
+  "pal.platinum": "Platinum · warm white → ice"
 }

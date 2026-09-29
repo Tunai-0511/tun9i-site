@@ -1,11 +1,12 @@
 // 終端機彩蛋:按 ` 或 Ctrl+K 叫出,可以打指令
 import { t } from './i18n.js';
+import { PALETTES, PALETTE_KEYS, currentPalette } from './world/palettes.js';
 
 const BANNER = [
   "tun9i.com — type 'help' for commands, 'exit' to close.",
 ];
 
-export function initTerminal({ fireKonami } = {}) {
+export function initTerminal({ fireKonami, setPalette } = {}) {
   const el = document.createElement('div');
   el.id = 'term';
   el.hidden = true;
@@ -67,9 +68,8 @@ export function initTerminal({ fireKonami } = {}) {
     help: () => [
       'help            這份說明',
       'whoami          我是誰',
-      'theme           看看現在住在哪個世界',
-      'theme auto      依時間自動換主題',
-      'theme list      列出所有主題',
+      'theme <name>    換色調 (' + PALETTE_KEYS.join(' | ') + ')',
+      'theme list      列出所有色調(* 是目前的)',
       'games           在玩的遊戲',
       'ai              每天在用的 AI',
       'setup           電腦配備',
@@ -112,7 +112,12 @@ export function initTerminal({ fireKonami } = {}) {
       if (arg === 'go') { fireKonami?.(); return ['✨'] ; }
       return ['↑ ↑ ↓ ↓ ← → ← → B A', "(或直接輸入 'konami go')"];
     },
-    theme: () => ['這裡只有一個世界:黏土微縮世界 🏺', '(六主題時代已由捲動飛行取代)'],
+    theme: (arg) => {
+      if (!arg || arg === 'list') return PALETTE_KEYS.map((k) => (k === currentPalette() ? '* ' : '  ') + k.padEnd(10) + PALETTES[k].zh);
+      if (!PALETTE_KEYS.includes(arg)) return [`theme: 沒有這個色調 '${arg}'`, '可用:' + PALETTE_KEYS.join(', ')];
+      setPalette?.(arg);
+      return ['色調 → ' + arg + '(' + PALETTES[arg].zh + ')'];
+    },
   };
 
   form.addEventListener('submit', (e) => {

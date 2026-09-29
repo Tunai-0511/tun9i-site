@@ -147,5 +147,11 @@
   "gh.sub": "過去一年在 GitHub 上的公開足跡。",
   "gh.less": "少",
   "gh.more": "多",
-  "gh.total": "次貢獻"
+  "gh.total": "次貢獻",
+  "a11y.palette": "切換色調",
+  "pal.tungsten": "鎢絲 → 紫光",
+  "pal.neon": "霓虹 · 青 → 洋紅",
+  "pal.circuit": "電路板 · 綠 → 青藍",
+  "pal.sakura": "櫻夜 · 粉 → 淡紫",
+  "pal.platinum": "白金 · 暖白 → 冰藍"
 }

@@ -38,7 +38,7 @@
   color-scheme: dark;
   --bg: #050407;
   --bg-2: #0c0a10;
-  --surface: rgba(255, 255, 255, 0.045);
+  --surface: rgba(12, 10, 17, 0.6); /* 背後是一整座會發光的城,玻璃要夠深,內文才讀得到 */
   --surface-strong: rgba(14, 12, 19, 0.78);
   --text: #f4efe7;
   --text-dim: rgba(244, 239, 231, 0.74);
@@ -61,6 +61,34 @@
   --hero-veil: none;
   --font-title: var(--font-serif);
   --selection: rgba(232, 180, 92, 0.32);
+}
+
+/* ---------- 色調(html[data-palette]):底色與文字不動,只換強調色 ----------
+   跟 src/js/world/palettes.js 同步(那裡是 3D 世界的色票,這裡是網站的按鈕、漸層標題、眉標)。
+   鎢絲(tungsten)就是上面 film 的預設值,不用另外寫。 */
+[data-palette='neon'] {
+  --accent: #35dcff; --accent-2: #ff4fd8; --accent-ink: #8ff0ff; --accent-contrast: #031318;
+  --border: rgba(53, 220, 255, 0.18);
+  --shadow-glow: 0 0 40px -8px rgba(53, 220, 255, 0.42);
+  --selection: rgba(53, 220, 255, 0.3);
+}
+[data-palette='circuit'] {
+  --accent: #4dff9a; --accent-2: #3a9bff; --accent-ink: #a6ffc8; --accent-contrast: #03140a;
+  --border: rgba(77, 255, 154, 0.16);
+  --shadow-glow: 0 0 40px -8px rgba(77, 255, 154, 0.38);
+  --selection: rgba(77, 255, 154, 0.28);
+}
+[data-palette='sakura'] {
+  --accent: #ff8fb8; --accent-2: #c3a6ff; --accent-ink: #ffc2d8; --accent-contrast: #1a0710;
+  --border: rgba(255, 143, 184, 0.18);
+  --shadow-glow: 0 0 40px -8px rgba(255, 143, 184, 0.42);
+  --selection: rgba(255, 143, 184, 0.3);
+}
+[data-palette='platinum'] {
+  --accent: #efdcbc; --accent-2: #9fcaf5; --accent-ink: #fff0d6; --accent-contrast: #141210;
+  --border: rgba(239, 220, 188, 0.18);
+  --shadow-glow: 0 0 40px -8px rgba(239, 220, 188, 0.35);
+  --selection: rgba(159, 202, 245, 0.3);
 }
 
 ::selection { background: var(--selection); }
