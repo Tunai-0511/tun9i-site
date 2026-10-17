@@ -50,6 +50,8 @@ function apply(lang) {
   });
   const toggle = document.getElementById('lang-toggle');
   if (toggle) toggle.textContent = NEXT_LABEL[lang];
+  // 作業系統博物館在另一個網域(os.tun9i.com),localStorage 不共用 → 用 ?lang= 把語言帶過去
+  document.querySelectorAll('a[data-os-link]').forEach((a) => { a.href = `https://os.tun9i.com/?lang=${lang}`; });
   dispatchEvent(new CustomEvent('langchange', { detail: lang }));
 }
 

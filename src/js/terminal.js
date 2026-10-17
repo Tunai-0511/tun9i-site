@@ -108,8 +108,8 @@ export function initTerminal({ fireKonami, setPalette } = {}) {
     ],
     social: () => ['  github   https://github.com/Tunai-0511', '  email    tunai0511edu@gmail.com'],
     os: () => {
-      setTimeout(() => { location.href = '/os/'; }, 600);
-      return ['→ /os/  Haiku · ReactOS · SerenityOS · Linux'];
+      setTimeout(() => { location.href = `https://os.tun9i.com/?lang=${document.documentElement.dataset.lang || 'zh'}`; }, 600);
+      return ['→ os.tun9i.com  Haiku · ReactOS · SerenityOS · Linux'];
     },
     clear: () => { out.innerHTML = ''; return []; },
     exit: () => { close(); return []; },
