@@ -75,6 +75,7 @@ export function initTerminal({ fireKonami, setPalette } = {}) {
       'setup           電腦配備',
       'school          學歷',
       'social          連結',
+      'os              作業系統博物館:在瀏覽器裡開機 Haiku、ReactOS…',
       'konami          ???',
       'clear           清空畫面',
       'exit            關掉終端機',
@@ -106,6 +107,10 @@ export function initTerminal({ fireKonami, setPalette } = {}) {
       }),
     ],
     social: () => ['  github   https://github.com/Tunai-0511', '  email    tunai0511edu@gmail.com'],
+    os: () => {
+      setTimeout(() => { location.href = '/os/'; }, 600);
+      return ['→ /os/  Haiku · ReactOS · SerenityOS · Linux'];
+    },
     clear: () => { out.innerHTML = ''; return []; },
     exit: () => { close(); return []; },
     konami: (arg) => {

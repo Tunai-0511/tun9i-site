@@ -106,13 +106,54 @@
 或 `pow()` 吃到浮點誤差造成的負數),它會被模糊金字塔擴散成一整塊黑色方塊。
 改著色器或材質顏色後,跑一次 `scanBad()`。
 
+## 作業系統博物館(`/os/`)
+
+[tun9i.com/os](https://tun9i.com/os/) —— 四台真的 x86 電腦在瀏覽器裡開機:Haiku、ReactOS、SerenityOS、Linux(SliTaz)。
+不是截圖也不是影片,是 [v86](https://github.com/copy/v86) 在 WebAssembly 裡逐條執行機器碼。
+
+- **秒開**:每台都有一份「已經開到桌面」的記憶體快照(zstd,11–67 MB),點下去直接還原,不用等開機。
+- **隨時切換**:一次只開一台(每台要 512 MB 記憶體)。換台時先把目前這台 `save_state()`、gzip 後存進訪客瀏覽器的
+  IndexedDB,再還原下一台;回來時從存檔繼續。切走分頁會自動暫停並存檔。
+- **磁碟按需下載**:硬碟映像切成 1 MiB 一塊、zstd 壓縮,放在 R2(`tun9i-os` 桶子,約 1.2 GB / 2700 個物件),
+  由 `worker.js` 的 `/os/disk/*` 提供(一年 immutable + 邊際節點快取)。訪客只會下載實際讀到的那幾塊。
+- **操作**:點畫面接管滑鼠鍵盤(相對座標滑鼠用 Pointer Lock,支援 VMware 絕對座標的系統不鎖);
+  工具列送 Ctrl+Alt+Del / Win / Alt+Tab、把文字轉成美式鍵盤掃描碼打進去、截圖、全螢幕(Chrome 會鎖鍵盤,Esc 也送得進去)。
+- **CSP**:`/os/*` 另外放寬 `'wasm-unsafe-eval'`、`worker-src blob:`(v86 的 zstd 解壓在 blob Worker 裡跑)與
+  `script-src blob:`(音效的 AudioWorklet 是 blob: 模組,歸 script-src 管),見 `public/_headers`。
+  ⚠️ dev server 沒有 CSP,這類問題只有 `npm run preview:cf` 或 `wrangler dev --remote` 才測得出來。
+
+| 檔案 | 內容 |
+|---|---|
+| `os/index.html` | 頁面骨架 |
+| `src/os/systems.js` | 展品清單:磁碟、記憶體、網卡、快照版號、解析度、待機截圖 |
+| `src/os/machine.js` | 一台 v86 的生命週期、按鍵掃描碼、文字輸入 |
+| `src/os/main.js` | 切換 / 存檔 / 遮罩 / 工具列 / 縮放 |
+| `src/os/store.js` | IndexedDB 存檔(gzip) |
+| `src/os/i18n/*.json` | 三語文案(key 三語嚴格對稱) |
+
+### 換快照、加系統
+
+磁碟映像與快照都不進 git,原始檔在 `.os-images/`(gitignored)。
+
+1. `npm run dev`,開 `/os/?author#<id>` 從硬碟冷開機,或 `/os/?author=snap#<id>` 從目前的快照開始改。
+2. 開到想要的樣子(越少讀硬碟越好,快照才小),主控台跑 `await __os.save()` →
+   `.os-images/states/<snapshot>.bin.gz`。`__os.m` 是目前的 Machine,`__os.click(0|1|2)` 按滑鼠鍵。
+3. `node scripts/os-pack-state.mjs <snapshot>` 轉成 `.os-images/r2/disk/state/<snapshot>.bin.zst`,
+   把印出來的大小填進 `systems.js` 的 `stateBytes`。
+4. **改 `snapshot` 版號**(R2 上是 immutable,不能原地覆蓋;訪客瀏覽器裡舊版號的存檔會自動作廢)。
+5. `npx wrangler r2 object put tun9i-os/disk/state/<snapshot>.bin.zst --file … --remote`。
+
+⚠️ 快照只能在**同一版 v86** 還原,`package.json` 把 v86 釘死在 0.5.471;升級 v86 要把四份快照全部重做。
+⚠️ 快照裡的硬體要跟還原時一模一樣(記憶體大小、ACPI、網卡種類),例如 ReactOS 的快照帶著 virtio 網卡。
+
 ## 技術棧
 
 | | |
 |---|---|
 | 前端 | Vite + vanilla JS、CSS custom properties(`html[data-theme='film']`,單一主題) |
 | 3D | three.js 即時渲染 + UnrealBloom 後製,延遲載入;沒有 WebGL2 或要求減少動態時用卡片版面 |
-| 部署 | Cloudflare Worker 靜態資產模式(`run_worker_first`),worker 只做轉址與 404 快取防護 |
+| 部署 | Cloudflare Worker 靜態資產模式(`run_worker_first`),worker 做轉址、404 快取防護、從 R2 提供 `/os/` 的磁碟映像 |
+| 模擬器 | v86 0.5.471(釘死版本,快照格式綁版本)+ SeaBIOS |
 | 圖片 | sharp 管線:`.assets-raw/`(gitignored 原圖)→ AVIF/WebP 1920w + 960w |
 | 安全 | CSP 鎖 first-party,只放行 GitHub API 與貢獻資料來源 |
 
@@ -129,8 +170,9 @@ npm run deploy     # build + wrangler deploy
 ## 結構
 
 ```
-worker.js            轉址 + 404 no-store(邊際節點傳播空窗的 404 不准被快取)
+worker.js            轉址 + 404 no-store(邊際節點傳播空窗的 404 不准被快取)+ /os/disk/* 從 R2 讀磁碟映像
 index.html           單頁骨架 + FOUC 防護 inline script
+os/index.html        作業系統博物館(程式在 src/os/)
 src/js/world/        《訊號簡史》背景:index(入口 + HUD)/ engine(捲動→鏡頭)/ film(場景與訊號形狀)
 src/js/              i18n / reveal / pointer / github / heatmap / terminal / konami …
 src/styles/world.css 背景舞台、紀錄片 HUD、內容浮層契約

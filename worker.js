@@ -1,8 +1,9 @@
 // tun9i.com — 極簡 Worker
 //  1. www → apex、http → https 轉址
 //  2. 404 一律不准被快取
+//  3. /os/disk/* 從 R2 提供作業系統博物館的磁碟分塊與記憶體快照
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
     // 本機開發不能轉 https:wrangler dev 只跑 http,一轉就把自己導向不存在的
     // https 位址,整個 worker 在本機完全測不了。
@@ -19,6 +20,8 @@ export default {
       return Response.redirect(url.toString(), 301);
     }
 
+    if (url.pathname.startsWith('/os/disk/')) return osDisk(request, env, ctx, url);
+
     const res = await env.ASSETS.fetch(request);
 
     // _headers 給 /images/* 設了 7 天快取,那條規則會連 404 一起套用。
@@ -34,3 +37,36 @@ export default {
     return res;
   },
 };
+
+// 作業系統博物館(/os/)的磁碟分塊與開機快照:總共一點多 GB、兩千多個檔,
+// 放不進靜態資產(單檔上限 25 MiB、也不該每次部署都帶著),所以放 R2 的 tun9i-os 桶子。
+// 物件名稱都帶版號(haiku-v5/…、state/haiku-1.bin.zst),內容永遠不變 → 一年 immutable。
+// 換快照一定要換檔名,不要原地覆蓋。
+async function osDisk(request, env, ctx, url) {
+  if (request.method !== 'GET' && request.method !== 'HEAD') {
+    return new Response('Method Not Allowed', { status: 405, headers: { Allow: 'GET, HEAD' } });
+  }
+  const key = 'disk/' + decodeURIComponent(url.pathname.slice('/os/disk/'.length));
+  if (key.includes('..') || key.endsWith('/')) return osNotFound();
+
+  // 邊際節點快取:同一塊磁碟被很多人讀,不必每次都打 R2
+  const cacheKey = new Request(url.origin + url.pathname, { method: 'GET' });
+  const cached = await caches.default.match(cacheKey);
+  if (cached) return request.method === 'HEAD' ? new Response(null, cached) : cached;
+
+  const obj = await env.OS_DISK.get(key);
+  if (!obj) return osNotFound();
+  const headers = new Headers({
+    'Content-Type': 'application/octet-stream',
+    'Cache-Control': 'public, max-age=31536000, immutable',
+    'ETag': obj.httpEtag,
+    'X-Content-Type-Options': 'nosniff',
+  });
+  const res = new Response(obj.body, { headers });
+  ctx.waitUntil(caches.default.put(cacheKey, res.clone()));
+  return request.method === 'HEAD' ? new Response(null, { headers }) : res;
+}
+
+function osNotFound() {
+  return new Response('Not found', { status: 404, headers: { 'Cache-Control': 'no-store, must-revalidate' } });
+}

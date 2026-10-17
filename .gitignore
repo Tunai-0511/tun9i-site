@@ -4,3 +4,6 @@ dist/
 .wrangler/
 .DS_Store
 .dev.vars
+
+# 作業系統博物館的磁碟映像(幾 GB,放 R2,不進 git)
+.os-images/

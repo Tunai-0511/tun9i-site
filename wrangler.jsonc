@@ -9,6 +9,10 @@
     "binding": "ASSETS",
     "run_worker_first": true
   },
+  // 作業系統博物館的磁碟映像(worker.js 的 /os/disk/*)
+  "r2_buckets": [
+    { "binding": "OS_DISK", "bucket_name": "tun9i-os" }
+  ],
   "workers_dev": true,
   "routes": [
     { "pattern": "tun9i.com", "custom_domain": true },

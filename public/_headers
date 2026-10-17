@@ -4,6 +4,14 @@
   Permissions-Policy: camera=(), microphone=(), geolocation=()
   Content-Security-Policy: default-src 'self'; img-src 'self' data:; media-src 'self' blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self' https://api.github.com https://github-contributions-api.jogruber.de; manifest-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
 
+# 作業系統博物館:v86 要編譯 WebAssembly('wasm-unsafe-eval');
+# 磁碟分塊的 zstd 解壓在 blob: 做出來的 Worker 裡跑(worker-src blob:);
+# 音效是 blob: 載入的 AudioWorklet,worklet 歸 script-src 管(script-src blob:);截圖存檔用 blob: 網址。
+# 先用 ! 拿掉上面 /* 的 CSP —— 兩條 CSP 同時存在時瀏覽器會兩條都執行,等於沒放寬。
+/os/*
+  ! Content-Security-Policy
+  Content-Security-Policy: default-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob:; worker-src 'self' blob:; connect-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
 

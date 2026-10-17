@@ -1,0 +1,667 @@
+/* ============================================================
+   /os/ 作業系統博物館
+   跟首頁同一套 film 主題:全黑舞台、主體自己發光、紀錄片式 HUD。
+   這頁的主體就是那塊電腦畫面,其他東西都退到旁邊。
+   ============================================================ */
+
+/* base.css 給首頁錨點導覽的 scroll-padding(96px)會跟 .osm-machine 的 scroll-margin 疊加;
+   這支 CSS 只在 /os/ 載入,直接歸零 */
+html { scroll-padding-top: 0; }
+
+.osm {
+  --osm-w: min(1240px, 100% - 2.5rem);
+  --osm-mono: 'Space Grotesk', ui-monospace, 'SF Mono', Menlo, monospace;
+  --osm-line: rgba(244, 239, 231, 0.09);
+  --osm-glow: color-mix(in srgb, var(--accent) 34%, transparent);
+  background:
+    radial-gradient(1100px 620px at 50% 430px, color-mix(in srgb, var(--accent) 7%, transparent), transparent 70%),
+    var(--bg);
+  font-size: 1rem;
+  line-height: 1.7;
+  min-height: 100svh;
+}
+
+.osm-eyebrow {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 0.78rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+:root[data-lang='zh'] .osm-eyebrow,
+:root[data-lang='ja'] .osm-eyebrow { letter-spacing: 0.12em; }
+
+/* ---------- 頂列 ---------- */
+.osm-bar {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-nav);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  height: 56px;
+  padding-inline: max(1.25rem, (100% - 1240px) / 2);
+  background: var(--nav-bg);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  border-bottom: 1px solid var(--osm-line);
+}
+.osm-home {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  transition: color var(--dur-fast) var(--ease);
+}
+.osm-home svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+.osm-home:hover { color: var(--text); }
+.osm-bar-title {
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+.osm-lang {
+  justify-self: end;
+  min-width: 2.4rem;
+  height: 2rem;
+  padding-inline: 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--osm-line);
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  transition: border-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+.osm-lang:hover { color: var(--text); border-color: var(--border); }
+
+/* ---------- 開場 ---------- */
+.osm main { width: var(--osm-w); margin-inline: auto; }
+.osm-intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 31rem);
+  align-items: end;
+  gap: 1rem 3.5rem;
+  padding-top: clamp(1.8rem, 5vh, 3.2rem);
+}
+.osm-title {
+  margin-top: 0.5rem;
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: clamp(2.2rem, 4.2vw, 3.4rem);
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+}
+.osm-lede {
+  color: var(--text-dim);
+  font-size: 0.95rem;
+  line-height: 1.75;
+}
+
+/* ---------- 分頁 ---------- */
+.osm-switch {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin-top: clamp(2rem, 5vh, 3rem);
+  border-bottom: 1px solid var(--osm-line);
+}
+.osm-tab {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas: 'idx name' 'idx line';
+  column-gap: 0.8rem;
+  align-items: baseline;
+  padding: 1rem 1rem 1.05rem;
+  text-align: left;
+  color: var(--text-faint);
+  transition: color var(--dur) var(--ease), background-color var(--dur) var(--ease);
+}
+.osm-tab::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: -1px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+.osm-tab:hover { color: var(--text-dim); background: rgba(244, 239, 231, 0.025); }
+.osm-tab[aria-selected='true'] { color: var(--text); }
+.osm-tab[aria-selected='true']::after { transform: scaleX(1); }
+.osm-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 6px; }
+.osm-tab-idx {
+  grid-area: idx;
+  font-family: var(--osm-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: var(--text-faint);
+}
+.osm-tab[aria-selected='true'] .osm-tab-idx { color: var(--accent); }
+.osm-tab-name {
+  grid-area: name;
+  font-family: var(--font-title);
+  font-size: 1.45rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.osm-tab-line {
+  grid-area: line;
+  margin-top: 0.15rem;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+.osm-tab-dot {
+  display: inline-block;
+  width: 6px; height: 6px;
+  margin-left: 0.5rem;
+  vertical-align: 0.3em;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent);
+}
+
+/* ---------- 電腦 ---------- */
+.osm-machine {
+  position: relative;
+  margin-top: 1.1rem;
+  scroll-margin-top: 64px; /* 開機時捲到這裡:頂列下面剛好放得下整台 */
+}
+.osm-hud {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  font-family: var(--osm-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+.osm-hud-top { padding: 0 0.2rem 0.6rem; }
+.osm-hud-name { color: var(--accent); }
+.osm-hud-res { margin-left: auto; font-variant-numeric: tabular-nums; }
+.osm-hud-bottom {
+  padding: 0.6rem 0 0 0.2rem;
+  min-height: 48px;
+}
+
+.osm-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: min(calc(100svh - 150px), (100vw - 2.5rem) * 0.75, 960px);
+  min-height: 300px;
+  padding: 18px;
+  border-radius: 16px;
+  background: radial-gradient(ellipse at 50% 45%, #0d0b12 0%, #060509 72%);
+  border: 1px solid rgba(244, 239, 231, 0.05);
+  overflow: hidden;
+}
+.osm-tick {
+  position: absolute;
+  width: 14px; height: 14px;
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  border-style: solid;
+  border-width: 0;
+  pointer-events: none;
+}
+.osm-tick.tl { top: 8px; left: 8px; border-top-width: 1px; border-left-width: 1px; }
+.osm-tick.tr { top: 8px; right: 8px; border-top-width: 1px; border-right-width: 1px; }
+.osm-tick.bl { bottom: 8px; left: 8px; border-bottom-width: 1px; border-left-width: 1px; }
+.osm-tick.br { bottom: 8px; right: 8px; border-bottom-width: 1px; border-right-width: 1px; }
+
+.osm-screen {
+  position: relative;
+  width: 0;
+  height: 0;
+  background: #000;
+  outline: none;
+  box-shadow:
+    0 0 0 1px rgba(244, 239, 231, 0.07),
+    0 30px 90px -24px rgba(0, 0, 0, 0.95),
+    0 0 140px -30px var(--osm-glow);
+  transition: box-shadow var(--dur) var(--ease);
+}
+.osm-machine[data-phase='running'] .osm-screen,
+.osm-machine[data-phase='paused'] .osm-screen { cursor: default; }
+/* 待機截圖:還沒開機、載入中、出錯時墊在畫面底下;開機完成後真的畫面淡入蓋過去 */
+.osm-screen {
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+.osm-machine[data-phase='idle'] .osm-screen canvas,
+.osm-machine[data-phase='loading'] .osm-screen canvas,
+.osm-machine[data-phase='error'] .osm-screen canvas { opacity: 0; }
+/* 三個狀態用同一個動畫宣告:暫停 ↔ 執行切換時動畫不會重播閃一下 */
+.osm-machine[data-phase='running'] .osm-screen canvas,
+.osm-machine[data-phase='paused'] .osm-screen canvas,
+.osm-machine[data-phase='saving'] .osm-screen canvas { animation: osm-fade 420ms var(--ease) both; }
+@keyframes osm-fade { from { opacity: 0; } to { opacity: 1; } }
+.osm-screen canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none;
+  image-rendering: auto !important;
+}
+.osm-screen.is-pixelated canvas { image-rendering: pixelated !important; }
+.osm-screen .osm-textmode { display: none !important; }
+.osm-stage.is-focused .osm-screen {
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent),
+    0 30px 90px -24px rgba(0, 0, 0, 0.95),
+    0 0 160px -26px var(--osm-glow);
+}
+
+/* 手機的螢幕鍵盤靠這個 textarea 叫出來(v86 認 phone_keyboard 這個 class) */
+.osm-softkb {
+  position: absolute;
+  left: 0; bottom: 0;
+  width: 1px; height: 1px;
+  opacity: 0;
+  border: 0;
+  padding: 0;
+  resize: none;
+  pointer-events: none;
+}
+
+.osm-hint {
+  position: absolute;
+  top: 22px;
+  left: 50%;
+  translate: -50% -6px;
+  padding: 0.45rem 0.95rem;
+  border-radius: 999px;
+  background: rgba(5, 4, 7, 0.78);
+  border: 1px solid var(--osm-line);
+  backdrop-filter: blur(8px);
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur) var(--ease), translate var(--dur) var(--ease-out);
+  z-index: 3;
+}
+.osm-hint.is-on { opacity: 1; translate: -50% 0; }
+
+/* ---------- 遮罩:開機 / 載入 / 暫停 / 錯誤 ---------- */
+.osm-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: radial-gradient(ellipse at 50% 50%, rgba(5, 4, 7, 0.5), rgba(5, 4, 7, 0.9));
+}
+.osm-overlay[hidden] { display: none; }
+.osm-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  max-width: 32rem;
+  text-align: center;
+  animation: osm-rise var(--dur-slow) var(--ease-out) both;
+}
+.osm-card-eyebrow {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+.osm-card-name {
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  line-height: 1.1;
+}
+.osm-card-note {
+  font-size: 0.86rem;
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+}
+.osm-card-warn { color: var(--accent-ink); opacity: 0.85; }
+.osm-power {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+  padding: 0.85rem 1.6rem 0.85rem 1.3rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+  box-shadow: var(--shadow-glow);
+  transition: transform var(--dur) var(--ease-spring), box-shadow var(--dur) var(--ease);
+}
+.osm-power:hover { transform: translateY(-2px); box-shadow: 0 0 56px -6px var(--osm-glow); }
+.osm-power:active { transform: translateY(0) scale(0.98); }
+.osm-power:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; }
+.osm-power-icon { display: inline-flex; }
+.osm-power-icon svg { width: 20px; height: 20px; }
+.osm-linkbtn {
+  color: var(--text-dim);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--osm-line);
+}
+.osm-linkbtn:hover { color: var(--text); text-decoration-color: currentColor; }
+
+.osm-card-paused {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  justify-content: center;
+  cursor: pointer;
+}
+.osm-card-paused .osm-power-icon svg { width: 40px; height: 40px; color: var(--accent); }
+
+.osm-bar-track {
+  position: relative;
+  width: min(22rem, 70vw);
+  height: 3px;
+  margin-top: 0.4rem;
+  border-radius: 3px;
+  background: rgba(244, 239, 231, 0.09);
+  overflow: hidden;
+}
+.osm-bar-track i {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 240ms var(--ease);
+}
+.osm-bar-track.is-indeterminate i {
+  transform: none;
+  width: 32%;
+  animation: osm-sweep 1.3s var(--ease) infinite;
+}
+
+/* ---------- 狀態列與工具列 ---------- */
+.osm-status { display: inline-flex; align-items: center; gap: 0.55rem; min-width: 7.5rem; }
+.osm-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--text-faint);
+  opacity: 0.6;
+}
+.osm-machine[data-phase='running'] .osm-dot { background: var(--accent); opacity: 1; box-shadow: 0 0 10px var(--accent); }
+.osm-machine[data-phase='loading'] .osm-dot,
+.osm-machine[data-phase='saving'] .osm-dot { background: var(--accent); opacity: 1; animation: osm-blink 1s steps(2) infinite; }
+.osm-machine[data-phase='error'] .osm-dot { background: #ff6b6b; opacity: 1; }
+.osm-meters { display: inline-flex; gap: 1.2rem; font-variant-numeric: tabular-nums; }
+.osm-meters b { font-weight: 500; color: var(--text-dim); }
+
+.osm-tools {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  margin-left: auto;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.osm-tools-sep { width: 1px; height: 18px; margin-inline: 0.35rem; background: var(--osm-line); }
+.osm-tool {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  min-width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  color: var(--text-dim);
+  transition: color var(--dur-fast) var(--ease), background-color var(--dur-fast) var(--ease);
+}
+.osm-tool svg { width: 19px; height: 19px; }
+.osm-tool.is-text { padding-inline: 0.65rem; font-family: var(--osm-mono); font-size: 0.72rem; letter-spacing: 0.04em; white-space: nowrap; }
+.osm-tool:hover:not(:disabled) { color: var(--text); background: rgba(244, 239, 231, 0.07); }
+.osm-tool:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.osm-tool:disabled { opacity: 0.32; cursor: default; }
+.osm-tool[aria-expanded='true'] { color: var(--accent-ink); background: rgba(244, 239, 231, 0.07); }
+.osm-tool.is-danger { color: var(--accent-contrast); background: var(--accent); }
+.osm-tool[data-tip]:hover:not(:disabled)::after,
+.osm-tool[data-tip]:focus-visible::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  translate: -50% 0;
+  padding: 0.3rem 0.6rem;
+  border-radius: 8px;
+  background: var(--surface-strong);
+  border: 1px solid var(--osm-line);
+  backdrop-filter: blur(8px);
+  font-family: var(--font-body);
+  font-size: 0.76rem;
+  color: var(--text);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 5;
+}
+.osm-tool.is-danger[data-tip]::after { color: var(--text); }
+
+.osm-pop {
+  position: absolute;
+  z-index: 6;
+  padding: 0.55rem;
+  border-radius: 14px;
+  background: var(--surface-strong);
+  border: 1px solid var(--osm-line);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  box-shadow: var(--shadow-card);
+  animation: osm-rise var(--dur) var(--ease-out) both;
+}
+.osm-pop-keys { display: grid; grid-template-columns: repeat(3, auto); gap: 0.3rem; }
+.osm-key {
+  padding: 0.55rem 0.8rem;
+  border-radius: 9px;
+  border: 1px solid var(--osm-line);
+  font-family: var(--osm-mono);
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+.osm-key:hover, .osm-key:focus-visible { color: var(--text); border-color: var(--border); background: rgba(244, 239, 231, 0.05); outline: none; }
+.osm-pop-type { width: min(24rem, calc(100vw - 2rem)); }
+.osm-type-input {
+  display: block;
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid var(--osm-line);
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--text);
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 0.88rem;
+  resize: vertical;
+}
+.osm-type-input:focus { outline: none; border-color: var(--border); }
+.osm-pop-row { display: flex; align-items: center; gap: 0.8rem; margin-top: 0.5rem; }
+.osm-pop-note { flex: 1; font-size: 0.74rem; line-height: 1.45; color: var(--text-faint); }
+.osm-pop-send {
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.84rem;
+}
+
+/* ---------- 全螢幕 ---------- */
+.osm-machine:fullscreen {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 14px 18px 8px;
+  background: #000;
+}
+.osm-machine:fullscreen .osm-stage {
+  flex: 1;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  background: #000;
+}
+.osm-machine:fullscreen .osm-tick { display: none; }
+
+/* ---------- 介紹 ---------- */
+.osm-about { margin-top: clamp(3.5rem, 9vh, 6rem); }
+.osm-about-title {
+  margin-top: 0.5rem;
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.1;
+}
+.osm-about-title span { color: var(--text-faint); font-weight: 600; }
+.osm-about-tagline {
+  margin-top: 0.6rem;
+  font-family: var(--font-title);
+  font-style: italic;
+  font-size: 1.2rem;
+  color: var(--accent-ink);
+}
+:root[data-lang='zh'] .osm-about-tagline,
+:root[data-lang='ja'] .osm-about-tagline { font-style: normal; }
+.osm-about-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  gap: clamp(2rem, 5vw, 4.5rem);
+  margin-top: 2rem;
+}
+.osm-about-body p { color: var(--text-dim); font-size: 1.04rem; line-height: 1.85; }
+.osm-about-body h3 {
+  margin-top: 2rem;
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+.osm-about-body ul { margin-top: 0.8rem; display: grid; gap: 0.6rem; }
+.osm-about-body li {
+  position: relative;
+  padding-left: 1.3rem;
+  color: var(--text-dim);
+  font-size: 0.96rem;
+}
+.osm-about-body li::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0.72em;
+  width: 0.55rem; height: 1px;
+  background: var(--accent);
+}
+.osm-facts { display: grid; margin: 0; border-top: 1px solid var(--osm-line); }
+.osm-facts div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--osm-line);
+}
+.osm-facts dt { font-size: 0.86rem; color: var(--text-faint); }
+.osm-facts dd { margin: 0; font-family: var(--font-display); font-size: 0.92rem; color: var(--text); text-align: right; }
+.osm-links { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.2rem; }
+.osm-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.95rem;
+  border-radius: 999px;
+  border: 1px solid var(--osm-line);
+  font-size: 0.86rem;
+  color: var(--text-dim);
+  transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+}
+.osm-links a span { display: inline-flex; }
+.osm-links a svg { width: 14px; height: 14px; }
+.osm-links a:hover { color: var(--text); border-color: var(--border); }
+
+/* ---------- 說明與出處 ---------- */
+.osm-notes { margin-top: clamp(3.5rem, 9vh, 6rem); }
+.osm-h2 {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+.osm-notes-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 1.4rem 2.4rem;
+  margin-top: 1.2rem;
+}
+.osm-notes-list li { display: grid; gap: 0.3rem; padding-top: 0.9rem; border-top: 1px solid var(--osm-line); }
+.osm-notes-list b { font-family: var(--font-display); font-weight: 500; font-size: 0.92rem; color: var(--text); }
+.osm-notes-list span { font-size: 0.9rem; color: var(--text-faint); line-height: 1.65; }
+
+.osm-credits {
+  margin: clamp(3.5rem, 9vh, 6rem) 0 3rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--osm-line);
+  display: grid;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  line-height: 1.7;
+  color: var(--text-faint);
+}
+.osm-credits a { color: var(--text-dim); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--osm-line); }
+.osm-credits a:hover { color: var(--text); }
+
+/* ---------- 動態 ---------- */
+@keyframes osm-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes osm-sweep { from { transform: translateX(-110%); } to { transform: translateX(320%); } }
+@keyframes osm-blink { 50% { opacity: 0.25; } }
+@media (prefers-reduced-motion: reduce) {
+  .osm *, .osm *::before, .osm *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
+
+/* ---------- 窄螢幕 ---------- */
+@media (max-width: 900px) {
+  .osm-intro { grid-template-columns: 1fr; align-items: start; }
+  .osm-switch { grid-template-columns: repeat(2, 1fr); }
+  .osm-about-grid { grid-template-columns: 1fr; }
+  .osm-hud-bottom { flex-wrap: wrap; row-gap: 0.4rem; }
+  .osm-tools { width: 100%; margin-left: 0; justify-content: flex-start; overflow-x: auto; scrollbar-width: none; }
+  .osm-tools::-webkit-scrollbar { display: none; }
+}
+@media (max-width: 560px) {
+  .osm { --osm-w: calc(100% - 2rem); }
+  .osm-bar { grid-template-columns: auto 1fr auto; gap: 0.8rem; padding-inline: 1rem; }
+  .osm-bar-title { justify-self: center; font-size: 0.72rem; }
+  .osm-stage { height: auto; aspect-ratio: 4 / 3; min-height: 0; padding: 8px; border-radius: 12px; }
+  .osm-tick { display: none; }
+  .osm-tab { padding: 0.8rem 0.6rem; column-gap: 0.5rem; }
+  .osm-tab-name { font-size: 1.15rem; }
+  .osm-tab-line { font-size: 0.72rem; }
+  .osm-hud-top { font-size: 0.66rem; gap: 0.8rem; }
+  .osm-meters { display: none; }
+  /* 4:3 的小畫面裡放得下的卡片 */
+  .osm-overlay { padding: 0.75rem; }
+  .osm-card { gap: 0.4rem; }
+  .osm-card-eyebrow { display: none; }
+  .osm-card-name { font-size: 1.7rem; }
+  .osm-power { margin-top: 0.2rem; padding: 0.6rem 1.1rem 0.6rem 0.9rem; font-size: 0.88rem; }
+  .osm-power-icon svg { width: 17px; height: 17px; }
+  .osm-card-note { font-size: 0.74rem; line-height: 1.45; }
+  .osm-card-paused .osm-power-icon svg { width: 30px; height: 30px; }
+}
