@@ -47,61 +47,62 @@
   </header>
 
   <main id="top">
-    <section class="osm-intro">
-      <div>
-        <p class="osm-eyebrow" data-i18n="intro.eyebrow">四台真的電腦 · 在你的瀏覽器裡</p>
-        <h1 class="osm-title" data-i18n="intro.title">作業系統博物館</h1>
-      </div>
-      <p class="osm-lede" data-i18n="intro.lede">這裡沒有截圖,也沒有影片。每一格都是一台 x86 電腦:CPU、記憶體、顯示卡、硬碟,全部在 WebAssembly 裡模擬,一條一條執行真正的機器碼。隨時可以換一台,離開時的進度會留在你的瀏覽器裡。</p>
+    <section class="osm-room">
+      <h1 class="osm-title" data-i18n="intro.title">作業系統博物館</h1>
+      <p class="osm-lede" data-i18n="intro.lede">這裡沒有截圖,也沒有影片。每一格都是一台 x86 電腦:CPU、記憶體、顯示卡、硬碟全在 WebAssembly 裡模擬,一條一條執行真正的機器碼。隨時可以換一台,離開時的進度會留在你的瀏覽器裡。</p>
     </section>
 
-    <div class="osm-switch" id="switch" role="tablist" data-i18n-aria="a11y.switch" aria-label="選擇作業系統"></div>
+    <nav class="osm-exhibits" id="switch" role="tablist" data-i18n-aria="a11y.switch" aria-label="選擇作業系統"></nav>
 
-    <section class="osm-machine" id="machine" data-i18n-aria="a11y.machine" aria-label="電腦">
-      <div class="osm-hud osm-hud-top" aria-hidden="true">
-        <span class="osm-hud-name" id="hud-name"></span>
-        <span class="osm-hud-spec" id="hud-spec"></span>
-        <span class="osm-hud-res" id="hud-res"></span>
-      </div>
-
-      <div class="osm-stage" id="stage">
-        <i class="osm-tick tl" aria-hidden="true"></i><i class="osm-tick tr" aria-hidden="true"></i>
-        <i class="osm-tick bl" aria-hidden="true"></i><i class="osm-tick br" aria-hidden="true"></i>
-        <div class="osm-screen" id="screen" tabindex="0" role="application" data-i18n-aria="a11y.screen" aria-label="電腦畫面:點一下開始操作"></div>
-        <textarea class="phone_keyboard osm-softkb" id="softkb" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false" aria-hidden="true" tabindex="-1"></textarea>
-        <div class="osm-hint" id="hint" aria-live="polite"></div>
-        <div class="osm-overlay" id="overlay"></div>
-      </div>
-
-      <div class="osm-hud osm-hud-bottom">
-        <div class="osm-status" id="status" aria-live="polite">
-          <span class="osm-dot" aria-hidden="true"></span>
-          <span id="status-text"></span>
+    <section class="osm-wall" id="machine" data-i18n-aria="a11y.machine" aria-label="電腦">
+      <div class="osm-work" id="work">
+        <div class="osm-stage" id="stage">
+          <div class="osm-screen" id="screen" tabindex="0" role="application" data-i18n-aria="a11y.screen" aria-label="電腦畫面:點一下開始操作"></div>
+          <textarea class="phone_keyboard osm-softkb" id="softkb" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false" aria-hidden="true" tabindex="-1"></textarea>
+          <div class="osm-hint" id="hint" aria-live="polite"></div>
+          <div class="osm-overlay" id="overlay"></div>
         </div>
-        <div class="osm-meters" aria-hidden="true">
-          <span><b id="meter-mips">—</b> MIPS</span>
-          <span><b id="meter-net">0</b> MB</span>
+        <div class="osm-console">
+          <div class="osm-status" id="status" aria-live="polite">
+            <span class="osm-dot" aria-hidden="true"></span>
+            <span id="status-text"></span>
+          </div>
+          <div class="osm-capture" id="capture" role="status"></div>
+          <div class="osm-tools" id="tools" role="toolbar" data-i18n-aria="a11y.tools" aria-label="控制"></div>
         </div>
-        <div class="osm-tools" id="tools" role="toolbar" data-i18n-aria="a11y.tools" aria-label="控制"></div>
       </div>
+      <aside class="osm-label" id="label" aria-live="polite"></aside>
     </section>
 
-    <section class="osm-about" id="about" aria-live="polite"></section>
+    <section class="osm-story" id="about"></section>
 
-    <section class="osm-notes">
-      <h2 class="osm-h2" data-i18n="notes.title">使用說明</h2>
-      <ul class="osm-notes-list">
-        <li><b data-i18n="notes.mouse.k">滑鼠</b><span data-i18n="notes.mouse.v">點一下畫面就會接管滑鼠和鍵盤;按 Esc 把滑鼠還給網頁。</span></li>
-        <li><b data-i18n="notes.keys.k">特殊鍵</b><span data-i18n="notes.keys.v">Ctrl + Alt + Del、Win、Alt + Tab 這類組合鍵會先被你自己的電腦攔走,改用下方的按鈕送進去。</span></li>
-        <li><b data-i18n="notes.save.k">存檔</b><span data-i18n="notes.save.v">換到另一台、切走分頁時會自動存檔,存在你的瀏覽器裡(IndexedDB),不會上傳。按「重新開始」就回到剛開機的樣子。</span></li>
-        <li><b data-i18n="notes.net.k">網路</b><span data-i18n="notes.net.v">這些電腦都沒有接上網際網路,瀏覽器打不開網頁是正常的。</span></li>
-        <li><b data-i18n="notes.perf.k">效能</b><span data-i18n="notes.perf.v">模擬一整台電腦很吃 CPU,桌機的 Chrome、Edge、Firefox 最順。手機可以看,但操作不方便。</span></li>
-      </ul>
+    <section class="osm-guide">
+      <h2 class="osm-h2" data-i18n="notes.title">參觀須知</h2>
+      <dl class="osm-guide-list">
+        <div><dt data-i18n="notes.mouse.k">滑鼠</dt><dd data-i18n="notes.mouse.v">點一下畫面就會接管滑鼠和鍵盤;按 Esc 把滑鼠還給網頁。</dd></div>
+        <div><dt data-i18n="notes.keys.k">特殊鍵</dt><dd data-i18n="notes.keys.v">Ctrl + Alt + Del、Win、Alt + Tab 這類組合鍵會先被你自己的電腦攔走,改用畫面下方的按鈕送進去。</dd></div>
+        <div><dt data-i18n="notes.save.k">存檔</dt><dd data-i18n="notes.save.v">換到另一台、切走分頁時會自動存檔,存在你的瀏覽器裡(IndexedDB),不會上傳。按「重新開始」就回到剛開機的樣子。</dd></div>
+        <div><dt data-i18n="notes.net.k">網路</dt><dd data-i18n="notes.net.v">這些電腦都沒有接上網際網路,瀏覽器打不開網頁是正常的。</dd></div>
+        <div><dt data-i18n="notes.perf.k">效能</dt><dd data-i18n="notes.perf.v">模擬一整台電腦很吃 CPU,桌機的 Chrome、Edge、Firefox 最順。手機可以看,但操作不方便。</dd></div>
+      </dl>
     </section>
 
-    <footer class="osm-credits">
-      <p data-i18n="credits.engine">模擬器是 v86(BSD-2-Clause,Fabian Hemmer 與貢獻者),BIOS 是 SeaBIOS(LGPL-3.0)。磁碟映像是 v86 專案預先安裝好的版本。各作業系統依各自的授權散布,原始碼連結在每台電腦的介紹裡。</p>
-      <p><a href="https://github.com/copy/v86" rel="noopener" target="_blank">github.com/copy/v86</a> · <a href="https://www.seabios.org/" rel="noopener" target="_blank">seabios.org</a> · <a href="/" data-i18n="credits.home">回到首頁</a></p>
+    <section class="osm-hunt" id="hunt">
+      <h2 class="osm-h2" data-i18n="hunt.title">尋寶</h2>
+      <p class="osm-hunt-lede" data-i18n="notes.egg.v">每台電腦裡都藏了一個英文單字。四個都找到之後,依照順序在這個網頁上(不是電腦畫面裡)直接打出來,會發生一點事。</p>
+      <div class="osm-slots" id="slots" aria-hidden="true"></div>
+      <p class="osm-hunt-state" id="hunt-state" aria-live="polite"></p>
+    </section>
+
+    <footer class="osm-colophon">
+      <h2 class="osm-h2" data-i18n="colophon.title">藏品來源</h2>
+      <dl class="osm-colophon-list">
+        <div><dt data-i18n="colophon.engine.k">模擬器</dt><dd><a href="https://github.com/copy/v86" rel="noopener" target="_blank">v86</a> · BSD-2-Clause · <span data-i18n="colophon.engine.v">Fabian Hemmer 與貢獻者</span></dd></div>
+        <div><dt>BIOS</dt><dd><a href="https://www.seabios.org/" rel="noopener" target="_blank">SeaBIOS</a> · LGPL-3.0</dd></div>
+        <div><dt data-i18n="colophon.images.k">磁碟映像</dt><dd data-i18n="colophon.images.v">v86 專案預先安裝好的版本;KolibriOS 取自官方每日建置。</dd></div>
+        <div><dt data-i18n="colophon.license.k">授權</dt><dd data-i18n="colophon.license.v">各作業系統依各自的授權散布,原始碼連結在每件展品的說明卡上。</dd></div>
+      </dl>
+      <p class="osm-colophon-foot"><a href="/" data-i18n="credits.home">回到首頁</a> · <a href="https://github.com/Tunai-0511/tun9i-site" rel="noopener" target="_blank" data-i18n="colophon.repo">這頁的原始碼</a></p>
     </footer>
   </main>
 </body>

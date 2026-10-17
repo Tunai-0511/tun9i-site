@@ -23,8 +23,13 @@ function open() {
   return dbPromise;
 }
 
+// IndexedDB 偶爾會整個卡住(隱私模式、儲存空間壞掉、某些無頭瀏覽器),不要讓開機跟著卡死
+function withTimeout(promise, ms) {
+  return Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject(new Error('indexedDB timeout')), ms))]);
+}
+
 function tx(mode, fn) {
-  return open().then((db) => new Promise((resolve, reject) => {
+  return withTimeout(open(), 4000).then((db) => new Promise((resolve, reject) => {
     const t = db.transaction(STORE, mode);
     const req = fn(t.objectStore(STORE));
     t.oncomplete = () => resolve(req?.result);

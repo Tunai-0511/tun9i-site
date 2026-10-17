@@ -10,12 +10,13 @@ import './os.css';
 import { SYSTEMS, byId } from './systems.js';
 import { Machine, KEY } from './machine.js';
 import * as store from './store.js';
+import { fetchSnapshot, prefetchSnapshot, dropSnapshot } from './snapshots.js';
 import { initI18n, t, onLang } from './i18n.js';
 import { ICON } from './icons.js';
 
 // 作者模式(只有 dev server):開到想要的樣子後用 __os.save() 存成開機快照。
 //   ?author       從硬碟冷開機
-//   ?author=snap  從目前的開機快照開始改(例如整理桌面)
+//   ?author=snap  從目前的開機快照開始改(例如放彩蛋)
 const AUTHOR_MODE = new URLSearchParams(location.search).get('author');
 const AUTHOR = import.meta.env.DEV && AUTHOR_MODE !== null;
 const COLD = AUTHOR && AUTHOR_MODE !== 'snap';
@@ -24,12 +25,22 @@ const AWAKE = import.meta.env.DEV && new URLSearchParams(location.search).has('a
 const TOUCH = matchMedia('(pointer: coarse)').matches;
 const MB = 1024 * 1024;
 
+// 訪客偏好(都只是方便,讀寫失敗就當沒有)
+const LS = {
+  get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+};
+const PREF = { last: 'tun9i-os-last', muted: 'tun9i-os-muted', coached: 'tun9i-os-coached', unlocked: 'tun9i-os-unlocked' };
+
+// 解鎖第五台的通關密語:四台電腦裡各藏一個字,在網頁上(不是電腦畫面裡)依序打出來
+const PASSPHRASE = 'fromnoisetosignal';
+
 const $ = (id) => document.getElementById(id);
 const els = {
   machine: $('machine'), switch: $('switch'), stage: $('stage'), screen: $('screen'),
   overlay: $('overlay'), hint: $('hint'), status: $('status'), statusText: $('status-text'),
-  mips: $('meter-mips'), net: $('meter-net'), tools: $('tools'), about: $('about'),
-  hudName: $('hud-name'), hudSpec: $('hud-spec'), hudRes: $('hud-res'), softkb: $('softkb'),
+  capture: $('capture'), tools: $('tools'), about: $('about'), label: $('label'), work: $('work'),
+  softkb: $('softkb'), slots: $('slots'), hunt: $('hunt'), huntState: $('hunt-state'),
 };
 
 const app = {
@@ -40,12 +51,16 @@ const app = {
   started: false,      // 這次造訪開過機之後,切換分頁就直接開機,不再停在「開機」按鈕
   dirty: false,        // 上次存檔之後有沒有再跑過
   autoPaused: false,   // 分頁被切走時自動暫停的
-  progress: null,      // { label, loaded, total }
+  progress: null,      // { label, loaded, total, rate }
   error: null,
   saved: {},           // id → { savedAt }
+  muted: LS.get(PREF.muted) === '1',
+  unlocked: LS.get(PREF.unlocked) === '1',
 };
 
-// 切換、重開、存檔全部排成一列依序做,避免兩台電腦同時在開機或存檔
+const visible = () => SYSTEMS.filter((s) => !s.hidden || app.unlocked);
+
+// 切換、重開全部排成一列依序做,避免兩台電腦同時在開機
 let chain = Promise.resolve();
 const serial = (fn) => (chain = chain.then(fn, fn).catch((e) => console.error(e)));
 
@@ -63,6 +78,8 @@ function h(tag, attrs = {}, ...kids) {
   return el;
 }
 const fmtMB = (bytes) => (bytes / MB >= 10 ? Math.round(bytes / MB) : (bytes / MB).toFixed(1));
+// 第一次開機要下載的量:開機快照,加上一次整包下載的磁片(KolibriOS)
+const firstLoad = (sys) => sys.stateBytes + (sys.fda && !sys.fda.async ? sys.fda.size : 0);
 function ago(ts) {
   const m = Math.round((Date.now() - ts) / 60000);
   if (m < 1) return t('time.now');
@@ -80,76 +97,102 @@ function hint(text, ms = 2600) {
 }
 
 // ---------- 分頁(選系統) ----------
+let prefetchTimer = 0;
+// 滑鼠停在分頁上(或鍵盤移到分頁上)一下下,就先把那台的開機快照抓下來
+function armPrefetch(sys) {
+  clearTimeout(prefetchTimer);
+  if (AUTHOR || app.saved[sys.id] || pending.has(sys.id) || (sys === app.sys && app.machine)) return;
+  prefetchTimer = setTimeout(() => prefetchSnapshot(sys), 180);
+}
+
 function renderTabs() {
-  els.switch.replaceChildren(...SYSTEMS.map((sys, i) => {
+  const list = visible();
+  els.switch.style.setProperty('--tabs', list.length);
+  els.switch.replaceChildren(...list.map((sys, i) => {
     const on = sys === app.sys;
+    const saved = app.saved[sys.id];
     return h('button', {
-      type: 'button', role: 'tab', id: `tab-${sys.id}`, class: 'osm-tab',
-      'aria-selected': on ? 'true' : 'false', 'aria-controls': 'machine', tabindex: on ? '0' : '-1',
+      type: 'button', role: 'tab', id: `tab-${sys.id}`, class: `osm-ex${sys.hidden ? ' is-secret' : ''}`,
+      'data-ex': sys.id, 'aria-selected': on ? 'true' : 'false', 'aria-controls': 'machine', tabindex: on ? '0' : '-1',
       onclick: () => { cancelLoading(); serial(() => select(sys.id, { boot: app.started })); },
+      onpointerenter: () => armPrefetch(sys),
+      onpointerleave: () => clearTimeout(prefetchTimer),
+      onfocus: () => armPrefetch(sys),
     },
-      h('span', { class: 'osm-tab-idx' }, String(i + 1).padStart(2, '0')),
-      h('span', { class: 'osm-tab-name' }, sys.name,
-        app.saved[sys.id] ? h('i', { class: 'osm-tab-dot', title: `${t('tab.saved')} · ${ago(app.saved[sys.id].savedAt)}` }) : null,
-        app.saved[sys.id] ? h('span', { class: 'sr-only' }, `(${t('tab.saved')})`) : null),
-      h('span', { class: 'osm-tab-line' }, t(`os.${sys.id}.lineage`)),
+      h('span', { class: 'osm-ex-thumb' },
+        h('img', { src: sys.poster, alt: '', width: sys.screen[0], height: sys.screen[1], decoding: 'async' })),
+      h('span', { class: 'osm-ex-meta' },
+        h('span', { class: 'osm-ex-no' }, String(i + 1).padStart(2, '0')),
+        h('span', { class: 'osm-ex-name' }, sys.name,
+          saved ? h('i', { class: 'osm-ex-saved', title: `${t('tab.saved')} · ${ago(saved.savedAt)}` }) : null,
+          saved ? h('span', { class: 'sr-only' }, `(${t('tab.saved')})`) : null),
+        h('span', { class: 'osm-ex-line' }, `${sys.since}– · ${t(`os.${sys.id}.lineage`)}`)),
     );
   }));
 }
 
 // 方向鍵在分頁之間移動(ARIA tabs 的慣例)
 els.switch.addEventListener('keydown', (e) => {
-  const i = SYSTEMS.indexOf(app.sys);
+  const list = visible();
+  const i = list.indexOf(app.sys);
   let j = null;
-  if (e.key === 'ArrowRight') j = (i + 1) % SYSTEMS.length;
-  if (e.key === 'ArrowLeft') j = (i - 1 + SYSTEMS.length) % SYSTEMS.length;
+  if (e.key === 'ArrowRight') j = (i + 1) % list.length;
+  if (e.key === 'ArrowLeft') j = (i - 1 + list.length) % list.length;
   if (e.key === 'Home') j = 0;
-  if (e.key === 'End') j = SYSTEMS.length - 1;
+  if (e.key === 'End') j = list.length - 1;
   if (j == null) return;
   e.preventDefault();
-  const id = SYSTEMS[j].id;
+  const id = list[j].id;
   cancelLoading();
   serial(() => select(id, { boot: app.started })).then(() => $(`tab-${id}`)?.focus());
 });
 
-// ---------- 介紹 ----------
-function renderAbout() {
+// ---------- 說明卡(展品旁邊那張) ----------
+// 博物館的作品標籤:編號、名稱、出處與年份、一句話,再來是規格。運轉中的數字(解析度、速度、下載量)也寫在這裡。
+const live = { res: '', mips: '—', net: '0' };
+function renderLabel() {
+  const sys = app.sys;
+  const no = visible().indexOf(sys) + 1;
+  const spec = (label, value, id, cls) => h('div', { class: cls }, h('dt', {}, t(label)), h('dd', { id }, value));
+  els.label.replaceChildren(
+    h('p', { class: 'osm-label-no' }, t('label.no', { n: String(no).padStart(2, '0') })),
+    h('h2', { class: 'osm-label-name' }, sys.name),
+    h('p', { class: 'osm-label-maker' }, `${t(`os.${sys.id}.lineage`)} · ${sys.since}–`),
+    h('p', { class: 'osm-label-tagline' }, t(`os.${sys.id}.tagline`)),
+    h('dl', { class: 'osm-label-specs' },
+      spec('label.medium', t('label.mediumV')),
+      spec('label.spec', `i686 · ${sys.memory / MB} MB`),
+      spec('label.res', live.res || `${sys.screen[0]} × ${sys.screen[1]}`, 'label-res'),
+      spec('about.version', sys.distro ? `${sys.distro} ${sys.version}` : sys.version),
+      spec('about.license', sys.license),
+      sys.stateBytes ? spec('about.download', `≈ ${fmtMB(firstLoad(sys))} MB`) : null,
+      spec('label.speed', `${live.mips} MIPS`, 'label-mips', 'osm-label-live'),
+      spec('label.loaded', `${live.net} MB`, 'label-net', 'osm-label-live')),
+    h('p', { class: 'osm-label-links' },
+      h('a', { href: sys.homepage, target: '_blank', rel: 'noopener' }, t('about.home'), h('span', { html: ICON.out, 'aria-hidden': 'true' })),
+      h('a', { href: sys.source, target: '_blank', rel: 'noopener' }, t('about.source'), h('span', { html: ICON.out, 'aria-hidden': 'true' }))),
+  );
+}
+function setLive(key, value) {
+  live[key] = value;
+  const el = $(`label-${key}`);
+  if (el) el.textContent = key === 'res' ? value : `${value} ${key === 'mips' ? 'MIPS' : 'MB'}`;
+}
+
+// ---------- 展品故事(畫面下方) ----------
+function renderStory() {
   const sys = app.sys;
   const k = (key) => t(`os.${sys.id}.${key}`);
   const tips = k('tips');
-  const facts = [
-    ['about.since', String(sys.since)],
-    ['about.version', sys.version],
-    ['about.license', sys.license],
-    ['about.memory', `${sys.memory / MB} MB`],
-    sys.stateBytes ? ['about.download', `≈ ${fmtMB(sys.stateBytes)} MB`] : null,
-  ].filter(Boolean);
+  const egg = k('egg');
   els.about.replaceChildren(
-    h('div', { class: 'osm-about-head' },
-      h('p', { class: 'osm-eyebrow' }, k('lineage')),
-      h('h2', { class: 'osm-about-title' }, sys.name, sys.distro ? h('span', {}, ` · ${sys.distro}`) : null),
-      h('p', { class: 'osm-about-tagline' }, k('tagline')),
-    ),
-    h('div', { class: 'osm-about-grid' },
-      h('div', { class: 'osm-about-body' },
-        h('p', {}, k('body')),
-        Array.isArray(tips) ? [h('h3', {}, t('about.tips')), h('ul', {}, tips.map((x) => h('li', {}, x)))] : null,
-      ),
-      h('aside', { class: 'osm-about-side' },
-        h('dl', { class: 'osm-facts' }, facts.map(([label, val]) => h('div', {}, h('dt', {}, t(label)), h('dd', {}, val)))),
-        h('p', { class: 'osm-links' },
-          h('a', { href: sys.homepage, target: '_blank', rel: 'noopener' }, t('about.home'), h('span', { html: ICON.out, 'aria-hidden': 'true' })),
-          h('a', { href: sys.source, target: '_blank', rel: 'noopener' }, t('about.source'), h('span', { html: ICON.out, 'aria-hidden': 'true' })),
-        ),
-      ),
-    ),
+    h('div', { class: 'osm-story-body' },
+      h('h2', { class: 'osm-h2' }, t('story.title', { name: sys.name })),
+      h('p', {}, k('body'))),
+    h('div', { class: 'osm-story-side' },
+      Array.isArray(tips) && tips.length ? [h('h3', {}, t('about.tips')), h('ul', {}, tips.map((x) => h('li', {}, x)))] : null,
+      egg !== `os.${sys.id}.egg` ? h('div', { class: 'osm-egg' }, h('h3', {}, t('about.egg')), h('p', {}, egg)) : null),
   );
-}
-
-function renderHud() {
-  const sys = app.sys;
-  els.hudName.textContent = sys.distro ? `${sys.name} · ${sys.distro}` : sys.name;
-  els.hudSpec.textContent = `i686 · ${sys.memory / MB} MB`;
 }
 
 // ---------- 狀態與遮罩 ----------
@@ -161,63 +204,132 @@ function setPhase(phase) {
   els.statusText.textContent = t(`status.${phase}`);
   renderOverlay();
   renderTools();
+  renderCapture();
+}
+
+// 載入中只更新進度條和文字,不重畫整張卡片
+let progressUI = null;
+function progressText() {
+  const pr = app.progress ?? {};
+  let s = pr.label ?? '';
+  if (pr.total) s += `  ${fmtMB(pr.loaded ?? 0)} / ${fmtMB(pr.total)} MB`;
+  if (pr.rate > 64 * 1024 && pr.total && pr.loaded < pr.total) {
+    const secs = Math.ceil((pr.total - pr.loaded) / pr.rate);
+    s += ` · ${(pr.rate / MB).toFixed(1)} MB/s`;
+    if (secs > 1) s += ` · ${t('overlay.eta', { s: secs })}`;
+  }
+  return s;
+}
+function updateProgress() {
+  if (app.phase !== 'loading' || !progressUI) return renderOverlay();
+  const pr = app.progress ?? {};
+  const frac = pr.total ? Math.min(1, (pr.loaded ?? 0) / pr.total) : null;
+  progressUI.track.classList.toggle('is-indeterminate', frac == null);
+  progressUI.bar.style.transform = frac == null ? '' : `scaleX(${frac})`;
+  if (frac == null) progressUI.track.removeAttribute('aria-valuenow');
+  else progressUI.track.setAttribute('aria-valuenow', Math.round(frac * 100));
+  progressUI.note.textContent = progressText();
 }
 
 function renderOverlay() {
   const sys = app.sys;
   const o = els.overlay;
   const p = app.phase;
+  progressUI = null;
   o.hidden = p === 'running';
+  o.classList.toggle('is-veil', p === 'paused');
   if (p === 'running') return o.replaceChildren();
+
+  const caption = (...kids) => h('div', { class: 'osm-caption' }, h('p', { class: 'osm-caption-name' }, sys.name), ...kids);
 
   if (p === 'idle') {
     const saved = app.saved[sys.id];
-    const big = h('button', { type: 'button', class: 'osm-power', onclick: () => serial(() => start()) },
-      h('span', { class: 'osm-power-icon', html: ICON.power, 'aria-hidden': 'true' }),
-      h('span', {}, saved ? t('overlay.resume') : t('overlay.boot')));
-    o.replaceChildren(h('div', { class: 'osm-card' },
-      h('p', { class: 'osm-card-eyebrow' }, t(`os.${sys.id}.lineage`)),
-      h('p', { class: 'osm-card-name' }, sys.name),
-      big,
-      saved
-        ? h('p', { class: 'osm-card-note' }, t('overlay.saved', { t: ago(saved.savedAt) }), ' · ',
-          h('button', { type: 'button', class: 'osm-linkbtn', onclick: () => serial(() => restart()) }, t('overlay.fresh')))
-        : sys.stateBytes ? h('p', { class: 'osm-card-note' }, t('overlay.size', { n: fmtMB(sys.stateBytes) })) : null,
-      TOUCH ? h('p', { class: 'osm-card-note osm-card-warn' }, t('overlay.mobile')) : null,
+    o.replaceChildren(caption(
+      h('div', { class: 'osm-caption-row' },
+        h('button', {
+          type: 'button', class: 'osm-power',
+          onclick: () => serial(() => start()),
+          onpointerenter: () => armPrefetch(sys),
+          onfocus: () => armPrefetch(sys),
+        },
+          h('span', { class: 'osm-power-icon', html: ICON.power, 'aria-hidden': 'true' }),
+          h('span', {}, saved ? t('overlay.resume') : t('overlay.boot'))),
+        saved
+          ? h('span', { class: 'osm-caption-note' }, t('overlay.saved', { t: ago(saved.savedAt) }), ' · ',
+            h('button', { type: 'button', class: 'osm-linkbtn', onclick: () => serial(() => restart()) }, t('overlay.fresh')))
+          : sys.stateBytes ? h('span', { class: 'osm-caption-note' }, t('overlay.size', { n: fmtMB(firstLoad(sys)) })) : null),
+      TOUCH ? h('p', { class: 'osm-caption-warn' }, t('overlay.mobile')) : null,
     ));
     return;
   }
   if (p === 'loading') {
-    const pr = app.progress ?? {};
-    const frac = pr.total ? Math.min(1, pr.loaded / pr.total) : null;
-    o.replaceChildren(h('div', { class: 'osm-card osm-card-loading' },
-      h('p', { class: 'osm-card-name' }, sys.name),
-      h('div', { class: `osm-bar-track${frac == null ? ' is-indeterminate' : ''}`, role: 'progressbar', 'aria-valuemin': '0', 'aria-valuemax': '100', 'aria-valuenow': frac == null ? null : Math.round(frac * 100) },
-        h('i', { style: frac == null ? null : `transform: scaleX(${frac})` })),
-      h('p', { class: 'osm-card-note' }, pr.label ?? '', pr.total ? `  ${fmtMB(pr.loaded)} / ${fmtMB(pr.total)} MB` : ''),
-    ));
+    const bar = h('i');
+    const track = h('div', { class: 'osm-bar-track', role: 'progressbar', 'aria-valuemin': '0', 'aria-valuemax': '100' }, bar);
+    const note = h('p', { class: 'osm-caption-note' });
+    o.replaceChildren(caption(track, note));
+    progressUI = { track, bar, note };
+    updateProgress();
     return;
   }
   if (p === 'saving') {
-    o.replaceChildren(h('div', { class: 'osm-card osm-card-loading' },
+    o.replaceChildren(caption(
       h('div', { class: 'osm-bar-track is-indeterminate' }, h('i')),
-      h('p', { class: 'osm-card-note' }, t('overlay.saving', { name: sys.name }))));
+      h('p', { class: 'osm-caption-note' }, t('overlay.saving', { name: sys.name }))));
     return;
   }
   if (p === 'paused') {
-    o.replaceChildren(h('button', { type: 'button', class: 'osm-card osm-card-paused', onclick: () => serial(resume) },
+    o.replaceChildren(h('button', { type: 'button', class: 'osm-paused', onclick: () => serial(resume) },
       h('span', { class: 'osm-power-icon', html: ICON.play, 'aria-hidden': 'true' }),
-      h('span', { class: 'osm-card-name' }, t('overlay.paused')),
-      h('span', { class: 'osm-card-note' }, t('overlay.clickResume'))));
+      h('span', { class: 'osm-paused-title' }, t('overlay.paused')),
+      h('span', { class: 'osm-caption-note' }, t('overlay.clickResume'))));
     return;
   }
   if (p === 'error') {
-    o.replaceChildren(h('div', { class: 'osm-card' },
-      h('p', { class: 'osm-card-name' }, t('overlay.errorTitle')),
-      h('p', { class: 'osm-card-note' }, app.error ?? ''),
-      h('button', { type: 'button', class: 'osm-power', onclick: () => serial(() => start()) },
-        h('span', { class: 'osm-power-icon', html: ICON.restart, 'aria-hidden': 'true' }), h('span', {}, t('overlay.retry')))));
+    o.replaceChildren(caption(
+      h('p', { class: 'osm-caption-note' }, `${t('overlay.errorTitle')} — ${app.error ?? ''}`),
+      h('div', { class: 'osm-caption-row' },
+        h('button', { type: 'button', class: 'osm-power', onclick: () => serial(() => start()) },
+          h('span', { class: 'osm-power-icon', html: ICON.restart, 'aria-hidden': 'true' }), h('span', {}, t('overlay.retry'))))));
   }
+}
+
+// ---------- 輸入狀態:鍵盤、滑鼠現在接在誰身上 ----------
+// v86 在客體系統有絕對座標滑鼠驅動(VMware 後門)時會把游標藏起來;那時不需要鎖定
+const absoluteMouse = () => els.screen.style.cursor === 'none';
+function renderCapture() {
+  const live = app.phase === 'running';
+  const kb = live && document.activeElement === els.screen;
+  const locked = live && document.pointerLockElement === els.screen;
+  const abs = live && absoluteMouse();
+  const name = app.sys?.name ?? '';
+  const mouseOn = locked || (abs && kb);
+  // replaceChildren 會把 null 變成字串 "null",條件式的元素要先濾掉
+  els.capture.replaceChildren(...[
+    h('span', { class: `osm-chip${kb ? ' is-on' : ''}`, title: kb ? t('capture.kbOn', { name }) : t('capture.kbOff') },
+      h('span', { html: ICON.keys, 'aria-hidden': 'true' }), h('span', {}, t('capture.kb'))),
+    TOUCH ? null : h('span', { class: `osm-chip${mouseOn ? ' is-on' : ''}`, title: locked ? t('capture.mouseLocked', { name }) : abs ? t('capture.mouseAbs', { name }) : t('capture.mouseOff') },
+      h('span', { html: ICON.mouse, 'aria-hidden': 'true' }), h('span', {}, t('capture.mouse'))),
+  ].filter(Boolean));
+  els.capture.setAttribute('aria-label', [
+    kb ? t('capture.kbOn', { name }) : t('capture.kbOff'),
+    TOUCH ? '' : locked ? t('capture.mouseLocked', { name }) : abs ? t('capture.mouseAbs', { name }) : t('capture.mouseOff'),
+  ].filter(Boolean).join(' · '));
+}
+
+// ---------- 第一次開機的操作提示 ----------
+let coachEl = null;
+function showCoach() {
+  if (coachEl || TOUCH || LS.get(PREF.coached) === '1') return;
+  const row = (key, text) => h('li', {}, h('kbd', {}, key), h('span', {}, text));
+  coachEl = h('div', { class: 'osm-coach', role: 'note' },
+    h('ul', {}, row(t('coach.clickKey'), t('coach.click')), row('Esc', t('coach.esc')), row('⌃⌥⌦', t('coach.keys'))),
+    h('button', { type: 'button', class: 'osm-coach-ok', onclick: () => hideCoach(true) }, t('coach.ok')));
+  els.stage.append(coachEl);
+}
+function hideCoach(remember = false) {
+  if (remember) LS.set(PREF.coached, '1');
+  coachEl?.remove();
+  coachEl = null;
 }
 
 // ---------- 工具列 ----------
@@ -260,10 +372,20 @@ function renderTools() {
     TOUCH ? tool('softkb', ICON.keyboard, t('tool.softkb'), () => els.softkb.focus(), { disabled: !running }) : null,
     h('span', { class: 'osm-tools-sep', 'aria-hidden': 'true' }),
     TOUCH ? null : tool('mouse', ICON.mouse, t('tool.mouse'), () => lockMouse(), { disabled: !running }),
+    tool('mute', app.muted ? ICON.muted : ICON.sound, app.muted ? t('tool.unmute') : t('tool.mute'), toggleMute, { pressed: app.muted }),
     tool('shot', ICON.camera, t('tool.shot'), screenshot, { disabled: !live }),
     tool('full', ICON.full, t('tool.full'), fullscreen, { disabled: !live }),
   ].filter(Boolean));
   if (popover && !live) closePopover();
+}
+
+function toggleMute() {
+  app.muted = !app.muted;
+  LS.set(PREF.muted, app.muted ? '1' : '0');
+  app.machine?.setMuted(app.muted);
+  renderTools();
+  hint(app.muted ? t('hint.muted') : t('hint.unmuted'));
+  refocus();
 }
 
 const COMBOS = [
@@ -302,9 +424,9 @@ function togglePopover(kind, anchor) {
     setTimeout(() => input.focus(), 0);
   }
   anchor.setAttribute('aria-expanded', 'true');
-  els.machine.append(panel);
+  els.work.append(panel);
   const a = anchor.getBoundingClientRect();
-  const m = els.machine.getBoundingClientRect();
+  const m = els.work.getBoundingClientRect();
   panel.style.right = `${Math.max(8, m.right - a.right)}px`;
   panel.style.bottom = `${m.bottom - a.top + 10}px`;
   popover = { kind, panel, anchor };
@@ -323,8 +445,6 @@ function refocus() {
   if (app.phase === 'running') els.screen.focus({ preventScroll: true });
 }
 
-// v86 在客體系統有絕對座標滑鼠驅動(VMware 後門)時會把游標藏起來;那時不需要鎖定
-const absoluteMouse = () => els.screen.style.cursor === 'none';
 function lockMouse() {
   if (app.phase !== 'running' || TOUCH) return;
   els.screen.focus({ preventScroll: true });
@@ -349,7 +469,7 @@ function screenshot() {
 async function fullscreen() {
   if (document.fullscreenElement) return document.exitFullscreen();
   try {
-    await els.machine.requestFullscreen({ navigationUI: 'hide' });
+    await els.work.requestFullscreen({ navigationUI: 'hide' });
     // Chrome 全螢幕時可以把 Esc、Win、Alt+Tab 也攔下來送進客體系統
     await navigator.keyboard?.lock?.().catch(() => {});
     refocus();
@@ -367,10 +487,12 @@ function fit() {
   const hgt = els.stage.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
   let s = Math.min(w / cw, hgt / ch);
   if (s >= 2) s = Math.floor(s); // 放大到兩倍以上就用整數倍,像素才不會糊
-  els.screen.style.width = `${Math.floor(cw * s)}px`;
-  els.screen.style.height = `${Math.floor(ch * s)}px`;
+  for (const el of [els.screen, els.overlay]) {
+    el.style.width = `${Math.floor(cw * s)}px`;
+    el.style.height = `${Math.floor(ch * s)}px`;
+  }
   els.screen.classList.toggle('is-pixelated', s >= 2);
-  els.hudRes.textContent = `${cw} × ${ch}`;
+  setLive('res', `${cw} × ${ch}`);
 }
 new ResizeObserver(fit).observe(els.stage);
 let canvasWatch = null;
@@ -383,7 +505,7 @@ let netBytes = 0;
 try { performance.setResourceTimingBufferSize(4000); } catch {}
 new PerformanceObserver((list) => {
   for (const e of list.getEntries()) if (e.name.includes('/os/disk/')) netBytes += e.encodedBodySize || e.transferSize || 0;
-  els.net.textContent = fmtMB(netBytes);
+  setLive('net', fmtMB(netBytes));
   if (performance.getEntriesByType('resource').length > 3000) performance.clearResourceTimings();
 }).observe({ type: 'resource', buffered: true });
 
@@ -398,38 +520,72 @@ function startMeters() {
     let d = ins - lastIns;
     if (d < 0) d += 2 ** 32;
     const mips = app.phase === 'running' ? d / ((now - lastT) / 1000) / 1e6 : 0;
-    els.mips.textContent = mips ? Math.round(mips) : '—';
+    setLive('mips', mips ? Math.round(mips) : '—');
     lastIns = ins;
     lastT = now;
   }, 1000);
 }
 function stopMeters() {
   clearInterval(meterTimer);
-  els.mips.textContent = '—';
+  setLive('mips', '—');
 }
 
-// ---------- 開機、切換、存檔 ----------
+// ---------- 存檔:背景壓縮、寫進 IndexedDB ----------
+// save_state 本身只要 0.1 秒,慢的是 gzip(兩三百 MB 要好幾秒)。所以換台時拿到狀態就先換,
+// 壓縮和寫入在背景做;還沒寫完又切回來,就直接用記憶體裡那份。
+const pending = new Map(); // id → { state, promise }
+
+function persistLater(sys, state) {
+  const job = { state };
+  app.saved[sys.id] = { savedAt: Date.now() };
+  job.promise = store.save(sys.id, sys.snapshot, state)
+    .catch((e) => {
+      console.warn('save failed', e);
+      delete app.saved[sys.id];
+      renderTabs();
+      hint(t('hint.saveFailed'), 4000);
+    })
+    .finally(() => { if (pending.get(sys.id) === job) pending.delete(sys.id); });
+  pending.set(sys.id, job);
+  renderTabs();
+}
+
+async function snapshotNow(m) {
+  if (AUTHOR) return;
+  try {
+    persistLater(m.sys, await m.saveState());
+    app.dirty = false;
+  } catch (e) {
+    console.warn('save_state failed', e);
+  }
+}
+
+// ---------- 開機、切換 ----------
 async function select(id, { boot = false } = {}) {
-  const sys = byId(id) ?? SYSTEMS[0];
+  const list = visible();
+  const sys = list.find((s) => s.id === id) ?? list[0];
   if (app.sys === sys && (app.machine || !boot)) return;
   app.gen++;
   await shutdown();
   app.sys = sys;
+  document.body.dataset.ex = sys.id;
+  live.res = '';
+  LS.set(PREF.last, sys.id);
   if (location.hash !== `#${sys.id}`) history.replaceState(null, '', `${location.pathname}${location.search}#${sys.id}`);
   renderTabs();
-  renderAbout();
-  renderHud();
+  renderLabel();
+  renderStory();
   if (boot) await start();
   else setPhase('idle');
 }
 
-// 正在載入快照的那台直接丟掉(還沒跑過,沒有進度要存),讓排在後面的切換馬上開始
+// 正在載入的那台直接丟掉(還沒跑過,沒有進度要存),讓排在後面的切換馬上開始
 function cancelLoading() {
-  if (app.phase !== 'loading' || !app.machine) return;
+  if (app.phase !== 'loading') return;
   app.gen++;
   const m = app.machine;
   app.machine = null;
-  m.destroy();
+  m?.destroy();
 }
 
 async function shutdown() {
@@ -439,27 +595,14 @@ async function shutdown() {
   stopMeters();
   canvasWatch?.disconnect();
   closePopover();
+  hideCoach();
   if (document.pointerLockElement) document.exitPointerLock();
   if (app.dirty && (app.phase === 'running' || app.phase === 'paused')) {
     setPhase('saving');
     await m.stop();
-    await persist(m);
+    await snapshotNow(m);
   }
   await m.destroy();
-}
-
-async function persist(m) {
-  if (AUTHOR) return;
-  try {
-    const state = await m.saveState();
-    await store.save(m.sys.id, m.sys.snapshot, state);
-    app.saved[m.sys.id] = { savedAt: Date.now() };
-    app.dirty = false;
-    renderTabs();
-  } catch (e) {
-    console.warn('save failed', e);
-    hint(t('hint.saveFailed'), 4000);
-  }
 }
 
 async function start({ fresh = false } = {}) {
@@ -467,18 +610,49 @@ async function start({ fresh = false } = {}) {
   const sys = app.sys;
   app.started = true;
   app.error = null;
-  let state = null;
-  if (COLD) state = 'cold';
-  else if (!fresh && !AUTHOR) state = (await store.load(sys.id, sys.snapshot))?.state ?? null;
-  if (gen !== app.gen) return;
-
   bringIntoView();
-  app.progress = {
-    label: state === 'cold' ? t('overlay.cold') : state ? t('overlay.restoreSaved') : t('overlay.download'),
-    loaded: 0,
-    total: state ? 0 : sys.stateBytes,
-  };
+  app.progress = { label: t('overlay.restore') };
   setPhase('loading');
+
+  // 開機來源:作者模式冷開機 > 還沒寫完的背景存檔 > IndexedDB 存檔 > 伺服器上的開機快照
+  let state = null;
+  if (COLD) {
+    state = 'cold';
+    app.progress = { label: t('overlay.cold') };
+  } else {
+    if (!fresh && !AUTHOR) {
+      state = pending.get(sys.id)?.state ?? null;
+      // 不靠 app.saved 判斷:頁面一開始先畫、存檔標記稍後才補上,太快按開機時它可能還是空的
+      if (!state) {
+        if (app.saved[sys.id]) {
+          app.progress = { label: t('overlay.restoreSaved') };
+          updateProgress();
+        }
+        state = (await store.load(sys.id, sys.snapshot))?.state ?? null;
+      }
+    }
+    if (gen !== app.gen) return;
+    if (!state) {
+      app.progress = { label: t('overlay.download'), loaded: 0, total: sys.stateBytes, rate: 0 };
+      updateProgress();
+      try {
+        state = await fetchSnapshot(sys, (pr) => {
+          if (gen !== app.gen) return;
+          app.progress = { label: t('overlay.download'), ...pr };
+          updateProgress();
+        });
+      } catch (e) {
+        if (gen !== app.gen) return;
+        console.error(e);
+        app.error = t('overlay.errorNet');
+        setPhase('error');
+        return;
+      }
+      if (gen !== app.gen) return;
+      app.progress = { label: t('overlay.restore') };
+    }
+  }
+  updateProgress();
 
   const m = new Machine(sys, els.screen);
   app.machine = m;
@@ -496,13 +670,7 @@ async function start({ fresh = false } = {}) {
   let watch = 0;
   try {
     const ok = await Promise.race([
-      m.boot(state, (e) => {
-        if (gen !== app.gen || !String(e.file_name ?? '').includes('/state/')) return;
-        app.progress.loaded = e.loaded;
-        if (e.total) app.progress.total = e.total;
-        if (e.total && e.loaded >= e.total) app.progress.label = t('overlay.restore');
-        renderOverlay();
-      }),
+      m.boot(state),
       new Promise((_, reject) => {
         watch = setInterval(() => { if (failure) reject(failure); }, 200);
       }),
@@ -528,10 +696,12 @@ async function start({ fresh = false } = {}) {
     removeEventListener('unhandledrejection', onError);
     removeEventListener('error', onError);
   }
+  dropSnapshot(sys);
 
   canvasWatch?.disconnect();
   canvasWatch = new MutationObserver(fit);
   canvasWatch.observe(m.canvas, { attributes: true, attributeFilter: ['width', 'height'] });
+  m.setMuted(app.muted);
   await m.run();
   if (gen !== app.gen) return;
   app.dirty = true;
@@ -551,7 +721,9 @@ async function start({ fresh = false } = {}) {
   } else if (active === els.screen) {
     m.setKeyboard(true);
   }
-  hint(t('hint.focus'));
+  renderCapture();
+  if (!coachEl && LS.get(PREF.coached) === '1') hint(t('hint.focus'));
+  showCoach();
 }
 
 // 開機時把整台電腦(含上下 HUD)捲到頂列下面;已經在畫面裡就不動
@@ -565,11 +737,15 @@ function bringIntoView() {
 async function restart() {
   app.gen++;
   const m = app.machine;
+  const sys = app.sys;
   app.machine = null;
   stopMeters();
+  hideCoach();
   if (m) await m.destroy();
-  await store.remove(app.sys.id);
-  delete app.saved[app.sys.id];
+  // 還在背景寫的舊存檔要等它寫完再刪,不然刪完它又寫回去
+  await pending.get(sys.id)?.promise;
+  await store.remove(sys.id);
+  delete app.saved[sys.id];
   renderTabs();
   await start({ fresh: true });
 }
@@ -591,20 +767,28 @@ async function resume() {
 
 // ---------- 輸入焦點 ----------
 // 鍵盤只在畫面有焦點時才送進客體系統;點到網頁其他地方就還給網頁
-els.screen.addEventListener('focus', () => { app.machine?.setKeyboard(true); els.stage.classList.add('is-focused'); });
-els.screen.addEventListener('blur', () => { app.machine?.setKeyboard(false); els.stage.classList.remove('is-focused'); });
+els.screen.addEventListener('focus', () => { app.machine?.setKeyboard(true); els.stage.classList.add('is-focused'); renderCapture(); });
+els.screen.addEventListener('blur', () => { app.machine?.setKeyboard(false); els.stage.classList.remove('is-focused'); renderCapture(); });
 els.screen.addEventListener('mousedown', () => {
   if (app.phase !== 'running') return;
+  if (coachEl) hideCoach(true);
   els.screen.focus({ preventScroll: true });
   if (!absoluteMouse() && !document.pointerLockElement) lockMouse();
+});
+// 游標藏不藏(絕對座標滑鼠)是 v86 動態決定的,滑過畫面時順便更新狀態
+let lastAbs = null;
+els.screen.addEventListener('mousemove', () => {
+  const abs = absoluteMouse();
+  if (abs !== lastAbs) { lastAbs = abs; renderCapture(); }
 });
 els.softkb.addEventListener('focus', () => app.machine?.setKeyboard(true));
 els.softkb.addEventListener('blur', () => { if (document.activeElement !== els.screen) app.machine?.setKeyboard(false); });
 document.addEventListener('pointerlockchange', () => {
   if (document.pointerLockElement) hint(t('hint.lock'));
+  renderCapture();
 });
 
-// 切走分頁:暫停並存檔;回來就繼續
+// 切走分頁:暫停並(在背景)存檔;回來就繼續
 document.addEventListener('visibilitychange', () => serial(async () => {
   if (AWAKE || AUTHOR) return;
   if (document.hidden) {
@@ -612,7 +796,7 @@ document.addEventListener('visibilitychange', () => serial(async () => {
     await app.machine.stop();
     app.autoPaused = true;
     setPhase('paused');
-    if (app.dirty) await persist(app.machine);
+    if (app.dirty) await snapshotNow(app.machine);
   } else if (app.autoPaused && app.phase === 'paused') {
     await resume();
   }
@@ -620,30 +804,95 @@ document.addEventListener('visibilitychange', () => serial(async () => {
 
 addEventListener('hashchange', () => {
   const id = location.hash.slice(1);
-  if (byId(id) && byId(id) !== app.sys) {
+  const sys = visible().find((s) => s.id === id);
+  if (sys && sys !== app.sys) {
     cancelLoading();
     serial(() => select(id, { boot: app.started }));
   }
 });
 
+// ---------- 彩蛋:通關密語 ----------
+// 在網頁上(不是電腦畫面裡、也不是輸入框裡)打出四個碎片拼成的那句話,第五台電腦就會出現。
+// 打的字會即時填進「尋寶」區的格子裡;格子只顯示你打了什麼,不會提示對錯。
+const WORDS = ['from', 'noise', 'to', 'signal'];
+let typed = '';
+
+function renderSlots() {
+  const solved = app.unlocked;
+  const letters = solved ? PASSPHRASE : typed;
+  const owners = SYSTEMS.filter((s) => !s.hidden);
+  let at = 0;
+  els.slots.replaceChildren(...WORDS.map((word, wi) => {
+    const cells = [...word].map(() => {
+      const ch = letters[at++] ?? '';
+      return h('span', { class: `osm-cell${ch ? ' is-typed' : ''}` }, ch);
+    });
+    return h('div', { class: 'osm-word' },
+      h('div', { class: 'osm-word-cells' }, cells),
+      h('span', { class: 'osm-word-label' }, owners[wi]?.name ?? ''));
+  }));
+  els.hunt.classList.toggle('is-solved', solved);
+  els.huntState.textContent = solved ? t('hunt.solved') : typed ? '' : t('hunt.idle');
+}
+
+addEventListener('keydown', (e) => {
+  if (app.unlocked || e.ctrlKey || e.metaKey || e.altKey) return;
+  const target = e.target;
+  if (target === els.screen || target?.closest?.('input, textarea, [contenteditable]')) return;
+  if (e.key === 'Backspace' && typed) {
+    typed = typed.slice(0, -1);
+    renderSlots();
+    return;
+  }
+  if (e.key === 'Escape' && typed) {
+    typed = '';
+    renderSlots();
+    return;
+  }
+  if (!/^[a-z]$/i.test(e.key)) return;
+  typed = (typed + e.key.toLowerCase()).slice(-PASSPHRASE.length);
+  if (typed === PASSPHRASE) unlock();
+  else renderSlots();
+});
+
+function unlock() {
+  app.unlocked = true;
+  LS.set(PREF.unlocked, '1');
+  renderTabs();
+  renderSlots();
+  const secret = SYSTEMS.find((s) => s.hidden);
+  const tab = secret && $(`tab-${secret.id}`);
+  tab?.classList.add('is-new');
+  tab?.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+  hint(t('egg.unlocked'), 6000);
+}
+
 onLang(() => {
   if (!app.sys) return; // initI18n() 第一次套用語言時還沒選系統,select() 之後自己會畫
   renderTabs();
-  renderAbout();
-  renderHud();
+  renderLabel();
+  renderStory();
+  renderSlots();
   els.statusText.textContent = t(`status.${app.phase}`);
   renderOverlay();
   renderTools();
+  renderCapture();
+  if (coachEl) { hideCoach(); showCoach(); }
 });
 
 // ---------- 啟動 ----------
 initI18n();
-serial(async () => {
-  for (const sys of SYSTEMS) {
-    const rec = await store.peek(sys.id);
-    if (rec && rec.snapshot === sys.snapshot) app.saved[sys.id] = { savedAt: rec.savedAt };
-  }
-  await select(location.hash.slice(1), { boot: false });
+renderSlots();
+// 先把頁面畫出來,存檔資訊(IndexedDB)之後再補上 —— IndexedDB 慢或卡住時頁面也不會停在半空
+// 網址指定的那台 > 上次看的那台 > 第一台
+serial(() => select(location.hash.slice(1) || LS.get(PREF.last) || '', { boot: false }));
+Promise.all(SYSTEMS.map(async (sys) => {
+  const rec = await store.peek(sys.id);
+  if (rec && rec.snapshot === sys.snapshot && !app.saved[sys.id]) app.saved[sys.id] = { savedAt: rec.savedAt };
+})).then(() => {
+  if (!app.sys) return;
+  renderTabs();
+  if (app.phase === 'idle') renderOverlay();
 });
 
 if (AUTHOR) {

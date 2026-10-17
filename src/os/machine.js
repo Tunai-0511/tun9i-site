@@ -65,12 +65,14 @@ export class Machine {
       screen: { container: this.screen, use_graphical_text: true },
       bios: { url: biosUrl },
       vga_bios: { url: vgaBiosUrl },
-      hda: { ...this.sys.hda },
       acpi: this.sys.acpi,
       net_device: { type: this.sys.net ?? 'ne2k' },
       mac_address_translation: true,
       autostart: false,
     };
+    // 磁碟:硬碟映像或磁片(KolibriOS 整套系統就是一張 1.44 MB 的磁片)
+    if (this.sys.hda) options.hda = { ...this.sys.hda };
+    if (this.sys.fda) options.fda = { ...this.sys.fda };
     if (state instanceof ArrayBuffer) options.initial_state = { buffer: state };
     else if (state !== 'cold') options.initial_state = { url: stateUrl(this.sys) };
 
@@ -95,6 +97,14 @@ export class Machine {
   }
 
   run() { return this.emu?.run(); }
+
+  // 靜音用混音器的主音量(dB):不像 AudioContext.suspend 會在每次 run() 被 v86 自己 resume 回來
+  setMuted(on) {
+    const bus = this.emu?.bus;
+    if (!bus) return;
+    bus.send('mixer-gain-left', on ? -200 : 0);
+    bus.send('mixer-gain-right', on ? -200 : 0);
+  }
   stop() { return this.emu?.stop(); }
   get running() { return !!this.emu?.is_running(); }
 

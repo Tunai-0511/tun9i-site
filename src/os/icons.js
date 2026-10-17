@@ -12,5 +12,7 @@ export const ICON = {
   mouse: svg('<rect x="6.5" y="3" width="11" height="18" rx="5.5"/><path d="M12 7v3.5"/>'),
   camera: svg('<path d="M4 8.5h3l1.8-2.5h6.4L17 8.5h3V19H4z"/><circle cx="12" cy="13.5" r="3.3"/>'),
   full: svg('<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>'),
+  sound: svg('<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4.5 4.5 0 0 1 0 6M18 6.5a8 8 0 0 1 0 11"/>'),
+  muted: svg('<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/>'),
   out: svg('<path d="M14 5h5v5M19 5l-8 8M17 14v5H5V7h5"/>'),
 };

@@ -6,14 +6,10 @@
   "a11y.machine": "Computer",
   "a11y.screen": "Computer screen: click to start using it",
   "a11y.tools": "Controls",
-
   "bar.title": "OS Museum",
-
-  "intro.eyebrow": "Four real computers · in your browser",
   "intro.title": "The OS Museum",
   "intro.lede": "No screenshots, no videos. Each tab is a whole x86 PC — CPU, memory, graphics card and hard disk — emulated in WebAssembly, running real machine code one instruction at a time. Switch machines whenever you like; your progress stays in your browser.",
-
-  "notes.title": "How to use",
+  "notes.title": "Visitor notes",
   "notes.mouse.k": "Mouse",
   "notes.mouse.v": "Click the screen and the computer takes over your mouse and keyboard. Press Esc to get the mouse back.",
   "notes.keys.k": "Special keys",
@@ -24,18 +20,14 @@
   "notes.net.v": "None of these computers is connected to the internet, so web browsers inside them won't load pages.",
   "notes.perf.k": "Performance",
   "notes.perf.v": "Emulating a whole PC is hard work for your CPU. Desktop Chrome, Edge and Firefox run it best. Phones can boot them, but they're awkward to use.",
-  "credits.engine": "The emulator is v86 (BSD-2-Clause, by Fabian Hemmer and contributors); the BIOS is SeaBIOS (LGPL-3.0). The disk images are the pre-installed builds from the v86 project. Each operating system is distributed under its own license — source links are in each machine's notes.",
   "credits.home": "Back to the home page",
-
   "tab.saved": "saved",
-
   "status.idle": "Standby",
   "status.loading": "Booting",
   "status.running": "Running",
   "status.paused": "Paused",
   "status.saving": "Saving",
   "status.error": "Error",
-
   "overlay.boot": "Power on",
   "overlay.resume": "Resume where you left off",
   "overlay.fresh": "start over",
@@ -54,13 +46,11 @@
   "overlay.errorOther": "The emulator hit an error: {msg}",
   "overlay.retry": "Try again",
   "overlay.mobile": "It will boot on a phone, but without a real keyboard and mouse it's hard going.",
-
   "hint.lock": "Press Esc to release the mouse",
   "hint.focus": "Click the screen to start",
   "hint.saved": "Saved",
   "hint.saveFailed": "Couldn't save: your browser is out of storage space",
   "hint.copied": "Screenshot saved",
-
   "tool.pause": "Pause",
   "tool.resume": "Resume",
   "tool.restart": "Start over",
@@ -72,16 +62,13 @@
   "tool.shot": "Screenshot",
   "tool.full": "Full screen",
   "tool.softkb": "On-screen keyboard",
-
   "type.placeholder": "Letters, numbers or symbols to type in…",
   "type.send": "Send",
   "type.note": "Typed one key at a time, using a US keyboard layout.",
-
   "time.now": "just now",
   "time.min": "{n} min ago",
   "time.hour": "{n} h ago",
   "time.day": "{n} days ago",
-
   "about.tips": "Things to try",
   "about.since": "Since",
   "about.version": "Version",
@@ -90,24 +77,89 @@
   "about.download": "First load",
   "about.home": "Website",
   "about.source": "Source code",
-
   "os.haiku.lineage": "An open-source BeOS",
   "os.haiku.tagline": "BeOS didn't die — it changed its name to Haiku",
   "os.haiku.body": "In the 1990s, BeOS was famous for its media performance and its thoroughly multithreaded design. In 1996 Apple nearly bought it to become the next Mac OS, then chose NeXT instead. After Be Inc. folded, a group of developers began rewriting it from scratch in 2001, aiming to run BeOS programs unchanged. More than twenty years on, Haiku is still under development, with its own kernel and its own UI toolkit — one of the few living desktop systems that belongs to neither the Unix nor the Windows family.",
-  "os.haiku.tips": ["The Deskbar in the top-right corner is the start menu; every app lives there.", "Besides the built-in WebPositive browser and media player, this machine has ArtPaint, Paladin IDE, BeLife and NetHack installed — and gcc and Python 3 in the Terminal.", "Window titles are little yellow tabs. Hold the Win key and drag one tab onto another window to stack or tile them (Stack & Tile)."],
-
+  "os.haiku.tips": [
+    "The Deskbar in the top-right corner is the start menu; every app lives there.",
+    "Besides the built-in WebPositive browser and media player, this machine has ArtPaint, Paladin IDE, BeLife and NetHack installed — and gcc and Python 3 in the Terminal.",
+    "Window titles are little yellow tabs. Hold the Win key and drag one tab onto another window to stack or tile them (Stack & Tile)."
+  ],
   "os.reactos.lineage": "An open-source Windows",
   "os.reactos.tagline": "Windows without a single line of Microsoft code",
   "os.reactos.body": "ReactOS aims to run Windows programs and drivers as they are, without using any Microsoft source code: everything is reimplemented from public documentation and observed behaviour — a clean-room implementation. The project has been going since 1998, and its look is frozen in the Windows 2000 and XP era. It is still alpha software and occasionally crashes, which is part of the exhibit too.",
-  "os.reactos.tips": ["The start menu is in the bottom-left corner; it feels almost exactly like Windows XP.", "CPU-Z, gVim, HxD and OllyDbg on the desktop are the original Windows programs, running unmodified.", "There's also DLX Linux (Bochs) on the desktop: an emulated PC running inside this emulated PC.", "Send Ctrl + Alt + Del with the button below the screen — your own computer would catch the real keys first."],
-
+  "os.reactos.tips": [
+    "The start menu is in the bottom-left corner; it feels almost exactly like Windows XP.",
+    "CPU-Z, gVim, HxD and OllyDbg on the desktop are the original Windows programs, running unmodified.",
+    "There's also DLX Linux (Bochs) on the desktop: an emulated PC running inside this emulated PC.",
+    "Send Ctrl + Alt + Del with the button below the screen — your own computer would catch the real keys first."
+  ],
   "os.serenity.lineage": "A whole system, written from scratch",
   "os.serenity.tagline": "A love letter to the '90s desktop",
   "os.serenity.body": "SerenityOS is an operating system Andreas Kling started writing in 2018. It looks like a late-'90s desktop, but the kernel, the GUI, the file manager — even the web browser — are all written from scratch, with almost no third-party libraries. Its browser later spun off as the Ladybird project. SerenityOS has since become 64-bit only; this is a build from back when it still supported 32-bit PCs.",
-  "os.serenity.tips": ["Every app is in the Serenity menu in the bottom-left corner.", "Games has a dozen titles — Minesweeper, Solitaire, Chess, 2048, Flappy Bug and more — all written in-house.", "The Browser on the desktop is the ancestor of what became the Ladybird browser."],
-
+  "os.serenity.tips": [
+    "Every app is in the Serenity menu in the bottom-left corner.",
+    "Games has a dozen titles — Minesweeper, Solitaire, Chess, 2048, Flappy Bug and more — all written in-house.",
+    "The Browser on the desktop is the ancestor of what became the Ladybird browser."
+  ],
   "os.linux.lineage": "Linux kernel · SliTaz distribution",
   "os.linux.tagline": "One 50 MB CD, one complete desktop",
   "os.linux.body": "Linux is the kernel Linus Torvalds started writing in 1991; today it runs everything from phones and routers to supercomputers. To keep things smooth inside a browser, this machine runs SliTaz, a distribution famous for being tiny: the whole image is under 60 MB and loads entirely into memory at boot, yet it has a full windowed desktop, a file manager, a terminal and a text editor.",
-  "os.linux.tips": ["Applications, at the left end of the top panel, is the program menu; right-clicking the desktop gives you another.", "In the terminal you are the regular user tux. Type su with the password root to become the administrator. If you break something, hit “Start over”.", "SliTaz is a live system: the entire root filesystem lives in memory. Saving works here because the memory gets saved along with it."]
+  "os.linux.tips": [
+    "Applications, at the left end of the top panel, is the program menu; right-clicking the desktop gives you another.",
+    "In the terminal you are the regular user tux. Type su with the password root to become the administrator. If you break something, hit “Start over”.",
+    "SliTaz is a live system: the entire root filesystem lives in memory. Saving works here because the memory gets saved along with it."
+  ],
+  "notes.egg.v": "Each computer hides one English word. Once you have all four, type them in order on a blank part of this page (not inside a computer screen).",
+  "overlay.eta": "{s}s left",
+  "capture.kb": "Keys",
+  "capture.mouse": "Mouse",
+  "capture.kbOn": "Keyboard goes to {name}",
+  "capture.kbOff": "Keyboard stays on the page — click the screen to connect it",
+  "capture.mouseLocked": "Mouse is captured by {name} — press Esc to release",
+  "capture.mouseAbs": "Mouse points straight at {name}'s screen",
+  "capture.mouseOff": "Mouse stays on the page",
+  "coach.clickKey": "Click",
+  "coach.click": "hand your mouse and keyboard to this computer",
+  "coach.esc": "get the mouse back",
+  "coach.keys": "key combos live in the bottom-right buttons",
+  "coach.ok": "Got it",
+  "tool.mute": "Mute",
+  "tool.unmute": "Unmute",
+  "hint.muted": "Muted",
+  "hint.unmuted": "Sound on",
+  "egg.unlocked": "Passphrase accepted — a fifth computer has appeared",
+  "about.egg": "Treasure hint",
+  "os.haiku.egg": "Haiku's address book has no database: every contact is just an empty file with attributes. Someone left a card in the people folder of the home directory.",
+  "os.reactos.egg": "Everything in the Windows family lives in the registry. Open regedit (Start → Run) and have a look around HKEY_CURRENT_USER\\Software.",
+  "os.serenity.egg": "The Browser on the desktop has no network, but someone seems to have changed its home page.",
+  "os.linux.egg": "Linux hides things in files whose names start with a dot. Type ls -a in the terminal, then run what you find.",
+  "os.kolibri.egg": "You found all four fragments — this machine is the reward. Thanks for playing all the way through.",
+  "os.kolibri.lineage": "A whole system written in assembly",
+  "os.kolibri.tagline": "An entire operating system on a single floppy disk",
+  "os.kolibri.body": "KolibriOS forked from MenuetOS in 2004, and its kernel and most of its programs are hand-written in FASM assembly. The GUI, file manager, text editor, games and demos all fit, compressed, on one 1.44 MB floppy — smaller than the v86 emulator this page uses to run it.",
+  "os.kolibri.tips": [
+    "The lower half of the desktop is all games: DINO, FLOPPY-BIRD, TETRIS, SNAKE, MINE, SUDOKU…",
+    "FASM in the top-right corner is the very assembler the whole system is written with — and it runs right here.",
+    "Menu in the bottom-left corner is the start menu; SHELL is the command line."
+  ],
+  "label.no": "Exhibit No. {n}",
+  "label.medium": "Medium",
+  "label.mediumV": "x86 machine code, executed in WebAssembly",
+  "label.spec": "Spec",
+  "label.res": "Resolution",
+  "label.speed": "Speed now",
+  "label.loaded": "Downloaded",
+  "story.title": "About {name}",
+  "hunt.title": "Treasure hunt",
+  "hunt.idle": "Just start typing on this page — the letters land in the boxes. Backspace fixes mistakes.",
+  "hunt.solved": "Solved — the fifth computer is now at the end of the exhibit row.",
+  "colophon.title": "Provenance",
+  "colophon.engine.k": "Emulator",
+  "colophon.engine.v": "Fabian Hemmer and contributors",
+  "colophon.images.k": "Disk images",
+  "colophon.images.v": "Pre-installed builds from the v86 project; KolibriOS comes from the official nightly build.",
+  "colophon.license.k": "Licences",
+  "colophon.license.v": "Each operating system is distributed under its own licence; source links are on every exhibit's label.",
+  "colophon.repo": "Source of this page"
 }

@@ -108,12 +108,16 @@
 
 ## 作業系統博物館(`/os/`)
 
-[tun9i.com/os](https://tun9i.com/os/) —— 四台真的 x86 電腦在瀏覽器裡開機:Haiku、ReactOS、SerenityOS、Linux(SliTaz)。
+[tun9i.com/os](https://tun9i.com/os/) —— 四台真的 x86 電腦在瀏覽器裡開機:Haiku、ReactOS、SerenityOS、Linux(SliTaz),
+外加一台要解謎才會出現的 KolibriOS。
 不是截圖也不是影片,是 [v86](https://github.com/copy/v86) 在 WebAssembly 裡逐條執行機器碼。
 
 - **秒開**:每台都有一份「已經開到桌面」的記憶體快照(zstd,11–67 MB),點下去直接還原,不用等開機。
-- **隨時切換**:一次只開一台(每台要 512 MB 記憶體)。換台時先把目前這台 `save_state()`、gzip 後存進訪客瀏覽器的
-  IndexedDB,再還原下一台;回來時從存檔繼續。切走分頁會自動暫停並存檔。
+- **隨時切換**:一次只開一台(每台要 512 MB 記憶體)。換台時先 `save_state()`(0.1 秒)就立刻換,
+  gzip 和寫進 IndexedDB 在背景做(兩三百 MB 要好幾秒);還沒寫完就切回來,直接用記憶體裡那份。切走分頁會自動暫停並存檔。
+- **預載**:滑鼠停在分頁或「開機」按鈕上就先下載那台的快照(`src/os/snapshots.js` 自己 fetch,v86 的 restore_state
+  認得 zstd,壓縮過的 buffer 直接當 initial_state);載入時顯示速度和剩餘秒數。
+- **輸入狀態**:狀態列的「鍵盤 / 滑鼠」標籤亮起代表已接到客體系統;第一次開機有一張操作提示卡;可靜音(混音器主音量,記在 localStorage)。
 - **磁碟按需下載**:硬碟映像切成 1 MiB 一塊、zstd 壓縮,放在 R2(`tun9i-os` 桶子,約 1.2 GB / 2700 個物件),
   由 `worker.js` 的 `/os/disk/*` 提供(一年 immutable + 邊際節點快取)。訪客只會下載實際讀到的那幾塊。
 - **操作**:點畫面接管滑鼠鍵盤(相對座標滑鼠用 Pointer Lock,支援 VMware 絕對座標的系統不鎖);
@@ -129,7 +133,23 @@
 | `src/os/machine.js` | 一台 v86 的生命週期、按鍵掃描碼、文字輸入 |
 | `src/os/main.js` | 切換 / 存檔 / 遮罩 / 工具列 / 縮放 |
 | `src/os/store.js` | IndexedDB 存檔(gzip) |
+| `src/os/snapshots.js` | 開機快照的下載、預載、進度 |
 | `src/os/i18n/*.json` | 三語文案(key 三語嚴格對稱) |
+
+### 彩蛋與第五台
+
+每台電腦裡藏一個英文單字,都用那個系統自己的特色藏:
+
+| 系統 | 藏在哪 |
+|---|---|
+| Haiku | `~/people/Tunai`:Haiku 的聯絡人就是帶屬性的空檔案,碎片在 `META:nickname` |
+| ReactOS | 登錄檔 `HKCU\Software\tun9i` |
+| SerenityOS | `~/.config/Browser.ini` 把 Browser 首頁指到 `~/Documents/tun9i.html`(一張 90 年代個人首頁)。`/res` 是唯讀的,不能直接換掉原本的歡迎頁 |
+| Linux | `~/.signal`:BusyBox awk 寫的「雜訊收斂成訊號」動畫(這版 awk 沒有 `sin()`,用查表) |
+
+四個字依分頁順序在網頁上(不是電腦畫面裡)打出來,就會解鎖第五台 **KolibriOS**(`systems.js` 裡 `hidden: true`),
+密語在 `src/os/main.js` 的 `PASSPHRASE`,解鎖狀態記在 localStorage。介紹區的紫色「彩蛋」框是每台的提示(i18n 的 `os.<id>.egg`)。
+彩蛋都做在開機快照裡(`*-2`),重做快照時記得保留。
 
 ### 換快照、加系統
 
