@@ -752,6 +752,10 @@ html { scroll-padding-top: 0; }
 
 /* ---------- 窄螢幕 ---------- */
 @media (max-width: 1100px) {
+  /* 平板、窄桌機:標題區單欄(不然「作業系統博物館」會被折成兩行),展品卡改成縮圖在上、名稱在下 */
+  .osm-room { grid-template-columns: minmax(0, 1fr); align-items: start; }
+  .osm-lede { max-width: 40em; }
+  .osm-ex { grid-template-columns: minmax(0, 1fr); align-items: start; gap: var(--sp-2); }
   .osm-wall { grid-template-columns: minmax(0, 1fr); gap: var(--sp-6); }
   .osm-label {
     position: static;
@@ -779,7 +783,7 @@ html { scroll-padding-top: 0; }
     border-radius: 0;
   }
   .osm-exhibits::-webkit-scrollbar { display: none; }
-  .osm-ex { flex: 0 0 min(72%, 17rem); scroll-snap-align: start; }
+  .osm-ex { flex: 0 0 min(72%, 17rem); grid-template-columns: 5.5rem minmax(0, 1fr); align-items: center; gap: var(--sp-3); scroll-snap-align: start; }
   .osm-label { grid-template-columns: minmax(0, 1fr); }
   .osm-label > *, .osm-label-specs, .osm-label-links, .osm-label-tagline { grid-column: 1; grid-row: auto; }
   .osm-label-specs { margin-top: var(--sp-5); }
