@@ -72,6 +72,29 @@ function painter(block) {
       lines.slice(0, max).forEach((l, i) => ctx.fillText(i === max - 1 && lines.length > max ? l.replace(/.$/, '…') : l, px(x), px(y + i * lh)));
       return y + Math.min(lines.length, max) * lh;
     },
+    // 線段(脈衝星地圖、軌道示意圖這類刻線)
+    line(x0, y0, x1, y1, o = {}) {
+      ctx.globalAlpha = o.alpha ?? 0.5;
+      ctx.strokeStyle = o.color || '#fff';
+      ctx.lineWidth = Math.max(1, px(o.lw ?? 0.01));
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(px(x0), px(y0));
+      ctx.lineTo(px(x1), px(y1));
+      ctx.stroke();
+    },
+    // 折線:pts = [[x, y], …](波形、軌跡)
+    poly(pts, o = {}) {
+      if (pts.length < 2) return;
+      ctx.globalAlpha = o.alpha ?? 0.5;
+      ctx.strokeStyle = o.color || '#fff';
+      ctx.lineWidth = Math.max(1, px(o.lw ?? 0.01));
+      ctx.lineJoin = ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(px(pts[0][0]), px(pts[0][1]));
+      for (let i = 1; i < pts.length; i++) ctx.lineTo(px(pts[i][0]), px(pts[i][1]));
+      ctx.stroke();
+    },
     rule(x, y, w, o = {}) {
       ctx.globalAlpha = o.alpha ?? 0.5;
       ctx.fillStyle = o.color || '#fff';

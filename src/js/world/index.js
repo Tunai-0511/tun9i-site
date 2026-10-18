@@ -36,7 +36,11 @@ export function initWorld({ reduced = false } = {}) {
     html.classList.add('world-fallback');
     root.remove();
   };
-  const start = () => import('./engine.js').then((m) => m.mountWorld(stage, { hud })).catch(fail);
+  // 預設是《事件視界》(bh/:掉進黑洞);網址加 ?film=signal 還能看舊的《訊號簡史》(CPU → 晶粒 → 城市)
+  const film = /[?&]film=signal\b/.test(location.search) ? 'signal' : 'bh';
+  html.dataset.film = film;
+  const load = film === 'signal' ? () => import('./engine.js') : () => import('./bh/engine.js');
+  const start = () => load().then((m) => m.mountWorld(stage, { hud })).catch(fail);
   if ('requestIdleCallback' in window) requestIdleCallback(start, { timeout: 800 });
   else setTimeout(start, 120);
 }
