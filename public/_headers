@@ -1,8 +1,10 @@
+# 瀏覽統計:Cloudflare 在邊緣自動塞進 Web Analytics 的 beacon(整個 tun9i.com 區域都開了)。
+# 腳本從 static.cloudflareinsights.com 載入,script-src 要放行;資料送回本站的 /cdn-cgi/rum,connect-src 'self' 就夠。
 /*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=()
-  Content-Security-Policy: default-src 'self'; img-src 'self' data:; media-src 'self' blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self' https://api.github.com https://github-contributions-api.jogruber.de; manifest-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+  Content-Security-Policy: default-src 'self'; img-src 'self' data:; media-src 'self' blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; connect-src 'self' https://api.github.com https://github-contributions-api.jogruber.de; manifest-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
 
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
