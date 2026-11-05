@@ -566,6 +566,66 @@ footer strong{color:var(--color-ink-2);font-weight:600}
   .lic-mini .copy{justify-self:start}
   .lic dd{margin-bottom:6px}
 }
+
+/* ---------- v1.3 看大圖：桌面懸停浮出、點一下開大圖；手機縮圖放大 ---------- */
+.cat-thumbs{display:grid;grid-template-columns:repeat(4,minmax(0,52px));gap:6px}
+.cat-thumbs img{width:100%;height:auto;aspect-ratio:1/1;border-radius:6px}
+.zoom{position:relative;display:block;width:100%;min-height:0;padding:0;border:0;border-radius:8px;background:none;cursor:zoom-in}
+.zoom:hover{border-color:transparent}
+.zoom:hover img{border-color:var(--color-accent)}
+.zoom img{display:block;transition:border-color var(--dur-short) var(--ease-out)}
+.zbadge{position:absolute;right:5px;bottom:5px;width:26px;height:26px;display:grid;place-items:center;border-radius:50%;background:var(--color-surface);color:var(--color-ink-2);border:var(--rule);box-shadow:0 2px 6px -2px var(--color-shadow);transition:transform var(--dur-short) var(--ease-out),color var(--dur-short) var(--ease-out)}
+.zbadge svg{width:14px;height:14px}
+.zoom:hover .zbadge{color:var(--color-accent);transform:scale(1.08)}
+.item.v3{grid-template-columns:112px minmax(0,14rem) minmax(0,1fr) auto}
+#peek{position:fixed;z-index:50;left:0;top:0;width:320px;padding:8px;pointer-events:none;background:var(--color-surface);border:var(--rule);border-radius:var(--radius-card);box-shadow:0 22px 44px -14px var(--color-shadow);opacity:0;transform:scale(.94);transform-origin:var(--ox,left) center;transition:opacity var(--dur-short) var(--ease-out),transform var(--dur-short) var(--ease-out)}
+#peek.on{opacity:1;transform:none}
+#peek img{display:block;width:100%;aspect-ratio:1/1;object-fit:contain;background:var(--thumb-bg);border-radius:6px}
+#peek p{display:flex;justify-content:space-between;align-items:baseline;gap:var(--space-2xs);margin:6px 2px 0;font-size:var(--text-xs);color:var(--color-muted)}
+#peek strong{font:500 var(--text-sm)/1.3 var(--font-display);color:var(--color-ink);overflow-wrap:anywhere}
+#peek span{white-space:nowrap}
+#viewer{width:min(720px,calc(100vw - 2rem));max-width:none;max-height:calc(100dvh - 2rem);overflow:auto;overscroll-behavior:contain;color:var(--color-ink)}
+.vw-head{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--space-sm);padding:var(--space-sm) var(--space-sm) var(--space-xs) var(--space-md)}
+.vw-head h2{margin:2px 0 0;font:500 var(--text-xl)/1.2 var(--font-display);color:var(--color-ink);overflow-wrap:anywhere}
+.vw-x{flex:none;width:44px;padding:0;display:grid;place-items:center}
+.vw-x svg{width:18px;height:18px}
+.vw-fig{margin:0 var(--space-md);touch-action:pan-y pinch-zoom}
+.vw-fig img{display:block;width:100%;height:min(60dvh,540px);object-fit:contain;background:var(--thumb-bg);border:var(--rule);border-radius:var(--radius-control)}
+.vw-fig figcaption{margin-top:var(--space-2xs);font-size:var(--text-sm);color:var(--color-ink-2)}
+.vw-note{margin:var(--space-2xs) var(--space-md) 0;font-size:var(--text-xs);color:var(--color-muted)}
+.vw-note .k-touch{display:none}
+.vw-foot{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2xs);padding:var(--space-sm) var(--space-md) var(--space-md)}
+.vw-foot .extlink{margin-left:auto}
+@media (hover:none),(pointer:coarse){
+  #peek{display:none}
+  .hint .k-key{display:none}
+  .vw-note .k-mouse{display:none} .vw-note .k-touch{display:inline}
+}
+@media (min-width:901px){
+  .items.many .item.v3{grid-template-columns:112px minmax(0,1fr) auto}
+}
+@media (max-width:900px){
+  .item.v3{grid-template-columns:104px minmax(0,1fr) auto}
+}
+@media (max-width:600px){
+  .cat-thumbs{grid-template-columns:repeat(4,minmax(0,76px))}
+  .verdict.v3{grid-template-columns:120px minmax(0,1fr)}
+  .item.v3{grid-template-columns:104px minmax(0,1fr)}
+  #viewer{width:calc(100vw - 1rem);max-height:calc(100dvh - 1rem)}
+  .vw-head{padding:var(--space-xs) var(--space-xs) var(--space-2xs)}
+  .vw-fig,.vw-note{margin-left:var(--space-xs);margin-right:var(--space-xs)}
+  .vw-fig img{height:min(56dvh,520px)}
+  .vw-foot{padding:var(--space-xs) var(--space-xs) var(--space-sm)}
+  .vw-foot #vwPrev,.vw-foot #vwNext{flex:1 1 0}
+  .vw-foot .extlink{order:3;width:100%;margin-left:0;justify-content:center}
+}
+@media (prefers-reduced-motion:no-preference){
+  #viewer[open]{animation:vwIn .22s var(--ease-out)}
+  #viewer[open]::backdrop{animation:vwFade .22s var(--ease-out)}
+  #vwImg.swap{animation:vwFade .18s var(--ease-out)}
+  @keyframes vwIn{from{opacity:0;transform:translateY(10px) scale(.98)}}
+  @keyframes vwFade{from{opacity:0}}
+}
 </style>
 </head>
 <body>
@@ -600,7 +660,7 @@ footer strong{color:var(--color-ink-2);font-weight:600}
             </div>
             <button class="btn-primary" type="submit">查詢</button>
           </div>
-          <p class="hint">可輸入品名或其中幾個字。按 <kbd>/</kbd> 跳到搜尋框<span class="k-pal">，按 <kbd class="palKey2">⌘K</kbd> 打開 18 件清單</span>。</p>
+          <p class="hint">可輸入品名或其中幾個字<span class="k-key">。按 <kbd>/</kbd> 跳到搜尋框<span class="k-pal">，按 <kbd class="palKey2">⌘K</kbd> 打開 18 件清單</span></span>。</p>
           <p id="entryMsg" class="msg" hidden></p>
         </form>
         <h2 class="pick-h">或從類別開始</h2>
@@ -698,6 +758,24 @@ footer strong{color:var(--color-ink-2);font-weight:600}
   <p class="pal-foot" aria-hidden="true"><span><kbd>↑</kbd> <kbd>↓</kbd> 選擇</span><span><kbd>Enter</kbd> 看答案</span><span><kbd>Esc</kbd> 關閉</span></p>
 </dialog>
 
+<dialog id="viewer" aria-labelledby="vwName" aria-describedby="vwCap">
+  <div class="vw-head">
+    <div><p class="label" id="vwPos"></p><h2 id="vwName"></h2></div>
+    <button type="button" class="vw-x" id="vwClose" aria-label="關閉大圖"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+  </div>
+  <figure class="vw-fig" id="vwFig">
+    <img id="vwImg" alt="">
+    <figcaption id="vwCap"></figcaption>
+  </figure>
+  <p class="vw-note">預覽圖取自故宮 Open Data 單件頁（長邊 600 像素）。要更清楚的 100 萬像素原圖（CC0，免標示），請到故宮單件頁下載。<span class="vw-k" id="vwKeys"><span class="k-mouse">鍵盤 ← → 換一件。</span><span class="k-touch">左右滑動換一件。</span></span></p>
+  <div class="vw-foot">
+    <button type="button" id="vwPrev"><span aria-hidden="true">←</span> 上一件</button>
+    <button type="button" id="vwNext">下一件 <span aria-hidden="true">→</span></button>
+    <a class="extlink" id="vwLink" target="_blank" rel="noopener">到故宮單件頁下載原圖<svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true" style="margin-left:6px"><path d="M8 4h8v8M16 4L7 13M4 8v8h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="sr">（另開新分頁）</span></a>
+  </div>
+</dialog>
+<div id="peek" aria-hidden="true" hidden><img id="peekImg" alt=""><p><strong id="peekName"></strong><span id="peekHint"></span></p></div>
+
 <footer>
   <div class="wrap">
     <span>原型版本 <strong id="ver">v1.2</strong>（2026/11/05）</span>
@@ -710,13 +788,14 @@ footer strong{color:var(--color-ink-2);font-weight:600}
 
 <script>
 'use strict';
-const VERSION = 'v1.2';
+const VERSION = 'v1.3';
 const CHECK = '2026/11/05';
 const ITEMS = [{"id": "1438", "no": "中銅000651N000000000", "name": "毛公鼎", "en": "Ding cauldron of Duke Mao", "type": "銅器", "cat": "銅器", "era": "西周晚期", "west": "西元前827-782年", "size": "通高53.8公分 腹深27.2公分 口徑47.0公分", "a": -827, "b": -782, "conv": "原文是西元前的年份區間，照原文畫成長條（西元前以負數計）。", "prec": "range", "dyn": ["shangzhou"], "chuan": false, "attr": "毛公鼎。國立故宮博物院，台北，CC BY 4.0 @ www.npm.gov.tw", "url": "https://digitalarchive.npm.gov.tw/opendata/Pub/Detail/1438?dep=U&mode=full", "catCount": 6236}, {"id": "203", "no": "故銅000003N000000000", "name": "亞醜□尊", "en": "Zun wine vessel with inscription \"Ya chou\"", "type": "銅器", "cat": "銅器", "era": "商晚期", "west": "西元前12-11世紀", "size": "高26.5公分 腹深23.3公分 口徑20.3公分 底徑13.5公分 足高5.5公分 腹圍31.5公分", "a": -1200, "b": -1001, "conv": "原文只寫到世紀：西元前12世紀到前11世紀，換算成前1200年到前1001年。", "prec": "range", "dyn": ["shangzhou"], "chuan": false, "attr": "亞醜□尊。國立故宮博物院，台北，CC BY 4.0 @ www.npm.gov.tw", "url": "https://digitalarchive.npm.gov.tw/opendata/Pub/Detail/203?dep=U&mode=full", "catCount": 6236}, {"id": "2601", "no": "購銅000123N000000000", "name": "青銅鎏金觀音菩薩立像", "en": "Gilt bronze Avalokitesvara Bodhisattva", "type": "銅器", "cat": "銅器", "era": "隋至初唐", "west": "西元7世紀初", "size": "高15.2公分", "a": 601, "b": 700, "conv": "原文只寫到世紀：7世紀，換算成 601–700 年。原文另寫「初」，但沒有說明到哪一年，本頁不自行縮小範圍。", "prec": "unsure", "dyn": ["suitang"], "chuan": false, "attr": "青銅鎏金觀音菩薩立像。國立故宮博物院，台北，CC BY 4.0 @ www.npm.gov.tw", "url": "https://digitalarchive.npm.gov.tw/opendata/Pub/Detail/2601?dep=U&mode=full", "catCount": 6236}, {"id": "47", "no": "故瓷016767N000000000", "name": "定窯 白瓷瓜稜罐", "en": "Melon-shaped jar in white glaze, Ding ware", "type": "陶瓷器", "cat": "陶瓷器", "era": "北宋", "west": "西元960-1127年", "size": "全高18.7公分 口徑4.6公分 底徑11.2公分 足徑11.1公分", "a": 960, "b": 1127, "conv": "原文是年份區間，照原文畫成長條。", "prec": "range", "dyn": ["song"], "chuan": false, "attr": "定窯 白瓷瓜稜罐。國立故宮博物院，台北，CC BY 4.0 @ www.npm.gov.tw", "url": "https://digitalarchive.npm.gov.tw/opendata/Pub/Detail/47?dep=U&mode=full", "catCount": 24201}, {"id": "18", "no": "故瓷014021N000000000", "name": "官窯 青瓷尊", "en": "Zun vassel with light bluish-green glaze, Guan ware", "type": "陶瓷器", "cat": "陶瓷器", "era": "南宋", "west": "西元1127-1279年", "size": "高25.9公分 口徑16.5公分 足徑13.0公分", "a": 1127, "b": 1279, "conv": "原文是年份區間，照原文畫成長條。", "prec": "range", "dyn": ["song"], "chuan": false, "attr": "官窯 青瓷尊。國立故宮博物院，台北，CC BY 4.0 @ www.npm.gov.tw", "url": "https://digitalarchive.npm.gov.tw/opendata/Pub/Detail/18?dep=U&mode=full", "catCount": 24201}, {"id": "45", "no": "故瓷017728N000000000", "name": "定窯 白瓷盤口紙槌瓶", "en": "Flat-rimmed mallet-shaped vase in white glaze", "type": "陶瓷器", "cat": "陶瓷器", "era": "北宋-金", "west": "西元12世紀", "size": "高15.9公分 口徑7.2公分 足徑9.2公分", "a": 1101, "b": 1200, "conv": "原文只寫到世紀：12世紀，換算成 1101–1200 年。", "prec": "unsure", "dyn": ["song"], "chuan": false, "attr": "定窯 白瓷盤口紙槌瓶。國立故宮博物院，台北，CC BY 4.0 @ www.npm.gov.tw", "url": "https://digitalarchive.npm.gov.tw/opendata/Pub/Detail/45?dep=U&mode=full", "catCount": 24201}, {"id": "909", "no": "故瓷015132N000000000", "name": "青花纏枝番蓮紋高足杯", "en": "Stem cup with underglaze-blue decoration of Indian lotus scrolls", "type": "陶瓷器", "cat": "陶瓷器", "era": "明 宣德", "west": "西元1426-1435年", "size": "高8.9公分 深3.3公分 口徑9.9公分 足徑4.5公分", "a": 1426, "b": 1435, "conv": "原文是年份區間，照原文畫成長條。", "prec": "range", "dyn": ["ming"], "chuan": false, "attr": "青花纏枝番蓮紋高足杯。國立故宮博物院，台北，CC BY 4.0 @ www.npm.gov.tw", "url": "https://digitalarchive.npm.gov.tw/opendata/Pub/Detail/909?dep=U&mode=full", "catCount": 24201}, {"id": "2", "no": "故瓷017646N000000000", "name": "霽青描金游魚轉心瓶", "en": "Revolving vase decorated with swimming goldfish and gold tracing on cobalt blue glaze", "type": "陶瓷器", "cat": "陶瓷器", "era": "清 乾隆", "west": "西元1736-1795年", "size": "高23.5公分 深19.8公分 口徑5.3公分 足徑8.4公分 腹圍43.2公分", "a": 1736, "b": 1795, "conv": "原文是年份區間，照原文畫成長條。", "prec": "range", "dyn": ["qing"], "chuan": false, "attr": "霽青描金游魚轉心瓶。國立故宮博物院，台北，CC BY 4.0 @ www.npm.gov.tw", "url": "https://digitalarchive.npm.gov.tw/opendata/Pub/Detail/2?dep=U&mode=full", "catCount": 24201}, {"id": "85", "no": "故玉002251N000000000", "name": "玉龍紋盤", "en": "Jade plate with dragon pattern", "type": "玉器", "cat": "玉器", "era": "北宋或遼", "west": "西元11世紀", "size": "高2.2公分 口徑26.2公分 底徑22.2公分", "a": 1001, "b": 1100, "conv": "原文只寫到世紀：11世紀，換算成 1001–1100 年。", "prec": "unsure", "dyn": ["song"], "chuan": false, "attr": "玉龍紋盤。國立故宮博物院，台北，CC BY 4.0 @ www.npm.gov.tw", "url": "https://digitalarchive.npm.gov.tw/opendata/Pub/Detail/85?dep=U&mode=full", "catCount": 12327}, {"id": "3", "no": "故玉002103N000000000", "name": "翠玉白菜", "en": "Jadeite cabbage", "type": "玉器", "cat": "玉器", "era": "清", "west": "西元1644-1911年", "size": "長18.7公分 寬9.1公分 厚5.07公分", "a": 1644, "b": 1911, "conv": "原文是年份區間，照原文畫成長條。", "prec": "range", "dyn": ["qing"], "chuan": false, "attr": "翠玉白菜。國立故宮博物院，台北，CC BY 4.0 @ www.npm.gov.tw", "url": "https://digitalarchive.npm.gov.tw/opendata/Pub/Detail/3?dep=U&mode=full", "catCount": 12327}, {"id": "49961", "no": "故雜000178N000000000", "name": "肉形石", "en": "Meat-shaped stone", "type": "雜項", "cat": "other", "era": "清", "west": "西元1644-1911年", "size": "長7.9公分 通高6.6公分", "a": 1644, "b": 1911, "conv": "原文是年份區間，照原文畫成長條。", "prec": "range", "dyn": ["qing"], "chuan": false, "attr": "肉形石。國立故宮博物院，台北，CC BY 4.0 @ www.npm.gov.tw", "url": "https://digitalarchive.npm.gov.tw/opendata/Pub/Detail/49961?dep=U&mode=full", "catCount": 11974}, {"id": "2502", "no": "故雕000182N000000000", "name": "雕橄欖核舟（底刻「後赤壁賦」全文）", "en": "Carved olive-pit of miniature boat decorated with the Ode to the Red Cliff on the bottom", "type": "雕刻", "cat": "other", "era": "清 乾隆二年", "west": "西元1737年", "size": "長3.4公分 寬1.4公分 高1.6公分", "a": 1737, "b": 1737, "conv": "原文是單一年份，畫成一個點。", "prec": "year", "dyn": ["qing"], "chuan": false, "attr": "雕橄欖核舟（底刻「後赤壁賦」全文）。國立故宮博物院，台北，CC BY 4.0 @ www.npm.gov.tw", "url": "https://digitalarchive.npm.gov.tw/opendata/Pub/Detail/2502?dep=U&mode=full", "catCount": 667}, {"id": "25577", "no": "故琺000001N000000000", "name": "瓷胎掐絲兼畫琺瑯西洋人物圖高足杯", "en": "Stem cup with decoration of Western figures in painted enamels on the porcelain centre and segments in cloisonné enamel", "type": "琺瑯器", "cat": "other", "era": "清", "west": "西元1644-1911年", "size": "長13.3公分 寬11.1公分 高21.0公分 通高24.7公分 深6.36公分 口徑6.5公分 足徑9.3公分", "a": 1644, "b": 1911, "conv": "原文是年份區間，照原文畫成長條。", "prec": "range", "dyn": ["qing"], "chuan": false, "attr": "瓷胎掐絲兼畫琺瑯西洋人物圖高足杯。國立故宮博物院，台北，CC BY 4.0 @ www.npm.gov.tw", "url": "https://digitalarchive.npm.gov.tw/opendata/Pub/Detail/25577?dep=U&mode=full", "catCount": 2521}, {"id": "2383", "no": "故文000001N000000000", "name": "「臨池真賞」墨", "en": "Octagonal inkstick inscribed with \"Linchi zhenshang\"", "type": "文具", "cat": "文具", "era": "清 康熙五十五年", "west": "西元1716年", "size": "高23.0公分 徑長4.6公分 寬4.2公分", "a": 1716, "b": 1716, "conv": "原文是單一年份，畫成一個點。", "prec": "year", "dyn": ["qing"], "chuan": false, "attr": "「臨池真賞」墨。國立故宮博物院，台北，CC BY 4.0 @ www.npm.gov.tw", "url": "https://digitalarchive.npm.gov.tw/opendata/Pub/Detail/2383?dep=U&mode=full", "catCount": 2385}, {"id": "25983", "no": "故文000042N000000001", "name": "剔紅海棠紋硯盒", "en": "Carved-red lacquer inkstone container with crabapple blossom decoration", "type": null, "cat": "other", "era": "清 十七世紀末至十八世紀初", "west": "西元1650-1750年", "size": "長19.9公分 寬22.7公分 高6.4公分", "a": 1650, "b": 1750, "conv": "原文是年份區間，照原文畫成長條。", "prec": "range", "dyn": ["qing"], "chuan": false, "attr": "剔紅海棠紋硯盒。國立故宮博物院，台北，CC BY 4.0 @ www.npm.gov.tw", "url": "https://digitalarchive.npm.gov.tw/opendata/Pub/Detail/25983?dep=U&mode=full", "catCount": null}, {"id": "477", "no": "故雜007128N000000000", "name": "畫琺瑯玫瑰花式懷錶", "en": "Rose-shaped pocket watch with decoration in painted enamels", "type": "雜項", "cat": "other", "era": null, "west": null, "size": "高6.8公分 徑約4.8公分 厚1.4公分", "a": null, "b": null, "conv": "故宮頁面沒有西元年欄位，本頁不畫在時間軸上。", "prec": "none", "dyn": ["none"], "chuan": false, "attr": "畫琺瑯玫瑰花式懷錶。國立故宮博物院，台北，CC BY 4.0 @ www.npm.gov.tw", "url": "https://digitalarchive.npm.gov.tw/opendata/Pub/Detail/477?dep=U&mode=full", "catCount": 11974}, {"id": "43757", "no": "中錢000001N000000000", "name": "銅錢", "en": "Coin", "type": "錢幣", "cat": "other", "era": null, "west": null, "size": null, "a": null, "b": null, "conv": "故宮頁面沒有西元年欄位，本頁不畫在時間軸上。", "prec": "none", "dyn": ["none"], "chuan": false, "attr": "銅錢。國立故宮博物院，台北，CC BY 4.0 @ www.npm.gov.tw", "url": "https://digitalarchive.npm.gov.tw/opendata/Pub/Detail/43757?dep=U&mode=full", "catCount": 6953}, {"id": "97", "no": "故文000152N000000000", "name": "從星硯", "en": "Inkstone with astrological theme and engraved with poem", "type": "文具", "cat": "文具", "era": "傳 北宋", "west": "傳 西元960-1127年", "size": "長15.9公分 寬9.0公分 高5.6公分", "a": 960, "b": 1127, "conv": "原文是年份區間，照原文畫成長條。", "prec": "unsure", "dyn": ["song"], "chuan": true, "attr": "從星硯。國立故宮博物院，台北，CC BY 4.0 @ www.npm.gov.tw", "url": "https://digitalarchive.npm.gov.tw/opendata/Pub/Detail/97?dep=U&mode=full", "catCount": 2385}];
 const DYN = [{"value": "-7000~-2000~新石器時代", "name": "新石器時代", "begin": -7000, "end": -2000, "count": 1093}, {"value": "-2600~-2000~新石器時代晚期", "name": "新石器時代晚期", "begin": -2600, "end": -2000, "count": 244}, {"value": "-1600~-1046~商", "name": "商", "begin": -1600, "end": -1046, "count": 858}, {"value": "-1100~-800~西周", "name": "西周", "begin": -1100, "end": -800, "count": 604}, {"value": "-800~-500~春秋", "name": "春秋", "begin": -800, "end": -500, "count": 447}, {"value": "-500~-300~戰國", "name": "戰國", "begin": -500, "end": -300, "count": 753}, {"value": "-221~-207~秦", "name": "秦", "begin": -221, "end": -207, "count": 18}, {"value": "-206~8~西漢", "name": "西漢", "begin": -206, "end": 8, "count": 2168}, {"value": "9~23~新莽", "name": "新莽", "begin": 9, "end": 23, "count": 19}, {"value": "25~220~東漢", "name": "東漢", "begin": 25, "end": 220, "count": 430}, {"value": "220~589~魏晉南北朝", "name": "魏晉南北朝", "begin": 220, "end": 589, "count": 3401}, {"value": "581~618~隋", "name": "隋", "begin": 581, "end": 618, "count": 857}, {"value": "618~907~唐", "name": "唐", "begin": 618, "end": 907, "count": 1288}, {"value": "907~960~五代", "name": "五代", "begin": 907, "end": 960, "count": 7167}, {"value": "907~1125~遼", "name": "遼", "begin": 907, "end": 1125, "count": 8895}, {"value": "960~1279~宋", "name": "宋", "begin": 960, "end": 1279, "count": 10329}, {"value": "1115~1234~金", "name": "金", "begin": 1115, "end": 1234, "count": 1118}, {"value": "1271~1368~元", "name": "元", "begin": 1271, "end": 1368, "count": 6143}, {"value": "1368~1644~明", "name": "明", "begin": 1368, "end": 1644, "count": 39762}, {"value": "1644~1911~清", "name": "清", "begin": 1644, "end": 1911, "count": 46783}, {"value": "1911~9999~民國", "name": "民國", "begin": 1911, "end": 9999, "count": 1244}, {"value": "0~0~時代不詳", "name": "時代不詳", "begin": 0, "end": 0, "count": 10105}];
 const OD_TOTAL = 108670;
 const CAT_COUNTS = {"銅器": 6236, "陶瓷器": 24201, "玉器": 12327, "琺瑯器": 2521, "雕刻": 667, "漆器": 762, "錢幣": 6953, "文具": 2385, "雜項": 11974, "織品": 1612, "絲繡": 438, "繪畫": 16697, "法書": 5763, "法帖": 7147, "拓片": 1214, "成扇": 2545, "其他": 5228};
 const IMG = {"1438": "img/1438.webp", "203": "img/203.webp", "2601": "img/2601.webp", "47": "img/47.webp", "18": "img/18.webp", "45": "img/45.webp", "909": "img/909.webp", "2": "img/2.webp", "85": "img/85.webp", "3": "img/3.webp", "49961": "img/49961.webp", "2502": "img/2502.webp", "25577": "img/25577.webp", "2383": "img/2383.webp", "25983": "img/25983.webp", "477": "img/477.webp", "43757": "img/43757.webp", "97": "img/97.webp"};
+const IMGL = {"1438": "img/l/1438.webp", "203": "img/l/203.webp", "2601": "img/l/2601.webp", "47": "img/l/47.webp", "18": "img/l/18.webp", "45": "img/l/45.webp", "909": "img/l/909.webp", "2": "img/l/2.webp", "85": "img/l/85.webp", "3": "img/l/3.webp", "49961": "img/l/49961.webp", "2502": "img/l/2502.webp", "25577": "img/l/25577.webp", "2383": "img/l/2383.webp", "25983": "img/l/25983.webp", "477": "img/l/477.webp", "43757": "img/l/43757.webp", "97": "img/l/97.webp"};
 
 const SOURCES = {
   od: {publisher:'國立故宮博物院', title:'故宮典藏資料檢索：Opendata 開放資料', url:'https://digitalarchive.npm.gov.tw/opendata/', updated:'頁面未標示更新日；查閱時共 108,670 筆', unit:'筆數；朝代篩選以「起年~迄年~朝代」比對', terms:'網站文字 CC BY 4.0；本頁只引用欄位與筆數並附連結', role:'原始發布單位'},
@@ -816,7 +895,7 @@ function renderEntry(){
     const od = c==='all' ? OD_TOTAL : c==='other' ? null : CAT_COUNTS[c];
     return `<button type="button" data-cat="${c}">
       <span class="cat-top"><span class="cat-name">${c==='all'?'全部 18 件':CATS[c]}</span><span class="fam-arrow" aria-hidden="true">→</span></span>
-      <span class="cat-thumbs" aria-hidden="true">${rows.slice(0,4).map(it=>`<img src="${IMG[it.id]}" alt="">`).join('')}</span>
+      <span class="cat-thumbs" aria-hidden="true">${rows.slice(0,4).map(it=>`<img src="${IMG[it.id]}" alt="" data-zoom="${it.id}">`).join('')}</span>
       <span class="cat-sub">本頁 ${rows.length} 件${od?` · 故宮開放 ${od.toLocaleString()} 筆`:''}</span>
       <span class="fam-sub">${c==='all'?'一起比較年代':CATSUB[c]}</span></button>`;
   }).join('');
@@ -867,7 +946,7 @@ function renderCount(rows){
   if (rows.length===1){
     const it = rows[0], note = noteOf(it);
     el.innerHTML = `<div class="verdict v3 pr-${it.prec}">
-      <img class="v-img" src="${IMG[it.id]}" alt="${it.name}（故宮 Open Data 縮圖）">
+      <button type="button" class="zoom" data-zoom="${it.id}" data-view="${it.id}" aria-label="看大圖：${it.name}"><img class="v-img" src="${IMG[it.id]}" alt="">${ZBADGE}</button>
       <div class="v-id"><span class="label">符合 1 件 · ${it.no}</span><span class="v-name">${it.name}</span>${it.en?`<span class="v-en">${it.en}</span>`:''}
         <div class="tags">${pbadge(it.prec)}<span class="chip">${it.type||'分類未提供'}</span></div>
         <p class="v-sent">時代：${eraText(it)}</p>${note?`<p class="hint">${note}</p>`:''}</div>
@@ -973,7 +1052,7 @@ function renderItems(rows){
   $('items').innerHTML = rows.map(it => {
     const note = noteOf(it);
     return `<article class="item v3 pr-${it.prec}" id="it-${it.id}">
-      <img class="thumb" src="${IMG[it.id]}" alt="${it.name}（故宮 Open Data 縮圖）">
+      <button type="button" class="zoom" data-zoom="${it.id}" data-view="${it.id}" aria-label="看大圖：${it.name}"><img class="thumb" src="${IMG[it.id]}" alt="">${ZBADGE}</button>
       <div class="item-id"><h3>${it.name}</h3>${it.en?`<p class="sub">${it.en}</p>`:''}${pbadge(it.prec)}</div>
       <dl class="facts">
         <dt>分類</dt><dd>${it.type || '<span class="miss">未提供（頁面沒有分類欄）</span>'}</dd>
@@ -1086,6 +1165,85 @@ $('palQ').addEventListener('keydown', e => {
 });
 $('palList').addEventListener('click', e => { const li = e.target.closest('li[data-i]'); if (li) pickPal(+li.dataset.i); });
 pal.addEventListener('click', e => { if (e.target===pal) pal.close(); });
+
+// ---------- v1.3 看大圖 ----------
+// 縮圖右下角的放大鏡：按下開大圖（鍵盤、滑鼠、觸控都可用）；桌面滑鼠停在縮圖上 0.12 秒浮出預覽。
+const ZBADGE = '<span class="zbadge" aria-hidden="true"><svg viewBox="0 0 20 20"><circle cx="8.5" cy="8.5" r="5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12.5 12.5l4 4M6.5 8.5h4M8.5 6.5v4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>';
+function loadBig(img, id){
+  // 先放小圖，大圖載完再換上，避免空白
+  img.dataset.id = id; img.src = IMG[id];
+  const big = new Image(); big.onload = () => { if (img.dataset.id === id) img.src = IMGL[id]; }; big.src = IMGL[id];
+}
+const vw = $('viewer'); let vwSet = [], vwIdx = 0, vwFrom = null;
+function renderViewer(swap){
+  const it = vwSet[vwIdx], many = vwSet.length > 1;
+  $('vwPos').textContent = many ? `${vwIdx+1} / ${vwSet.length} · ${it.no}` : it.no;
+  $('vwName').textContent = it.name;
+  const im = $('vwImg'); loadBig(im, it.id); im.alt = `${it.name}（故宮 Open Data 預覽圖）`;
+  if (swap){ im.classList.remove('swap'); void im.offsetWidth; im.classList.add('swap'); }
+  $('vwCap').textContent = `${it.type || '分類未提供'} · 時代：${it.era || '未提供'}${it.size ? ' · ' + it.size : ''}`;
+  $('vwLink').href = it.url;
+  $('vwPrev').hidden = $('vwNext').hidden = $('vwKeys').hidden = !many;
+}
+function openViewer(id, set){ vwSet = set; vwIdx = Math.max(0, set.findIndex(x => x.id===id)); vwFrom = id; renderViewer(false); vw.showModal(); $('vwClose').focus(); }
+function stepViewer(d){ if (vwSet.length < 2) return; vwIdx = (vwIdx + d + vwSet.length) % vwSet.length; renderViewer(true); announce(`第 ${vwIdx+1} 件，共 ${vwSet.length} 件：${vwSet[vwIdx].name}`); }
+document.addEventListener('click', e => {
+  const b = e.target.closest('button[data-view]'); if (!b) return;
+  const id = b.dataset.view;
+  hidePeek(); openViewer(id, b.closest('#items') ? filtered() : ITEMS.filter(x => x.id===id));
+});
+$('vwClose').addEventListener('click', () => vw.close());
+$('vwPrev').addEventListener('click', () => stepViewer(-1));
+$('vwNext').addEventListener('click', () => stepViewer(1));
+vw.addEventListener('keydown', e => {
+  if (e.key==='ArrowLeft'){ e.preventDefault(); stepViewer(-1); }
+  else if (e.key==='ArrowRight'){ e.preventDefault(); stepViewer(1); }
+});
+vw.addEventListener('click', e => { if (e.target===vw) vw.close(); });
+vw.addEventListener('close', () => {
+  // 回到目前看的那一件的縮圖；換過件就捲到那張卡片
+  const cur = vwSet[vwIdx]; if (!cur) return;
+  const t = document.querySelector(`button[data-view="${cur.id}"]`) || document.querySelector(`button[data-view="${vwFrom}"]`);
+  if (!t) return;
+  if (cur.id !== vwFrom) t.scrollIntoView({block:'center'});
+  t.focus({preventScroll:true});
+});
+let swX = null, swY = 0;
+$('vwFig').addEventListener('pointerdown', e => { if (e.pointerType!=='mouse' && e.isPrimary){ swX = e.clientX; swY = e.clientY; } });
+$('vwFig').addEventListener('pointerup', e => {
+  if (swX===null) return; const dx = e.clientX - swX, dy = e.clientY - swY; swX = null;
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) stepViewer(dx < 0 ? 1 : -1);
+});
+$('vwFig').addEventListener('pointercancel', () => { swX = null; });
+
+const peek = $('peek'), canHover = matchMedia('(hover:hover) and (pointer:fine)'); let peekT = 0, peekEl = null;
+function showPeek(el){
+  const id = el.dataset.zoom, it = ITEMS.find(x => x.id===id); if (!it) return;
+  peekEl = el; loadBig($('peekImg'), id);
+  $('peekName').textContent = it.name;
+  $('peekHint').textContent = el.matches('button[data-view]') ? '點一下看大圖' : (it.era || '');
+  peek.classList.remove('on'); peek.hidden = false;
+  const r = el.getBoundingClientRect(), pw = peek.offsetWidth, ph = peek.offsetHeight, gap = 12;
+  let x = r.right + gap, ox = 'left';
+  if (x + pw > innerWidth - 8){ x = r.left - gap - pw; ox = 'right'; }
+  if (x < 8){ x = Math.min(Math.max(8, r.left), innerWidth - pw - 8); ox = 'center'; }
+  const y = Math.max(8, Math.min(r.top + r.height/2 - ph/2, innerHeight - ph - 8));
+  peek.style.left = x + 'px'; peek.style.top = y + 'px'; peek.style.setProperty('--ox', ox);
+  requestAnimationFrame(() => { if (peekEl===el) peek.classList.add('on'); });
+}
+function hidePeek(){ clearTimeout(peekT); peekEl = null; peek.classList.remove('on'); peek.hidden = true; }
+document.addEventListener('pointerover', e => {
+  if (e.pointerType!=='mouse' || !canHover.matches) return;
+  const el = e.target.closest('[data-zoom]'); if (!el || el===peekEl) return;
+  clearTimeout(peekT); peekT = setTimeout(() => showPeek(el), 120);
+});
+document.addEventListener('pointerout', e => {
+  const el = e.target.closest('[data-zoom]'); if (!el) return;
+  if (e.relatedTarget && el.contains(e.relatedTarget)) return;
+  hidePeek();
+});
+addEventListener('scroll', hidePeek, {passive:true});
+document.addEventListener('pointerdown', hidePeek);
 
 // ---------- 其他 ----------
 $('hc').addEventListener('click', () => { const on = document.documentElement.classList.toggle('hc'); $('hc').setAttribute('aria-pressed', String(on)); $('hcState').textContent = `：${on?'開':'關'}`; });
