@@ -31,19 +31,20 @@
   --color-accent-ink:oklch(99% 0 0);
   --color-accent-soft:oklch(94% 0.035 258);
   --color-focus:oklch(50% 0.2 258);
-  --color-graphite:oklch(22% 0.016 260);
-  --color-graphite-2:oklch(27% 0.018 260);
-  --color-graphite-rule:oklch(34% 0.018 260);
-  --color-g-text:oklch(93% 0.008 255);
-  --color-g-muted:oklch(74% 0.015 255);
-  --color-g-accent:oklch(74% 0.14 255);
+  /* 讀數面板：柔和石墨（v2.1 起；v2.0 的 22% 太黑，會搶走搜尋框的注意力） */
+  --color-graphite:oklch(33% 0.022 258);
+  --color-graphite-2:oklch(38% 0.022 258);
+  --color-graphite-rule:oklch(44% 0.02 258);
+  --color-g-text:oklch(94% 0.008 255);
+  --color-g-muted:oklch(80% 0.014 255);
+  --color-g-accent:oklch(80% 0.12 255);
   --color-today:oklch(50% 0.2 258);
   --color-shadow:oklch(24% 0.02 258 / 0.28);
   --color-scrim:oklch(24% 0.02 258 / 0.42);
-  --st-ok:oklch(48% 0.12 155);   --st-ok-soft:oklch(95% 0.035 155);  --st-ok-g:oklch(80% 0.13 155);
-  --st-warn:oklch(50% 0.11 70);  --st-warn-soft:oklch(95.5% 0.04 80); --st-warn-g:oklch(82% 0.12 75);
-  --st-end:oklch(50% 0.18 27);   --st-end-soft:oklch(95.5% 0.03 25);  --st-end-g:oklch(76% 0.13 27);
-  --st-unk:oklch(48% 0.025 257); --st-unk-soft:oklch(95% 0.008 257); --st-unk-g:oklch(78% 0.02 257);
+  --st-ok:oklch(48% 0.12 155);   --st-ok-soft:oklch(95% 0.035 155);  --st-ok-g:oklch(84% 0.13 155);
+  --st-warn:oklch(50% 0.11 70);  --st-warn-soft:oklch(95.5% 0.04 80); --st-warn-g:oklch(86% 0.11 78);
+  --st-end:oklch(50% 0.18 27);   --st-end-soft:oklch(95.5% 0.03 25);  --st-end-g:oklch(82% 0.11 27);
+  --st-unk:oklch(48% 0.025 257); --st-unk-soft:oklch(95% 0.008 257); --st-unk-g:oklch(84% 0.02 257);
 
   --font-display:"Space Grotesk","PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;
   --font-body:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei","Segoe UI",system-ui,sans-serif;
@@ -532,7 +533,7 @@ footer strong{color:var(--color-ink-2);font-weight:600}
 
 <footer>
   <div class="wrap">
-    <span>原型版本 <strong id="ver">v2.0</strong>（2026/11/05）</span>
+    <span>原型版本 <strong id="ver">v2.1</strong>（2026/11/05）</span>
     <span>單一 HTML，不連網、不收集資料</span>
     <span>本頁不是 Microsoft、Apple 或 Canonical 的網站；做決定前請到官方頁面核對，日期可能在查閱日之後變更</span>
     <span>鍵盤：Tab、Enter、<kbd>/</kbd> 搜尋、<kbd class="palKey2">⌘K</kbd> 版本清單</span>
@@ -542,7 +543,7 @@ footer strong{color:var(--color-ink-2);font-weight:600}
 
 <script>
 'use strict';
-const VERSION = 'v2.0';
+const VERSION = 'v2.1';
 const CHECK = '2026-11-05'; // 資料查閱日：狀態一律以這天判斷
 
 // ---------- 來源 ----------
