@@ -39,6 +39,7 @@
   --color-g-muted:oklch(80% 0.014 255);
   --color-g-accent:oklch(80% 0.12 255);
   --color-today:oklch(50% 0.2 258);
+  --color-grid:oklch(90.5% 0.008 255);
   --color-shadow:oklch(24% 0.02 258 / 0.28);
   --color-scrim:oklch(24% 0.02 258 / 0.42);
   --st-ok:oklch(48% 0.12 155);   --st-ok-soft:oklch(95% 0.035 155);  --st-ok-g:oklch(84% 0.13 155);
@@ -68,7 +69,7 @@
   :root:not(.hc){
     --color-paper:oklch(17% 0.012 260); --color-surface:oklch(21% 0.014 260); --color-sunk:oklch(19% 0.013 260);
     --color-ink:oklch(95% 0.006 255); --color-ink-2:oklch(86% 0.01 255); --color-muted:oklch(72% 0.014 255);
-    --color-rule:oklch(30% 0.016 260); --color-rule-2:oklch(42% 0.016 260);
+    --color-rule:oklch(30% 0.016 260); --color-rule-2:oklch(42% 0.016 260); --color-grid:oklch(30% 0.016 260);
     --color-accent:oklch(72% 0.15 256); --color-accent-ink:oklch(18% 0.02 260); --color-accent-soft:oklch(28% 0.05 258);
     --color-focus:oklch(72% 0.15 256); --color-today:oklch(72% 0.15 256);
     --color-graphite:oklch(13% 0.012 260); --color-graphite-2:oklch(17% 0.014 260); --color-graphite-rule:oklch(28% 0.016 260);
@@ -79,22 +80,28 @@
   }
 }
 .hc{
-  --color-paper:oklch(0% 0 0); --color-surface:oklch(0% 0 0); --color-sunk:oklch(0% 0 0);
-  --color-ink:oklch(100% 0 0); --color-ink-2:oklch(100% 0 0); --color-muted:oklch(92% 0 0);
-  --color-rule:oklch(100% 0 0); --color-rule-2:oklch(100% 0 0);
-  --color-accent:oklch(90% 0.18 100); --color-accent-ink:oklch(0% 0 0); --color-accent-soft:oklch(0% 0 0);
-  --color-focus:oklch(88% 0.15 200); --color-today:oklch(90% 0.18 100);
-  --color-graphite:oklch(0% 0 0); --color-graphite-2:oklch(0% 0 0); --color-graphite-rule:oklch(100% 0 0);
-  --color-g-text:oklch(100% 0 0); --color-g-muted:oklch(92% 0 0); --color-g-accent:oklch(90% 0.18 100);
-  --st-ok:oklch(86% 0.17 150); --st-warn:oklch(90% 0.18 100); --st-end:oklch(78% 0.15 25); --st-unk:oklch(92% 0 0);
-  --st-ok-soft:oklch(0% 0 0); --st-warn-soft:oklch(0% 0 0); --st-end-soft:oklch(0% 0 0); --st-unk-soft:oklch(0% 0 0);
-  --st-ok-g:oklch(86% 0.17 150); --st-warn-g:oklch(90% 0.18 100); --st-end-g:oklch(78% 0.15 25); --st-unk-g:oklch(92% 0 0);
+  /* 高對比（v2.2 起改淺色）：白底黑字、2px 黑邊框，文字與狀態色皆 ≥ 7:1（WCAG AAA） */
+  --color-paper:oklch(100% 0 0); --color-surface:oklch(100% 0 0); --color-sunk:oklch(100% 0 0);
+  --color-ink:oklch(0% 0 0); --color-ink-2:oklch(0% 0 0); --color-muted:oklch(30% 0 0);
+  --color-rule:oklch(0% 0 0); --color-rule-2:oklch(0% 0 0); --color-grid:oklch(82% 0 0);
+  --rule:2px solid var(--color-rule);
+  --color-accent:oklch(38% 0.2 262); --color-accent-ink:oklch(100% 0 0); --color-accent-soft:oklch(97% 0.06 100);
+  --color-focus:oklch(38% 0.2 262); --color-today:oklch(38% 0.2 262);
+  --color-graphite:oklch(100% 0 0); --color-graphite-2:oklch(97% 0.06 100); --color-graphite-rule:oklch(0% 0 0);
+  --color-g-text:oklch(0% 0 0); --color-g-muted:oklch(30% 0 0); --color-g-accent:oklch(38% 0.2 262);
+  --st-ok:oklch(38% 0.11 152); --st-warn:oklch(40% 0.09 62); --st-end:oklch(41% 0.16 27); --st-unk:oklch(30% 0.02 257);
+  --st-ok-soft:oklch(100% 0 0); --st-warn-soft:oklch(100% 0 0); --st-end-soft:oklch(100% 0 0); --st-unk-soft:oklch(100% 0 0);
+  --st-ok-g:oklch(38% 0.11 152); --st-warn-g:oklch(40% 0.09 62); --st-end-g:oklch(41% 0.16 27); --st-unk-g:oklch(30% 0.02 257);
+  --color-shadow:oklch(0% 0 0 / 0.4); --color-scrim:oklch(0% 0 0 / 0.6);
 }
+.hc button,.hc input[type=search]{border-width:2px}
+.hc .readout{border:var(--rule)}
+.hc :focus-visible{outline-width:4px}
 
 *{box-sizing:border-box}
 html,body{overflow-x:clip}
 html{-webkit-text-size-adjust:100%;color-scheme:light dark}
-.hc{color-scheme:dark}
+.hc{color-scheme:light}
 body{margin:0;background:var(--color-paper);color:var(--color-ink-2);font:400 var(--text-md)/1.7 var(--font-body);font-feature-settings:"palt" 0}
 h1,h2,h3{font-family:var(--font-display);color:var(--color-ink);font-weight:500;font-style:normal;margin:0;letter-spacing:-0.01em;overflow-wrap:anywhere;min-width:0}
 h1{font-size:var(--text-display);line-height:1.18;letter-spacing:-0.02em}
@@ -121,6 +128,9 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .btn-primary:hover{background:var(--color-ink);border-color:var(--color-ink);color:var(--color-paper)}
 .btn-quiet{border-color:transparent;background:transparent;color:var(--color-accent);padding:0 var(--space-2xs)}
 .btn-quiet:hover{border-color:var(--color-rule-2)}
+.btn-quiet{display:inline-flex;align-items:center;gap:6px}
+.i16{width:16px;height:16px;flex:none}
+.ext{width:12px;height:12px;margin-left:4px;vertical-align:-1px}
 input[type=search]{min-height:48px;width:100%;min-width:0;border:1px solid var(--color-rule-2);border-radius:var(--radius-control);padding:0 var(--space-sm);background:var(--color-surface);color:var(--color-ink)}
 input[type=search]::placeholder{color:var(--color-muted);opacity:1}
 input[type=search]:hover{border-color:var(--color-muted)}
@@ -135,6 +145,12 @@ input[type=search]:hover{border-color:var(--color-muted)}
 .mark small{font:500 var(--text-2xs)/1 var(--font-mono);color:var(--color-muted);letter-spacing:.06em;margin-left:var(--space-2xs);padding-left:var(--space-2xs);border-left:var(--rule)}
 .navbtn{display:inline-flex;align-items:center;gap:var(--space-2xs);font-size:var(--text-sm)}
 .navbtn kbd{font-size:var(--text-2xs)}
+.hcbtn{display:inline-flex;align-items:center;gap:var(--space-2xs);font-size:var(--text-sm)}
+.hcbtn>svg{width:18px;height:18px;flex:none}
+.sw{position:relative;width:32px;height:18px;border-radius:9px;background:var(--color-sunk);border:1px solid var(--color-rule-2);flex:none;transition:background-color var(--dur-short) var(--ease-out)}
+.sw i{position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--color-muted);transition:transform var(--dur-short) var(--ease-out),background-color var(--dur-short) var(--ease-out)}
+.hcbtn[aria-pressed=true] .sw{background:var(--color-accent);border-color:var(--color-accent)}
+.hcbtn[aria-pressed=true] .sw i{transform:translateX(14px);background:var(--color-accent-ink)}
 main{display:block;padding:var(--space-xl) 0 var(--space-2xl)}
 main:focus{outline:none}
 .label{font:500 var(--text-2xs)/1.4 var(--font-mono);letter-spacing:.06em;color:var(--color-muted);text-transform:uppercase}
@@ -166,7 +182,7 @@ main:focus{outline:none}
 .mix-text{font:500 var(--text-2xs)/1.5 var(--font-mono);color:var(--color-ink-2);letter-spacing:.02em}
 .bg-active{background:var(--st-ok)} .bg-extended{background:var(--st-warn)} .bg-ended{background:var(--st-end)} .bg-unknown{background:var(--st-unk)}
 
-.readout{background:var(--color-graphite);color:var(--color-g-text);border-radius:var(--radius-card);padding:var(--space-md);position:sticky;top:84px}
+.readout{--icon-knock:var(--color-graphite);background:var(--color-graphite);color:var(--color-g-text);border-radius:var(--radius-card);padding:var(--space-md);position:sticky;top:84px}
 .readout .label{color:var(--color-g-muted)}
 .readout h2{color:var(--color-g-text);font-size:var(--text-lg);margin:var(--space-2xs) 0 var(--space-sm)}
 .ro-list{list-style:none;margin:0;padding:0;border-top:1px solid var(--color-graphite-rule)}
@@ -176,7 +192,8 @@ main:focus{outline:none}
 .ro-list button:hover .ro-name{text-decoration:underline;text-decoration-color:var(--color-g-accent);text-underline-offset:4px}
 .ro-kind{grid-column:1/-1;font:500 var(--text-2xs)/1.4 var(--font-mono);letter-spacing:.06em;color:var(--color-g-muted)}
 .ro-name{font:500 var(--text-md)/1.35 var(--font-display);color:var(--color-g-text)}
-.ro-val{font:500 var(--text-sm)/1.35 var(--font-mono);text-align:right;align-self:end}
+.ro-val{display:inline-flex;align-items:center;gap:6px;justify-content:flex-end;font:500 var(--text-sm)/1.35 var(--font-mono);text-align:right;align-self:end}
+.ro-val svg{width:14px;height:14px;flex:none}
 .ro-val.v-active{color:var(--st-ok-g)} .ro-val.v-extended{color:var(--st-warn-g)} .ro-val.v-ended{color:var(--st-end-g)} .ro-val.v-unknown{color:var(--st-unk-g)}
 .ro-sub{grid-column:1/-1;font-size:var(--text-xs);color:var(--color-g-muted)}
 .ro-foot{font-size:var(--text-xs);color:var(--color-g-muted);margin-top:var(--space-sm)}
@@ -258,7 +275,7 @@ main:focus{outline:none}
 .axis{height:22px;font:500 var(--text-2xs)/1 var(--font-mono);color:var(--color-muted);margin-left:var(--lab)}
 .axis span{position:absolute;top:4px;transform:translateX(-50%);white-space:nowrap}
 .rows{position:relative}
-.gridl{position:absolute;top:0;bottom:0;width:1px;background:var(--color-rule);pointer-events:none}
+.gridl{position:absolute;top:0;bottom:0;width:1px;background:var(--color-grid);pointer-events:none}
 .grp{font:500 var(--text-2xs)/1 var(--font-mono);letter-spacing:.06em;color:var(--color-muted);padding:var(--space-xs) 0 var(--space-3xs);text-transform:uppercase;position:relative}
 .row{display:grid;grid-template-columns:var(--lab) minmax(0,1fr);align-items:center;min-height:30px}
 .row .name{font-size:var(--text-sm);color:var(--color-ink);padding-right:var(--space-2xs);line-height:1.25;position:relative;z-index:1}
@@ -353,6 +370,7 @@ footer strong{color:var(--color-ink-2);font-weight:600}
   .families{grid-template-columns:minmax(0,1fr)}
   .hint .k-pal{display:none}
   .navbtn,#hc{padding:0 10px;font-size:var(--text-sm)}
+  .hcbtn .t{display:none}
   main{padding:var(--space-md) 0 var(--space-xl)}
   .lead{font-size:var(--text-md);margin:var(--space-xs) 0 var(--space-md)}
   .search .btn-primary{padding:0 var(--space-sm)}
@@ -392,7 +410,7 @@ footer strong{color:var(--color-ink-2);font-weight:600}
       <span>支援期限查詢</span><small>OS LIFECYCLE</small>
     </div>
     <button type="button" class="navbtn" id="openPal" aria-haspopup="dialog"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M13 13l4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span class="t">找版本</span><kbd id="palKey">⌘K</kbd></button>
-    <button id="hc" type="button" aria-pressed="false">高對比：關</button>
+    <button id="hc" type="button" class="hcbtn" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 2.5a7.5 7.5 0 0 1 0 15z" fill="currentColor"/></svg><span class="t">高對比</span><span class="sr" id="hcState">：關</span><span class="sw" aria-hidden="true"><i></i></span></button>
   </div>
 </header>
 
@@ -448,7 +466,7 @@ footer strong{color:var(--color-ink-2);font-weight:600}
   <div class="wrap">
     <div class="sum-head">
       <div>
-        <div class="crumbs"><button type="button" class="btn-quiet" id="toEntry">← 回到入口</button></div>
+        <div class="crumbs"><button type="button" class="btn-quiet" id="toEntry"><svg class="i16" viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8H4M7.5 4l-4 4 4 4" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>回到入口</button></div>
         <h1 id="sumTitle">查詢結果</h1>
       </div>
     </div>
@@ -512,7 +530,7 @@ footer strong{color:var(--color-ink-2);font-weight:600}
 <!-- 畫面三：來源 -->
 <main id="source" tabindex="-1" hidden>
   <div class="wrap">
-    <div class="crumbs"><button type="button" class="btn-quiet" id="back2">← 返回結果</button></div>
+    <div class="crumbs"><button type="button" class="btn-quiet" id="back2"><svg class="i16" viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8H4M7.5 4l-4 4 4 4" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>返回結果</button></div>
     <h1 id="srcTitle">資料來源</h1>
     <p class="retain"><span class="label">返回後會回到</span><span id="retained"></span></p>
     <div id="srcBody"></div>
@@ -533,7 +551,7 @@ footer strong{color:var(--color-ink-2);font-weight:600}
 
 <footer>
   <div class="wrap">
-    <span>原型版本 <strong id="ver">v2.1</strong>（2026/11/05）</span>
+    <span>原型版本 <strong id="ver">v2.2</strong>（2026/11/05）</span>
     <span>單一 HTML，不連網、不收集資料</span>
     <span>本頁不是 Microsoft、Apple 或 Canonical 的網站；做決定前請到官方頁面核對，日期可能在查閱日之後變更</span>
     <span>鍵盤：Tab、Enter、<kbd>/</kbd> 搜尋、<kbd class="palKey2">⌘K</kbd> 版本清單</span>
@@ -543,7 +561,7 @@ footer strong{color:var(--color-ink-2);font-weight:600}
 
 <script>
 'use strict';
-const VERSION = 'v2.1';
+const VERSION = 'v2.2';
 const CHECK = '2026-11-05'; // 資料查閱日：狀態一律以這天判斷
 
 // ---------- 來源 ----------
@@ -629,9 +647,9 @@ const STAT = {
 };
 const ORDER = ['active','extended','ended','unknown'];
 const ICON = {
-  active:'<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="currentColor"/><path d="M6 10.5l2.6 2.6L14.5 7" stroke="var(--color-surface)" stroke-width="2.2" fill="none"/></svg>',
+  active:'<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="currentColor"/><path d="M6 10.5l2.6 2.6L14.5 7" stroke="var(--icon-knock,var(--color-surface))" stroke-width="2.2" fill="none"/></svg>',
   extended:'<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M10 2a8 8 0 0 1 0 16z" fill="currentColor"/></svg>',
-  ended:'<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2" y="2" width="16" height="16" rx="3" fill="currentColor"/><path d="M6.5 6.5l7 7M13.5 6.5l-7 7" stroke="var(--color-surface)" stroke-width="2.2"/></svg>',
+  ended:'<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2" y="2" width="16" height="16" rx="3" fill="currentColor"/><path d="M6.5 6.5l7 7M13.5 6.5l-7 7" stroke="var(--icon-knock,var(--color-surface))" stroke-width="2.2"/></svg>',
   unknown:'<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-dasharray="3 2.4"/><text x="10" y="14.5" text-anchor="middle" font-size="11" font-weight="700" fill="currentColor">?</text></svg>'
 };
 const ARROW = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h9M8.5 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -734,7 +752,7 @@ function renderEntry(){
     ['官方未公告', stale, `${dayDiff(stale.last.d,CHECK)} 天沒更新`, `最近一次安全更新 ${fmt(stale.last.d)}，不是官方結束日`]
   ];
   $('roList').innerHTML = rows.map(([k,it,val,sub]) => `<li><button type="button" data-open="${it.id}">
-    <span class="ro-kind">${k}</span><span class="ro-name">${it.name}</span><span class="ro-val v-${statusOf(it)}">${val}</span><span class="ro-sub">${sub}</span></button></li>`).join('');
+    <span class="ro-kind">${k}</span><span class="ro-name">${it.name}</span><span class="ro-val v-${statusOf(it)}">${ICON[statusOf(it)]}${val}</span><span class="ro-sub">${sub}</span></button></li>`).join('');
 }
 $('familyPick').addEventListener('click', e => {
   const b = e.target.closest('button[data-family]'); if (!b) return;
@@ -928,7 +946,7 @@ function srcBlock(key){
   return `<dl class="kv">
     <dt>發布者</dt><dd>${s.publisher}（${s.role}）</dd>
     <dt>頁面</dt><dd>${s.title}</dd>
-    <dt>網址</dt><dd><a href="${s.url}" target="_blank" rel="noopener">${s.url}</a></dd>
+    <dt>網址</dt><dd><a href="${s.url}" target="_blank" rel="noopener">${s.url}<svg class="ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M7 1.5h3.5V5M10.5 1.5 5.5 6.5M9 7.5v2.5a.5.5 0 0 1-.5.5h-6a.5.5 0 0 1-.5-.5v-6a.5.5 0 0 1 .5-.5H5" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="sr">（新分頁開啟）</span></a></dd>
     <dt>版本／更新</dt><dd>${s.updated}</dd>
     <dt>查閱日期</dt><dd>2026/11/05</dd>
     <dt>單位與精度</dt><dd>${s.unit}</dd>
@@ -1003,7 +1021,7 @@ pal.addEventListener('click', e => { if (e.target===pal) pal.close(); });
 // ---------- 其他 ----------
 $('hc').addEventListener('click', () => {
   const on = document.documentElement.classList.toggle('hc');
-  $('hc').setAttribute('aria-pressed', String(on)); $('hc').textContent = `高對比：${on?'開':'關'}`;
+  $('hc').setAttribute('aria-pressed', String(on)); $('hcState').textContent = `：${on?'開':'關'}`;
 });
 const isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
 if (!isMac){ for (const k of [$('palKey'), ...document.querySelectorAll('.palKey2')]) k.textContent = 'Ctrl K'; }
