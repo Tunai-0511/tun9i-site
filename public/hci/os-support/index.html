@@ -190,6 +190,9 @@ footer p{margin:0 0 6px}
       <button type="button" class="link" id="toEntry">回到入口</button>
     </div>
 
+    <p id="count" class="status"></p>
+    <div id="emptyBox" class="empty" hidden></div>
+
     <details id="filters" class="card filters" open>
       <summary>修改條件（作業系統、狀態、搜尋）</summary>
     <fieldset>
@@ -212,10 +215,6 @@ footer p{margin:0 0 6px}
       </form>
     </fieldset>
     </details>
-
-    <p id="count" class="status"></p>
-
-    <div id="emptyBox" class="empty" hidden></div>
 
     <section id="tl" class="tl" aria-labelledby="tl-h">
       <div class="tl-head">
@@ -249,7 +248,7 @@ footer p{margin:0 0 6px}
   </main>
 
   <footer>
-    <p>原型版本 <strong id="ver">v1.2</strong>（2026/11/05）· 單一 HTML，不連網、不收集資料。</p>
+    <p>原型版本 <strong id="ver">v1.3</strong>（2026/11/05）· 單一 HTML，不連網、不收集資料。</p>
     <p>本頁不是 Microsoft、Apple 或 Canonical 的網站。做決定前請點「查看來源」到官方頁面核對；官方日期可能在查閱日之後變更。</p>
     <p>鍵盤：Tab 移動、Enter 啟動、<kbd>/</kbd> 跳到搜尋。</p>
   </footer>
@@ -257,7 +256,7 @@ footer p{margin:0 0 6px}
 
 <script>
 'use strict';
-const VERSION = 'v1.2';
+const VERSION = 'v1.3';
 const CHECK = '2026-11-05'; // 資料查閱日：狀態一律以這天判斷
 
 // ---------- 來源 ----------
@@ -417,7 +416,7 @@ $('entryForm').addEventListener('submit', e => {
   if (!q){ $('entryMsg').textContent='請先輸入版本名稱，例如 24H2、Sonoma、22.04；或在上方直接選作業系統。'; $('entryMsg').hidden=false; $('entryQ').focus(); return; }
   $('entryMsg').hidden=true;
   S.family='all'; S.status='all'; S.q=q; $('sumQ').value=q;
-  show('summary');
+  show('summary', {focus: () => $('emptyBox').hidden ? $('sumTitle') : $('emptyH')});
 });
 
 // ---------- 摘要 ----------
@@ -434,6 +433,7 @@ $('sumForm').addEventListener('submit', e => {
   const q = $('sumQ').value.trim();
   if (!q){ $('sumMsg').textContent='搜尋框是空的。請輸入版本名稱；若要看全部，按「清除所有條件」。'; $('sumMsg').hidden=false; $('sumQ').focus(); return; }
   $('sumMsg').hidden=true; S.q=q; renderSummary(); announce(`搜尋「${q}」，符合 ${filtered().length} 項。`);
+  if (!$('emptyBox').hidden) $('emptyH').focus();
 });
 $('clearAll').addEventListener('click', () => { S.family='all'; S.status='all'; S.q=''; $('sumQ').value=''; $('sumMsg').hidden=true; renderSummary(); announce('已清除所有條件，顯示全部 15 項。'); $('sumQ').focus(); });
 $('toEntry').addEventListener('click', () => show('entry'));
@@ -490,7 +490,7 @@ function renderEmpty(rows){
     btns.push(['statAll', S.family==='all' ? '改看全部狀態' : `改看 ${FAM[S.family]} 的全部狀態`]);
     if (S.family!=='all' && otherFam.length) btns.push(['famAll',`改看其他作業系統的「${STAT[S.status].label}」（${otherFam.length}）`]);
   }
-  box.innerHTML = `<h2>沒有符合的版本</h2><p>${why}</p><p class="hint">目前條件：${condText()}</p><div class="actions">${btns.map(([a,t],i)=>`<button type="button" data-fix="${a}"${i===0?' class="primary"':''}>${t}</button>`).join('')}</div>`;
+  box.innerHTML = `<h2 id="emptyH" tabindex="-1">沒有符合的版本</h2><p>${why}</p><p class="hint">目前條件：${condText()}</p><div class="actions">${btns.map(([a,t],i)=>`<button type="button" data-fix="${a}"${i===0?' class="primary"':''}>${t}</button>`).join('')}</div>`;
   box.hidden=false;
 }
 $('emptyBox').addEventListener('click', e => {
