@@ -471,6 +471,12 @@ footer strong{color:var(--color-ink-2);font-weight:600}
 .sumcheck div{border:var(--rule);border-radius:var(--radius-control);padding:var(--space-xs) var(--space-sm);background:var(--color-surface)}
 .sumcheck b{display:block;font:700 var(--text-xl)/1.2 var(--font-display);color:var(--color-ink)}
 .sumcheck span{font-size:var(--text-xs);color:var(--color-muted)}
+@media (min-width:901px){
+  .items.many{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .items.many .item.v3{grid-template-columns:96px minmax(0,1fr) auto;align-content:start}
+  .items.many .item.v3 .srcbtn{grid-column:3;grid-row:1}
+  .items.many .item.v3 .facts,.items.many .item.v3 .lic-mini,.items.many .item.v3 .note{grid-column:1/-1}
+}
 @media (max-width:900px){
   .verdict.v3{grid-template-columns:minmax(0,140px) minmax(0,1fr)}
   .v3 .v-lic{grid-column:1/-1;border-left:0;padding-left:0;border-top:var(--rule);padding-top:var(--space-sm)}
@@ -854,10 +860,11 @@ function renderTimeline(rows){
 
 function renderItems(rows){
   const one = rows.length===1;
+  $('items').classList.toggle('many', rows.length > 2);
   $('items').innerHTML = rows.map(it => {
     const note = noteOf(it);
     return `<article class="item v3 pr-${it.prec}" id="it-${it.id}">
-      <img class="thumb" src="${IMG[it.id]}" alt="${it.name}（故宮 Open Data 縮圖）" loading="lazy">
+      <img class="thumb" src="${IMG[it.id]}" alt="${it.name}（故宮 Open Data 縮圖）">
       <div class="item-id"><h3>${it.name}</h3>${it.en?`<p class="sub">${it.en}</p>`:''}${pbadge(it.prec)}</div>
       <dl class="facts">
         <dt>分類</dt><dd>${it.type || '<span class="miss">未提供（頁面沒有分類欄）</span>'}</dd>
