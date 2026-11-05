@@ -2,6 +2,7 @@
 //  1. www → apex、http → https 轉址
 //  2. 404 一律不准被快取
 //  3. /os/* 轉到 os.tun9i.com(作業系統博物館 2026-10-18 搬出去成獨立網站)
+//  4. /hci/npm-images/* 轉到 hci.tun9i.com(HCI 期中報告原型 2026-11-05 搬出去)
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -23,6 +24,11 @@ export default {
     // 舊網址 tun9i.com/os/#haiku → os.tun9i.com/#haiku(瀏覽器轉址時會保留 # 後面的部分)
     if (url.pathname === '/os' || url.pathname.startsWith('/os/')) {
       return Response.redirect(`https://os.tun9i.com${url.pathname.slice(3) || '/'}${url.search}`, 301);
+    }
+
+    // HCI 期中報告原型 tun9i.com/hci/npm-images/ → hci.tun9i.com/(2026-11-05 搬出去成獨立網域)
+    if (url.pathname === '/hci/npm-images' || url.pathname.startsWith('/hci/npm-images/')) {
+      return Response.redirect(`https://hci.tun9i.com${url.pathname.slice('/hci/npm-images'.length) || '/'}${url.search}`, 301);
     }
 
     const res = await env.ASSETS.fetch(request);
