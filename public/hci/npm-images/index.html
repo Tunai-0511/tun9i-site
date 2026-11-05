@@ -1,0 +1,990 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="light dark">
+<title>這件文物的圖，我可以用嗎？｜故宮開放資料文物圖像授權查詢</title>
+<meta name="description" content="依國立故宮博物院典藏資料檢索 Opendata，查 18 件器物的年代寫法、圖像授權與標示方式。課堂原型，資料查閱日 2026/11/05。">
+<style>
+/* Hallmark · genre: modern-minimal · macrostructure: Workbench · theme: Cobalt (offline adaptation: embedded Space Grotesk + system CJK + system mono)
+ * tone: technical / instrument-panel · anchor hue: cobalt 258 · enrichment: real CC0 thumbnails (data, not decoration) · nav: bordered bar + ⌘K · footer: Ft2 inline
+ * pre-emit critique: P5 H5 E4 S5 R5 V4
+ */
+@font-face{font-family:"Space Grotesk";font-style:normal;font-weight:500;font-display:swap;
+  src:url("fonts/space-grotesk-500.woff2") format("woff2")}
+@font-face{font-family:"Space Grotesk";font-style:normal;font-weight:700;font-display:swap;
+  src:url("fonts/space-grotesk-700.woff2") format("woff2")}
+
+:root{
+  /* 色彩：每個值都在報告附「視覺規範」列出對比 */
+  --color-paper:oklch(98.5% 0.004 250);
+  --color-surface:oklch(99.6% 0.002 250);
+  --color-sunk:oklch(96.2% 0.006 252);
+  --color-ink:oklch(24% 0.02 258);
+  --color-ink-2:oklch(34% 0.018 257);
+  --color-muted:oklch(47% 0.018 257);
+  --color-rule:oklch(90.5% 0.008 255);
+  --color-rule-2:oklch(80% 0.012 255);
+  --color-accent:oklch(50% 0.2 258);
+  --color-accent-ink:oklch(99% 0 0);
+  --color-accent-soft:oklch(94% 0.035 258);
+  --color-focus:oklch(50% 0.2 258);
+  /* 讀數面板：柔和石墨（v2.1 起；v2.0 的 22% 太黑，會搶走搜尋框的注意力） */
+  --color-graphite:oklch(33% 0.022 258);
+  --color-graphite-2:oklch(38% 0.022 258);
+  --color-graphite-rule:oklch(44% 0.02 258);
+  --color-g-text:oklch(94% 0.008 255);
+  --color-g-muted:oklch(80% 0.014 255);
+  --color-g-accent:oklch(80% 0.12 255);
+  --color-today:oklch(50% 0.2 258);
+  --color-grid:oklch(90.5% 0.008 255);
+  --color-shadow:oklch(24% 0.02 258 / 0.28);
+  --color-scrim:oklch(24% 0.02 258 / 0.42);
+  --st-ok:oklch(48% 0.12 155);   --st-ok-soft:oklch(95% 0.035 155);  --st-ok-g:oklch(84% 0.13 155);
+  --st-warn:oklch(50% 0.11 70);  --st-warn-soft:oklch(95.5% 0.04 80); --st-warn-g:oklch(86% 0.11 78);
+  --st-end:oklch(50% 0.18 27);   --st-end-soft:oklch(95.5% 0.03 25);  --st-end-g:oklch(82% 0.11 27);
+  --st-unk:oklch(48% 0.025 257); --st-unk-soft:oklch(95% 0.008 257); --st-unk-g:oklch(84% 0.02 257);
+
+  --font-display:"Space Grotesk","PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;
+  --font-body:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei","Segoe UI",system-ui,sans-serif;
+  --font-mono:ui-monospace,"SF Mono",Menlo,Consolas,"PingFang TC","Microsoft JhengHei",monospace;
+
+  --text-2xs:0.75rem; --text-xs:0.8125rem; --text-sm:0.9375rem; --text-md:1.0625rem;
+  --text-lg:1.25rem; --text-xl:1.5rem; --text-2xl:2rem;
+  --text-display:clamp(2.125rem,2.6vw + 1.1rem,3.25rem);
+  --text-num:clamp(3rem,5vw + 1rem,4.75rem);
+
+  --space-3xs:0.25rem; --space-2xs:0.5rem; --space-xs:0.75rem; --space-sm:1rem;
+  --space-md:1.5rem; --space-lg:2rem; --space-xl:3rem; --space-2xl:4.5rem;
+
+  --radius-control:6px; --radius-card:10px;
+  --rule:1px solid var(--color-rule);
+  --ease-out:cubic-bezier(0.16,1,0.3,1);
+  --dur-short:140ms;
+  --lab:190px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not(.hc){
+    --color-paper:oklch(17% 0.012 260); --color-surface:oklch(21% 0.014 260); --color-sunk:oklch(19% 0.013 260);
+    --color-ink:oklch(95% 0.006 255); --color-ink-2:oklch(86% 0.01 255); --color-muted:oklch(72% 0.014 255);
+    --color-rule:oklch(30% 0.016 260); --color-rule-2:oklch(42% 0.016 260); --color-grid:oklch(30% 0.016 260);
+    --color-accent:oklch(72% 0.15 256); --color-accent-ink:oklch(18% 0.02 260); --color-accent-soft:oklch(28% 0.05 258);
+    --color-focus:oklch(72% 0.15 256); --color-today:oklch(72% 0.15 256);
+    --color-graphite:oklch(13% 0.012 260); --color-graphite-2:oklch(17% 0.014 260); --color-graphite-rule:oklch(28% 0.016 260);
+    --st-ok:oklch(78% 0.14 155);  --st-ok-soft:oklch(26% 0.04 155);
+    --st-warn:oklch(80% 0.12 75); --st-warn-soft:oklch(27% 0.04 75);
+    --st-end:oklch(74% 0.15 25);  --st-end-soft:oklch(27% 0.045 25);
+    --st-unk:oklch(76% 0.02 257); --st-unk-soft:oklch(25% 0.01 257);
+  }
+}
+.hc{
+  /* 高對比（v2.2 起改淺色）：白底黑字、2px 黑邊框，文字與狀態色皆 ≥ 7:1（WCAG AAA） */
+  --color-paper:oklch(100% 0 0); --color-surface:oklch(100% 0 0); --color-sunk:oklch(100% 0 0);
+  --color-ink:oklch(0% 0 0); --color-ink-2:oklch(0% 0 0); --color-muted:oklch(30% 0 0);
+  --color-rule:oklch(0% 0 0); --color-rule-2:oklch(0% 0 0); --color-grid:oklch(82% 0 0);
+  --rule:2px solid var(--color-rule);
+  --color-accent:oklch(38% 0.2 262); --color-accent-ink:oklch(100% 0 0); --color-accent-soft:oklch(97% 0.06 100);
+  --color-focus:oklch(38% 0.2 262); --color-today:oklch(38% 0.2 262);
+  --color-graphite:oklch(100% 0 0); --color-graphite-2:oklch(97% 0.06 100); --color-graphite-rule:oklch(0% 0 0);
+  --color-g-text:oklch(0% 0 0); --color-g-muted:oklch(30% 0 0); --color-g-accent:oklch(38% 0.2 262);
+  --st-ok:oklch(38% 0.11 152); --st-warn:oklch(40% 0.09 62); --st-end:oklch(41% 0.16 27); --st-unk:oklch(30% 0.02 257);
+  --st-ok-soft:oklch(100% 0 0); --st-warn-soft:oklch(100% 0 0); --st-end-soft:oklch(100% 0 0); --st-unk-soft:oklch(100% 0 0);
+  --st-ok-g:oklch(38% 0.11 152); --st-warn-g:oklch(40% 0.09 62); --st-end-g:oklch(41% 0.16 27); --st-unk-g:oklch(30% 0.02 257);
+  --color-shadow:oklch(0% 0 0 / 0.4); --color-scrim:oklch(0% 0 0 / 0.6);
+}
+.hc button,.hc input[type=search]{border-width:2px}
+.hc .readout{border:var(--rule)}
+.hc :focus-visible{outline-width:4px}
+
+*{box-sizing:border-box}
+html,body{overflow-x:clip}
+html{-webkit-text-size-adjust:100%;color-scheme:light dark}
+.hc{color-scheme:light}
+body{margin:0;background:var(--color-paper);color:var(--color-ink-2);font:400 var(--text-md)/1.7 var(--font-body);font-feature-settings:"palt" 0}
+h1,h2,h3{font-family:var(--font-display);color:var(--color-ink);font-weight:500;font-style:normal;margin:0;letter-spacing:-0.01em;overflow-wrap:anywhere;min-width:0}
+h1{font-size:var(--text-display);line-height:1.18;letter-spacing:-0.02em}
+.ph{display:inline-block}
+h2{font-size:var(--text-xl);line-height:1.3}
+h3{font-size:var(--text-lg);line-height:1.35}
+p{margin:0}
+a{color:var(--color-accent);text-underline-offset:3px}
+code,kbd,.mono{font-family:var(--font-mono)}
+kbd{font-size:0.8em;border:1px solid var(--color-rule-2);border-bottom-width:2px;border-radius:4px;padding:0 0.35em;background:var(--color-surface);color:var(--color-ink);white-space:nowrap}
+.num{font-family:var(--font-display);font-variant-numeric:tabular-nums}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+[hidden]{display:none!important}
+:focus-visible{outline:3px solid var(--color-focus);outline-offset:2px}
+[tabindex="-1"]:focus{outline:none}
+
+/* 控制元件：8 種狀態 —— default / hover / focus / active / disabled / pressed / loading 不適用 / error 見 .msg */
+button,input{font:inherit;color:inherit}
+button{cursor:pointer;min-height:44px;padding:0 var(--space-sm);border:1px solid var(--color-rule-2);border-radius:var(--radius-control);background:var(--color-surface);color:var(--color-ink);font-weight:500;white-space:nowrap;transition:border-color var(--dur-short) var(--ease-out),background-color var(--dur-short) var(--ease-out),color var(--dur-short) var(--ease-out)}
+button:hover{border-color:var(--color-accent)}
+button:active{transform:translateY(1px)}
+button:disabled{opacity:.5;cursor:not-allowed}
+.btn-primary{background:var(--color-accent);border-color:var(--color-accent);color:var(--color-accent-ink)}
+.btn-primary:hover{background:var(--color-ink);border-color:var(--color-ink);color:var(--color-paper)}
+.btn-quiet{border-color:transparent;background:transparent;color:var(--color-accent);padding:0 var(--space-2xs)}
+.btn-quiet:hover{border-color:var(--color-rule-2)}
+.btn-quiet{display:inline-flex;align-items:center;gap:6px}
+.i16{width:16px;height:16px;flex:none}
+.ext{width:12px;height:12px;margin-left:4px;vertical-align:-1px}
+input[type=search]{min-height:48px;width:100%;min-width:0;border:1px solid var(--color-rule-2);border-radius:var(--radius-control);padding:0 var(--space-sm);background:var(--color-surface);color:var(--color-ink)}
+input[type=search]::placeholder{color:var(--color-muted);opacity:1}
+input[type=search]:hover{border-color:var(--color-muted)}
+.msg{display:flex;gap:var(--space-2xs);align-items:flex-start;margin-top:var(--space-2xs);color:var(--st-end);font-size:var(--text-sm);font-weight:600}
+
+/* 版面 */
+.wrap{max-width:1120px;margin:0 auto;padding:0 var(--space-lg)}
+.nav{position:sticky;top:0;z-index:5;background:var(--color-paper);border-bottom:var(--rule)}
+.nav .wrap{display:flex;align-items:center;gap:var(--space-sm);min-height:60px}
+.mark{display:flex;align-items:center;gap:var(--space-2xs);color:var(--color-ink);font-weight:600;letter-spacing:.02em;margin-right:auto;min-width:0}
+.mark svg{width:22px;height:22px;flex:none}
+.mark small{font:500 var(--text-2xs)/1 var(--font-mono);color:var(--color-muted);letter-spacing:.06em;margin-left:var(--space-2xs);padding-left:var(--space-2xs);border-left:var(--rule)}
+.navbtn{display:inline-flex;align-items:center;gap:var(--space-2xs);font-size:var(--text-sm)}
+.navbtn kbd{font-size:var(--text-2xs)}
+.hcbtn{display:inline-flex;align-items:center;gap:var(--space-2xs);font-size:var(--text-sm)}
+.hcbtn>svg{width:18px;height:18px;flex:none}
+.sw{position:relative;width:32px;height:18px;border-radius:9px;background:var(--color-sunk);border:1px solid var(--color-rule-2);flex:none;transition:background-color var(--dur-short) var(--ease-out)}
+.sw i{position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--color-muted);transition:transform var(--dur-short) var(--ease-out),background-color var(--dur-short) var(--ease-out)}
+.hcbtn[aria-pressed=true] .sw{background:var(--color-accent);border-color:var(--color-accent)}
+.hcbtn[aria-pressed=true] .sw i{transform:translateX(14px);background:var(--color-accent-ink)}
+main{display:block;padding:var(--space-xl) 0 var(--space-2xl)}
+main:focus{outline:none}
+.label{font:500 var(--text-2xs)/1.4 var(--font-mono);letter-spacing:.06em;color:var(--color-muted);text-transform:uppercase}
+.card{background:var(--color-surface);border:var(--rule);border-radius:var(--radius-card)}
+
+/* 入口 */
+.hero{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:var(--space-xl);align-items:start}
+.meta{display:flex;flex-wrap:wrap;gap:var(--space-2xs) var(--space-sm);margin-bottom:var(--space-sm)}
+.meta span{display:inline-flex;align-items:center;gap:6px}
+.meta span::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--color-accent)}
+.lead{font-size:var(--text-lg);color:var(--color-ink-2);margin:var(--space-sm) 0 var(--space-lg);max-width:34em}
+.search{display:flex;gap:var(--space-2xs)}
+.search .field{position:relative;flex:1;min-width:0}
+.search .field svg{position:absolute;left:14px;top:50%;width:18px;height:18px;transform:translateY(-50%);color:var(--color-muted);pointer-events:none}
+.search .field.ico input{padding-left:42px;min-height:56px;font-size:var(--text-md)}
+.search .btn-primary{min-height:56px;padding:0 var(--space-md);font-size:var(--text-md)}
+.hint{font-size:var(--text-sm);color:var(--color-muted);margin-top:var(--space-2xs)}
+.pick-h{margin:var(--space-xl) 0 var(--space-sm);font-size:var(--text-lg)}
+.families{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-xs)}
+.families button{display:flex;flex-direction:column;align-items:stretch;gap:var(--space-2xs);text-align:left;white-space:normal;min-height:0;padding:var(--space-sm) var(--space-sm) var(--space-xs);border-color:var(--color-rule);border-radius:var(--radius-card)}
+.families button:hover{border-color:var(--color-accent);background:var(--color-surface)}
+.fam-top{display:flex;justify-content:space-between;align-items:baseline;gap:var(--space-2xs)}
+.fam-name{font:500 var(--text-lg)/1.2 var(--font-display);color:var(--color-ink)}
+.fam-arrow{color:var(--color-muted);transition:transform var(--dur-short) var(--ease-out)}
+.families button:hover .fam-arrow{transform:translateX(3px);color:var(--color-accent)}
+.fam-sub{font-size:var(--text-xs);color:var(--color-muted);font-weight:400}
+.mix{display:flex;height:6px;border-radius:3px;overflow:hidden;gap:2px;background:var(--color-sunk)}
+.mix i{display:block;height:100%}
+.mix-text{font:500 var(--text-2xs)/1.5 var(--font-mono);color:var(--color-ink-2);letter-spacing:.02em}
+.bg-active{background:var(--st-ok)} .bg-extended{background:var(--st-warn)} .bg-ended{background:var(--st-end)} .bg-unknown{background:var(--st-unk)}
+
+.readout{--icon-knock:var(--color-graphite);background:var(--color-graphite);color:var(--color-g-text);border-radius:var(--radius-card);padding:var(--space-md);position:sticky;top:84px}
+.readout .label{color:var(--color-g-muted)}
+.readout h2{color:var(--color-g-text);font-size:var(--text-lg);margin:var(--space-2xs) 0 var(--space-sm)}
+.ro-list{list-style:none;margin:0;padding:0;border-top:1px solid var(--color-graphite-rule)}
+.ro-list li{border-bottom:1px solid var(--color-graphite-rule)}
+.ro-list button{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px var(--space-sm);width:100%;text-align:left;white-space:normal;background:transparent;border:0;border-radius:0;color:var(--color-g-text);padding:var(--space-xs) 0;min-height:0}
+.ro-list button:hover{background:var(--color-graphite-2)}
+.ro-list button:hover .ro-name{text-decoration:underline;text-decoration-color:var(--color-g-accent);text-underline-offset:4px}
+.ro-kind{grid-column:1/-1;font:500 var(--text-2xs)/1.4 var(--font-mono);letter-spacing:.06em;color:var(--color-g-muted)}
+.ro-name{font:500 var(--text-md)/1.35 var(--font-display);color:var(--color-g-text)}
+.ro-val{display:inline-flex;align-items:center;gap:6px;justify-content:flex-end;font:500 var(--text-sm)/1.35 var(--font-mono);text-align:right;align-self:end}
+.ro-val svg{width:14px;height:14px;flex:none}
+.ro-val.v-active{color:var(--st-ok-g)} .ro-val.v-extended{color:var(--st-warn-g)} .ro-val.v-ended{color:var(--st-end-g)} .ro-val.v-unknown{color:var(--st-unk-g)}
+.ro-sub{grid-column:1/-1;font-size:var(--text-xs);color:var(--color-g-muted)}
+.ro-foot{font-size:var(--text-xs);color:var(--color-g-muted);margin-top:var(--space-sm)}
+
+.howto{margin-top:var(--space-2xl);border-top:var(--rule);padding-top:var(--space-lg);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,3fr);gap:var(--space-lg)}
+.howto ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-md)}
+.howto li{font-size:var(--text-sm)}
+.howto li strong{display:block;font:500 var(--text-md)/1.3 var(--font-display);color:var(--color-ink);margin-bottom:var(--space-3xs)}
+
+/* 摘要 */
+.sum-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:var(--space-xs) var(--space-md)}
+.crumbs{display:flex;gap:var(--space-3xs);align-items:center;margin-bottom:var(--space-2xs)}
+.sum-head h1{font-size:var(--text-2xl)}
+.cond{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2xs) var(--space-sm);margin:var(--space-sm) 0 var(--space-md);padding:var(--space-xs) var(--space-sm);border:var(--rule);border-radius:var(--radius-control);background:var(--color-sunk)}
+.cond #condText{font:500 var(--text-sm)/1.4 var(--font-mono);color:var(--color-ink)}
+.cond .acts{margin-left:auto;display:flex;gap:var(--space-3xs)}
+
+.badge{display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:var(--text-sm);line-height:1;white-space:nowrap;padding:5px 9px 5px 7px;border-radius:var(--radius-control);border:1px solid currentColor}
+.badge svg{width:16px;height:16px;flex:none}
+.s-active{color:var(--st-ok)} .s-extended{color:var(--st-warn)} .s-ended{color:var(--st-end)} .s-unknown{color:var(--st-unk)}
+.badge.s-active{background:var(--st-ok-soft)} .badge.s-extended{background:var(--st-warn-soft)} .badge.s-ended{background:var(--st-end-soft)} .badge.s-unknown{background:var(--st-unk-soft)}
+
+#count:focus{outline:none}
+.verdict{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:var(--space-md) var(--space-xl);align-items:center;padding:var(--space-lg);border:var(--rule);border-left-width:6px;border-radius:var(--radius-card);background:var(--color-surface)}
+.verdict.s-active{border-left-color:var(--st-ok)} .verdict.s-extended{border-left-color:var(--st-warn)} .verdict.s-ended{border-left-color:var(--st-end)} .verdict.s-unknown{border-left-color:var(--st-unk)}
+.v-id{display:flex;flex-direction:column;align-items:flex-start;gap:var(--space-2xs);color:var(--color-ink-2)}
+.v-name{font:500 var(--text-2xl)/1.2 var(--font-display);color:var(--color-ink);letter-spacing:-0.015em}
+.v-sent{font-size:var(--text-md);color:var(--color-ink-2)}
+.v-num{display:flex;flex-direction:column;align-items:flex-start;border-left:var(--rule);padding-left:var(--space-lg)}
+.v-num .n{font:700 var(--text-num)/1 var(--font-display);letter-spacing:-0.03em}
+.v-num .u{font-size:var(--text-sm);color:var(--color-ink-2);margin-top:var(--space-2xs)}
+.v-foot{grid-column:1/-1;font-size:var(--text-xs);color:var(--color-muted);border-top:var(--rule);padding-top:var(--space-xs)}
+.tally{display:grid;gap:var(--space-xs);padding:var(--space-md) var(--space-lg);border:var(--rule);border-radius:var(--radius-card);background:var(--color-surface)}
+.t-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:var(--space-2xs) var(--space-sm);color:var(--color-ink)}
+.t-head strong{font:500 var(--text-xl)/1.2 var(--font-display)}
+.t-bar{display:flex;height:12px;gap:3px;border-radius:3px;overflow:hidden}
+.t-bar i{display:block;height:100%}
+.t-legend{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:var(--space-3xs) var(--space-md);font-size:var(--text-sm)}
+.t-legend li{display:inline-flex;align-items:center;gap:6px;font-weight:600}
+.t-legend svg{width:16px;height:16px}
+.t-legend .n{font-family:var(--font-display);font-variant-numeric:tabular-nums}
+.t-foot{font-size:var(--text-xs);color:var(--color-muted)}
+
+.empty{padding:var(--space-md) var(--space-lg);border:1px dashed var(--color-rule-2);border-radius:var(--radius-card);background:var(--color-surface)}
+.empty h2{font-size:var(--text-xl);margin-bottom:var(--space-2xs)}
+.empty h2:focus{outline:none}
+.empty .hint{margin:var(--space-2xs) 0 var(--space-sm)}
+.actions{display:flex;flex-wrap:wrap;gap:var(--space-2xs)}
+
+.filters{margin-top:var(--space-md);border:var(--rule);border-radius:var(--radius-card);background:var(--color-surface)}
+.filters>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:var(--space-sm);min-height:48px;padding:0 var(--space-md);font-weight:600;color:var(--color-ink)}
+.filters>summary::-webkit-details-marker{display:none}
+.filters>summary::after{content:"";width:9px;height:9px;border-right:2px solid var(--color-muted);border-bottom:2px solid var(--color-muted);transform:rotate(45deg) translateY(-3px);transition:transform var(--dur-short) var(--ease-out)}
+.filters[open]>summary::after{transform:rotate(-135deg) translateY(-3px)}
+.filters>summary:focus-visible{outline-offset:-3px;border-radius:var(--radius-card)}
+.fbody{display:grid;grid-template-columns:auto minmax(0,1fr);gap:var(--space-sm) var(--space-md);align-items:center;padding:var(--space-2xs) var(--space-md) var(--space-md);border-top:var(--rule)}
+.fbody .flab{font:500 var(--text-2xs)/1.4 var(--font-mono);letter-spacing:.06em;color:var(--color-muted);padding-top:var(--space-sm)}
+.fbody .fctl{padding-top:var(--space-sm)}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{min-height:40px;font-size:var(--text-sm);font-weight:500;color:var(--color-ink-2)}
+.seg button[aria-pressed=true]{background:var(--color-ink);border-color:var(--color-ink);color:var(--color-paper)}
+.seg .n{font-family:var(--font-display);font-variant-numeric:tabular-nums;margin-left:4px;opacity:.75}
+.fbody form .search input{min-height:44px}
+.fbody form .search button{min-height:44px}
+
+/* 時間軸 */
+.tl{margin-top:var(--space-md);padding:var(--space-md) var(--space-md) var(--space-sm);border:var(--rule);border-radius:var(--radius-card);background:var(--color-surface)}
+.tl-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:var(--space-2xs) var(--space-md)}
+#tlRange{font:500 var(--text-xs)/1.4 var(--font-mono);color:var(--color-muted)}
+.legend{display:flex;flex-wrap:wrap;gap:var(--space-3xs) var(--space-md);font-size:var(--text-xs);color:var(--color-ink-2);margin:var(--space-xs) 0 var(--space-sm)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.lg{display:inline-block;width:22px;height:10px;border-radius:2px}
+.lg-std{background:var(--color-ink-2)}
+.lg-ext{background:repeating-linear-gradient(135deg,var(--color-ink-2) 0 2px,transparent 2px 5px);border:1px solid var(--color-ink-2)}
+.lg-obs{width:26px;height:10px;background:radial-gradient(circle at 4px 5px,var(--color-surface) 2px,var(--st-unk) 2.1px 3.6px,transparent 3.7px),linear-gradient(45deg,transparent 40%,var(--st-unk) 40% 60%,transparent 60%) right 1px center/8px 8px no-repeat,repeating-linear-gradient(90deg,var(--st-unk) 0 3px,transparent 3px 6px) center/100% 2px no-repeat}
+.lg-today{width:2px;height:14px;background:var(--color-today)}
+.lg-dots{display:inline-flex;gap:3px}.lg-dots i{width:8px;height:8px;border-radius:2px;display:block}
+.axis,.row .track{position:relative}
+.axis{height:22px;font:500 var(--text-2xs)/1 var(--font-mono);color:var(--color-muted);margin-left:var(--lab)}
+.axis span{position:absolute;top:4px;transform:translateX(-50%);white-space:nowrap}
+.rows{position:relative}
+.gridl{position:absolute;top:0;bottom:0;width:1px;background:var(--color-grid);pointer-events:none}
+.grp{font:500 var(--text-2xs)/1 var(--font-mono);letter-spacing:.06em;color:var(--color-muted);padding:var(--space-xs) 0 var(--space-3xs);text-transform:uppercase;position:relative}
+.row{display:grid;grid-template-columns:var(--lab) minmax(0,1fr);align-items:center;min-height:30px}
+.row .name{font-size:var(--text-sm);color:var(--color-ink);padding-right:var(--space-2xs);line-height:1.25;position:relative;z-index:1}
+.row .track{height:30px}
+.seg-std,.seg-ext{position:absolute;top:9px;height:12px}
+.seg-std{border-radius:3px 0 0 3px}
+.seg-ext{border-radius:0 3px 3px 0}
+.seg-std.only{border-radius:3px}
+.c-active .seg-std{background:var(--st-ok)} .c-extended .seg-std{background:var(--st-warn)} .c-ended .seg-std{background:var(--st-end)}
+.seg-ext{border:1px solid currentColor;background:repeating-linear-gradient(135deg,currentColor 0 2px,transparent 2px 5px)}
+.c-active .seg-ext{color:var(--st-ok)} .c-extended .seg-ext{color:var(--st-warn)} .c-ended .seg-ext{color:var(--st-end)}
+.dot{position:absolute;top:11px;width:8px;height:8px;border-radius:50%;border:2px solid var(--st-unk);background:var(--color-surface);transform:translateX(-50%)}
+.dia{position:absolute;top:10px;width:10px;height:10px;background:var(--st-unk);transform:translateX(-50%) rotate(45deg)}
+.link{position:absolute;top:14px;height:2px;background:repeating-linear-gradient(90deg,var(--st-unk) 0 3px,transparent 3px 6px);opacity:.6}
+.unk-label{position:absolute;top:6px;font-size:var(--text-2xs);color:var(--color-muted);white-space:nowrap;background:var(--color-surface);padding:0 4px;border-radius:3px;z-index:1}
+.today{position:absolute;top:0;bottom:0;width:2px;background:var(--color-today);pointer-events:none;z-index:2}
+.today-chip{position:absolute;top:0;transform:translateX(-50%);font:600 var(--text-2xs)/1 var(--font-mono);color:var(--color-accent-ink);background:var(--color-today);padding:4px 6px;border-radius:4px;white-space:nowrap}
+.tl-foot{position:relative;height:24px;margin-left:var(--lab)}
+.tl-note{font-size:var(--text-xs);color:var(--color-muted);margin-top:var(--space-2xs);border-top:var(--rule);padding-top:var(--space-xs)}
+
+/* 清單 */
+.items{display:grid;gap:var(--space-xs);margin-top:var(--space-md)}
+.item{display:grid;grid-template-columns:minmax(0,15rem) minmax(0,1fr) auto;gap:var(--space-sm) var(--space-lg);align-items:start;padding:var(--space-md);border:var(--rule);border-radius:var(--radius-card);background:var(--color-surface);position:relative}
+.item::before{content:"";position:absolute;left:-1px;top:var(--space-md);bottom:var(--space-md);width:3px;border-radius:0 2px 2px 0;background:var(--st-unk)}
+.item.s-active::before{background:var(--st-ok)} .item.s-extended::before{background:var(--st-warn)} .item.s-ended::before{background:var(--st-end)}
+.item-id{display:flex;flex-direction:column;align-items:flex-start;gap:var(--space-2xs);color:var(--color-ink-2)}
+.item-id h3{font-size:var(--text-lg)}
+.item-id .sub{font-size:var(--text-xs);color:var(--color-muted);margin-top:-4px}
+.facts{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:6px var(--space-sm);margin:0;font-size:var(--text-sm)}
+.facts dt{color:var(--color-muted)}
+.facts dd{margin:0;color:var(--color-ink)}
+.facts dd .num{font-size:var(--text-md)}
+.facts .hint{margin-top:2px;font-size:var(--text-xs)}
+.also{grid-column:2/3;font-size:var(--text-sm);color:var(--color-ink-2);background:var(--color-sunk);border-radius:var(--radius-control);padding:var(--space-2xs) var(--space-xs)}
+.item .srcbtn{grid-column:3;grid-row:1;align-self:start}
+.srcbtn{display:inline-flex;align-items:center;gap:6px}
+.srcbtn svg{width:14px;height:14px}
+.tail{margin-top:var(--space-lg);display:flex;justify-content:flex-start}
+
+/* 來源 */
+.src-layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:var(--space-lg);margin-top:var(--space-md);align-items:start}
+.retain{display:flex;flex-wrap:wrap;gap:var(--space-2xs) var(--space-sm);align-items:center;margin-top:var(--space-sm);padding:var(--space-xs) var(--space-sm);border-radius:var(--radius-control);background:var(--color-accent-soft);color:var(--color-ink);font-size:var(--text-sm)}
+.retain #retained{font:600 var(--text-sm)/1.4 var(--font-mono)}
+.raw{background:var(--color-graphite);color:var(--color-g-text);border-radius:var(--radius-card);padding:var(--space-md)}
+.raw .label{color:var(--color-g-muted);margin-bottom:var(--space-xs);display:block}
+.raw code{display:block;font-size:var(--text-sm);line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--color-g-text)}
+.raw code+code{margin-top:var(--space-2xs);padding-top:var(--space-2xs);border-top:1px solid var(--color-graphite-rule)}
+.raw code b{color:var(--color-g-accent);font-weight:600}
+.block{padding:var(--space-md);border:var(--rule);border-radius:var(--radius-card);background:var(--color-surface)}
+.block h2{font-size:var(--text-lg);margin-bottom:var(--space-xs)}
+.stack{display:grid;gap:var(--space-sm)}
+.kv{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:var(--space-2xs) var(--space-sm);margin:0;font-size:var(--text-sm)}
+.kv dt{color:var(--color-muted)}
+.kv dd{margin:0;color:var(--color-ink);overflow-wrap:anywhere}
+.cannot{margin:0;padding-left:1.2em;font-size:var(--text-sm)}
+.cannot li+li{margin-top:var(--space-3xs)}
+.back-row{margin-top:var(--space-lg);display:flex;gap:var(--space-2xs)}
+
+/* ⌘K */
+dialog{border:var(--rule);border-radius:var(--radius-card);padding:0;width:min(640px,calc(100vw - 2rem));max-height:min(70vh,560px);background:var(--color-surface);color:var(--color-ink-2);box-shadow:0 24px 48px -12px var(--color-shadow)}
+dialog::backdrop{background:var(--color-scrim)}
+.pal-in{display:flex;align-items:center;gap:var(--space-2xs);padding:var(--space-xs) var(--space-sm);border-bottom:var(--rule)}
+.pal-in svg{width:18px;height:18px;color:var(--color-muted);flex:none}
+.pal-in input{flex:1;min-width:0;border:0;min-height:44px;padding:0;background:transparent;font-size:var(--text-md)}
+.pal-in input:focus-visible{outline:none}
+.pal-list{list-style:none;margin:0;padding:var(--space-2xs);overflow:auto;max-height:calc(min(70vh,560px) - 110px)}
+.pal-list li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:var(--space-sm);align-items:center;padding:var(--space-2xs) var(--space-xs);border-radius:var(--radius-control);cursor:pointer}
+.pal-list li[aria-selected=true]{background:var(--color-accent-soft);outline:2px solid var(--color-accent);outline-offset:-2px}
+.pal-list .pn{font:500 var(--text-md)/1.3 var(--font-display);color:var(--color-ink)}
+.pal-list .pd{font-size:var(--text-xs);color:var(--color-muted)}
+.pal-empty{padding:var(--space-md);font-size:var(--text-sm)}
+.pal-foot{display:flex;gap:var(--space-md);padding:var(--space-2xs) var(--space-sm);border-top:var(--rule);font-size:var(--text-xs);color:var(--color-muted)}
+
+footer{border-top:var(--rule);padding:var(--space-md) 0 var(--space-lg);font-size:var(--text-xs);color:var(--color-muted)}
+footer .wrap{display:flex;flex-wrap:wrap;gap:var(--space-3xs) var(--space-md)}
+footer strong{color:var(--color-ink-2);font-weight:600}
+
+@media (max-width:900px){
+  .hero{grid-template-columns:minmax(0,1fr)}
+  .readout{position:static}
+  .item{grid-template-columns:minmax(0,1fr) auto}
+  .item .facts,.item .also{grid-column:1/-1}
+  .item .srcbtn{grid-column:2;grid-row:1}
+  .src-layout{grid-template-columns:minmax(0,1fr)}
+  .howto{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:600px){
+  :root{--lab:112px}
+  .wrap{padding:0 var(--space-sm)}
+  .nav .wrap{min-height:56px;gap:var(--space-2xs)}
+  .mark small,.navbtn kbd{display:none}
+  .families{grid-template-columns:minmax(0,1fr)}
+  .hint .k-pal{display:none}
+  .navbtn,#hc{padding:0 10px;font-size:var(--text-sm)}
+  .hcbtn .t{display:none}
+  main{padding:var(--space-md) 0 var(--space-xl)}
+  .lead{font-size:var(--text-md);margin:var(--space-xs) 0 var(--space-md)}
+  .search .btn-primary{padding:0 var(--space-sm)}
+  .howto ol{grid-template-columns:minmax(0,1fr)}
+  .sum-head h1{font-size:var(--text-xl)}
+  .cond{margin:var(--space-xs) 0 var(--space-sm)}
+  .cond .acts{margin-left:0}
+  .verdict{grid-template-columns:minmax(0,1fr);padding:var(--space-md);gap:var(--space-sm)}
+  .v-name{font-size:var(--text-xl)}
+  .v-num{border-left:0;padding-left:0;flex-direction:row;align-items:baseline;gap:var(--space-2xs);flex-wrap:wrap}
+  .v-num .n{font-size:2.75rem}
+  .v-num .u{margin-top:0}
+  .tally{padding:var(--space-sm)}
+  .fbody{grid-template-columns:minmax(0,1fr);gap:var(--space-3xs);padding:0 var(--space-sm) var(--space-sm)}
+  .filters>summary{padding:0 var(--space-sm)}
+  .tl{padding:var(--space-sm) var(--space-xs) var(--space-xs)}
+  .row .name{font-size:var(--text-xs)}
+  .item{padding:var(--space-sm);gap:var(--space-xs)}
+  .facts{grid-template-columns:minmax(0,1fr);gap:0}
+  .facts dd{margin-bottom:var(--space-2xs)}
+  .kv{grid-template-columns:minmax(0,1fr);gap:0}
+  .kv dd{margin-bottom:var(--space-2xs)}
+  .block,.raw{padding:var(--space-sm)}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important}
+  button:active{transform:none}
+}
+@media print{.nav,footer,#hc{display:none}}
+</style>
+<style>
+/* ---------- 故宮題目新增的元件（沿用上方 token） ---------- */
+:root{--pr-year:var(--st-ok);--pr-range:var(--color-accent);--pr-unsure:var(--st-warn);--pr-none:var(--st-unk);--thumb-bg:var(--color-sunk)}
+.pr-year{--pr:var(--pr-year)} .pr-range{--pr:var(--pr-range)} .pr-unsure{--pr:var(--pr-unsure)} .pr-none{--pr:var(--pr-none)}
+.pbadge{display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:var(--text-sm);line-height:1;white-space:nowrap;padding:5px 9px 5px 7px;border-radius:var(--radius-control);border:1px solid currentColor;color:var(--pr);background:var(--color-surface)}
+.pbadge svg{width:16px;height:16px;flex:none}
+.chip{display:inline-flex;align-items:center;font-size:var(--text-xs);color:var(--color-ink-2);border:var(--rule);border-radius:var(--radius-control);padding:3px 8px;white-space:nowrap}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.thumb{width:100%;aspect-ratio:1/1;object-fit:contain;background:var(--thumb-bg);border:var(--rule);border-radius:8px;display:block}
+.attr{font:500 var(--text-sm)/1.6 var(--font-body);color:var(--color-ink);background:var(--color-sunk);border:1px dashed var(--color-rule-2);border-radius:var(--radius-control);padding:var(--space-2xs) var(--space-xs);overflow-wrap:anywhere}
+.copy{display:inline-flex;align-items:center;gap:6px;min-height:40px;font-size:var(--text-sm)}
+.copy svg{width:15px;height:15px}
+.copy[data-done]{border-color:var(--st-ok);color:var(--st-ok)}
+.lic{display:grid;gap:var(--space-2xs)}
+.lic dl{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:4px var(--space-sm);margin:0;font-size:var(--text-sm)}
+.lic dt{color:var(--color-muted)} .lic dd{margin:0;color:var(--color-ink)}
+.lic .ok{display:flex;align-items:center;gap:6px;font-weight:700;color:var(--st-ok)}
+.lic .ok svg{width:18px;height:18px}
+.cats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-xs)}
+.cats button{display:flex;flex-direction:column;align-items:stretch;gap:6px;text-align:left;white-space:normal;min-height:0;padding:var(--space-sm) var(--space-sm) var(--space-xs);border-color:var(--color-rule);border-radius:var(--radius-card)}
+.cats button:hover{border-color:var(--color-accent)}
+.cat-top{display:flex;justify-content:space-between;align-items:baseline;gap:var(--space-2xs)}
+.cat-name{font:500 var(--text-lg)/1.2 var(--font-display);color:var(--color-ink)}
+.cat-sub{font:500 var(--text-2xs)/1.5 var(--font-mono);color:var(--color-ink-2);letter-spacing:.02em}
+.cat-thumbs{display:flex;gap:4px}
+.cat-thumbs img{width:34px;height:34px;object-fit:contain;background:var(--thumb-bg);border-radius:4px}
+.rules{list-style:none;margin:0;padding:0;border-top:1px solid var(--color-graphite-rule)}
+.rules li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px var(--space-sm);padding:var(--space-xs) 0;border-bottom:1px solid var(--color-graphite-rule)}
+.rules .k{font:700 var(--text-sm)/1.3 var(--font-mono);color:var(--color-g-accent);white-space:nowrap}
+.rules .v{font-size:var(--text-sm);color:var(--color-g-text)}
+.rules .v small{display:block;color:var(--color-g-muted);font-size:var(--text-xs);margin-top:2px}
+.readout .trap{margin-top:var(--space-sm);display:grid;gap:var(--space-2xs);font-size:var(--text-sm);color:var(--color-g-text)}
+.readout .trap button{justify-self:start;background:transparent;color:var(--color-g-accent);border-color:var(--color-graphite-rule)}
+.readout .trap button:hover{border-color:var(--color-g-accent)}
+/* 答案卡 */
+.verdict.v3{grid-template-columns:minmax(0,190px) minmax(0,1fr) minmax(0,1.05fr);border-left-color:var(--pr)}
+.v3 .v-img{width:100%;aspect-ratio:1/1;object-fit:contain;background:var(--thumb-bg);border-radius:8px;border:var(--rule)}
+.v3 .v-en{font-size:var(--text-xs);color:var(--color-muted);margin-top:-4px}
+.v3 .v-lic{border-left:var(--rule);padding-left:var(--space-lg)}
+/* 卡片 */
+.item.v3{grid-template-columns:96px minmax(0,14rem) minmax(0,1fr) auto}
+.item.v3::before{background:var(--pr)}
+.item.v3 .srcbtn{grid-column:4;grid-row:1}
+.item.v3 .lic,.item.v3 .lic-mini{grid-column:3/5}
+.lic-mini{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px var(--space-sm);align-items:center}
+.lic-mini .label{grid-column:1/-1}
+.item.v3 .note{grid-column:2/5;font-size:var(--text-sm);color:var(--color-ink-2);background:var(--color-sunk);border-radius:var(--radius-control);padding:var(--space-2xs) var(--space-xs)}
+.miss{color:var(--color-muted)}
+.extlink{display:inline-flex;align-items:center;min-height:44px;padding:0 var(--space-sm);border:1px solid var(--color-rule-2);border-radius:var(--radius-control);color:var(--color-accent);text-decoration:none;font-weight:500;white-space:nowrap}
+.extlink:hover{border-color:var(--color-accent)}
+/* 年代時間軸 */
+.seg-r{position:absolute;top:9px;height:12px;border-radius:3px;background:var(--pr);min-width:3px}
+.seg-r.chuan{background:repeating-linear-gradient(90deg,var(--pr) 0 6px,transparent 6px 9px);outline:1px dashed var(--pr);outline-offset:1px}
+.pt{position:absolute;top:8px;width:14px;height:14px;border-radius:50%;background:var(--pr);border:2px solid var(--color-surface);box-shadow:0 0 0 1px var(--pr);transform:translateX(-50%)}
+.r-lab{position:absolute;top:6px;font:500 var(--text-2xs)/1 var(--font-mono);color:var(--color-muted);white-space:nowrap;background:var(--color-surface);padding:2px 4px;border-radius:3px;z-index:1}
+.lg-r{background:var(--pr-range)} .lg-y{width:12px!important;height:12px!important;border-radius:50%;background:var(--pr-year)} .lg-u{background:var(--pr-unsure)}
+.lg-c{background:repeating-linear-gradient(90deg,var(--pr-unsure) 0 5px,transparent 5px 8px);outline:1px dashed var(--pr-unsure)}
+.undrawn{margin-top:var(--space-xs);font-size:var(--text-sm);color:var(--color-ink-2);border-top:var(--rule);padding-top:var(--space-xs)}
+/* 朝代筆數圖 */
+.dchart{display:grid;gap:4px;margin-top:var(--space-sm)}
+.drow{display:grid;grid-template-columns:8.5rem minmax(0,1fr) 5.5rem;gap:var(--space-sm);align-items:center;font-size:var(--text-sm)}
+.drow .dn{color:var(--color-ink)} .drow .dn small{display:block;color:var(--color-muted);font:500 var(--text-2xs)/1.3 var(--font-mono)}
+.drow .dt{height:12px;background:var(--color-sunk);border-radius:3px;position:relative}
+.drow .db{position:absolute;left:0;top:0;bottom:0;background:var(--color-accent);border-radius:3px}
+.drow.unk .db{background:repeating-linear-gradient(135deg,var(--st-unk) 0 3px,transparent 3px 6px);border:1px solid var(--st-unk)}
+.drow .dc{font-family:var(--font-display);font-variant-numeric:tabular-nums;text-align:right;color:var(--color-ink)}
+.sumcheck{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-sm);margin-top:var(--space-sm)}
+.sumcheck div{border:var(--rule);border-radius:var(--radius-control);padding:var(--space-xs) var(--space-sm);background:var(--color-surface)}
+.sumcheck b{display:block;font:700 var(--text-xl)/1.2 var(--font-display);color:var(--color-ink)}
+.sumcheck span{font-size:var(--text-xs);color:var(--color-muted)}
+@media (max-width:900px){
+  .verdict.v3{grid-template-columns:minmax(0,140px) minmax(0,1fr)}
+  .v3 .v-lic{grid-column:1/-1;border-left:0;padding-left:0;border-top:var(--rule);padding-top:var(--space-sm)}
+  .item.v3{grid-template-columns:80px minmax(0,1fr) auto}
+  .item.v3 .facts{grid-column:1/-1} .item.v3 .lic,.item.v3 .lic-mini,.item.v3 .note{grid-column:1/-1}
+  .item.v3 .srcbtn{grid-column:3}
+  .cats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .sumcheck{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:600px){
+  .verdict.v3{grid-template-columns:96px minmax(0,1fr)}
+  .item.v3{grid-template-columns:64px minmax(0,1fr)}
+  .item.v3 .srcbtn{grid-column:1/-1;grid-row:auto;justify-self:start}
+  .cats{grid-template-columns:minmax(0,1fr)}
+  .drow{grid-template-columns:6.5rem minmax(0,1fr) 4.5rem;gap:var(--space-2xs)}
+  .lic dl{grid-template-columns:minmax(0,1fr);gap:0}
+  .lic-mini{grid-template-columns:minmax(0,1fr)}
+  .lic-mini .copy{justify-self:start}
+  .lic dd{margin-bottom:6px}
+}
+</style>
+</head>
+<body>
+<header class="nav">
+  <div class="wrap">
+    <div class="mark" aria-label="故宮文物圖像授權查詢">
+      <svg viewBox="0 0 22 22" aria-hidden="true"><rect x="3" y="3" width="16" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 15l4.5-4.5 3.5 3.5 2.5-2.5L19 17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="14.5" cy="7.5" r="1.8" fill="var(--color-accent)"/></svg>
+      <span>文物圖像授權查詢</span><small>NPM OPEN DATA</small>
+    </div>
+    <button type="button" class="navbtn" id="openPal" aria-haspopup="dialog"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M13 13l4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span class="t">找文物</span><kbd id="palKey">⌘K</kbd></button>
+    <button id="hc" type="button" class="hcbtn" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 2.5a7.5 7.5 0 0 1 0 15z" fill="currentColor"/></svg><span class="t">高對比</span><span class="sr" id="hcState">：關</span><span class="sw" aria-hidden="true"><i></i></span></button>
+  </div>
+</header>
+
+<p id="live" class="sr" role="status" aria-live="polite"></p>
+
+<!-- 畫面一：入口 -->
+<main id="entry" tabindex="-1">
+  <div class="wrap">
+    <div class="hero">
+      <div>
+        <p class="meta label"><span>資料查閱日 2026-11-05</span><span>本頁 18 件器物</span><span>故宮開放資料 108,670 筆</span></p>
+        <h1><span class="ph">這件文物的圖，</span><span class="ph">我可以用嗎？</span></h1>
+        <p class="lead">替報告、簡報或海報找故宮文物圖：依類別與朝代挑一件，看它的年代寫得多明確、圖能怎麼用、標示要怎麼寫。</p>
+        <form id="entryForm" novalidate role="search">
+          <label for="entryQ" class="sr">文物名稱</label>
+          <div class="search">
+            <div class="field ico">
+              <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M13 13l4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <input id="entryQ" type="search" autocomplete="off" placeholder="例如：翠玉白菜、毛公鼎、青瓷">
+            </div>
+            <button class="btn-primary" type="submit">查詢</button>
+          </div>
+          <p class="hint">可輸入品名或其中幾個字。按 <kbd>/</kbd> 跳到搜尋框<span class="k-pal">，按 <kbd class="palKey2">⌘K</kbd> 打開 18 件清單</span>。</p>
+          <p id="entryMsg" class="msg" hidden></p>
+        </form>
+        <h2 class="pick-h">或從類別開始</h2>
+        <div class="cats" id="catPick"></div>
+      </div>
+      <aside class="readout" aria-labelledby="ro-h">
+        <p class="label">故宮網站資料開放宣告 · 2026-11-05</p>
+        <h2 id="ro-h">用故宮的圖之前，先知道三件事</h2>
+        <ul class="rules">
+          <li><span class="k">100 萬像素</span><span class="v">CC0，不需註明出處<small>適合簡報、網頁。無須申請、不限用途、不用付費。</small></span></li>
+          <li><span class="k">600 萬像素</span><span class="v">CC BY 4.0，要標示品名與出處<small>適合海報、印刷。格式：品名。國立故宮博物院，台北，CC BY 4.0 @ www.npm.gov.tw</small></span></li>
+          <li><span class="k">不包括</span><span class="v">商標權與專利權<small>做成商品時，不能讓人誤會是故宮出品。</small></span></li>
+        </ul>
+        <div class="trap"><p>注意：故宮網站的朝代篩選用「年份區間重疊」比對，選「五代」時前幾筆其實是宋代文物，各朝代筆數加起來也會超過總數。</p><button type="button" id="trapBtn">看資料說明與筆數圖</button></div>
+      </aside>
+    </div>
+    <section class="howto" aria-labelledby="howto-h">
+      <h2 id="howto-h">三種用途怎麼選圖？</h2>
+      <ol>
+        <li><strong>課堂簡報、作業網頁</strong>用 100 萬像素圖（CC0）就夠清楚，不需標示；想寫出處更好。</li>
+        <li><strong>海報、印刷品</strong>用 600 萬像素圖（CC BY 4.0），在圖旁或頁尾放上標示文字。</li>
+        <li><strong>引用年代或說明文字</strong>故宮網站文字也是 CC BY 4.0；年代請照原文寫，「傳」「或」等字不要省略。</li>
+      </ol>
+    </section>
+  </div>
+</main>
+
+<!-- 畫面二：摘要 -->
+<main id="summary" tabindex="-1" hidden>
+  <div class="wrap">
+    <div class="sum-head"><div>
+      <div class="crumbs"><button type="button" class="btn-quiet" id="toEntry"><svg class="i16" viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8H4M7.5 4l-4 4 4 4" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>回到入口</button></div>
+      <h1 id="sumTitle">查詢結果</h1>
+    </div></div>
+    <div class="cond" aria-label="目前條件">
+      <span class="label">目前條件</span>
+      <span id="condText"></span>
+      <span class="acts"><button type="button" class="btn-quiet" id="clearAll">清除所有條件</button></span>
+    </div>
+    <div id="count"></div>
+    <div id="emptyBox" class="empty" hidden></div>
+    <details id="filters" class="filters" open>
+      <summary>修改條件<span class="sr">（類別、朝代、年代明確度、搜尋）</span></summary>
+      <div class="fbody">
+        <span class="flab" id="catL">類別</span>
+        <div class="fctl"><div class="seg" id="catSeg" role="group" aria-labelledby="catL"></div></div>
+        <span class="flab" id="dynL">朝代</span>
+        <div class="fctl"><div class="seg" id="dynSeg" role="group" aria-labelledby="dynL"></div></div>
+        <span class="flab" id="precL">年代明確度</span>
+        <div class="fctl"><div class="seg" id="precSeg" role="group" aria-labelledby="precL"></div></div>
+        <label class="flab" for="sumQ">搜尋品名</label>
+        <div class="fctl"><form id="sumForm" novalidate role="search">
+          <div class="search"><div class="field"><input id="sumQ" type="search" autocomplete="off" placeholder="例如：翠玉白菜、毛公鼎、青瓷"></div><button type="submit">查詢</button></div>
+          <p id="sumMsg" class="msg" hidden></p>
+        </form></div>
+      </div>
+    </details>
+    <section id="tl" class="tl" aria-labelledby="tl-h">
+      <div class="tl-head"><h2 id="tl-h">年代時間軸</h2><span id="tlRange"></span></div>
+      <div class="legend" aria-hidden="true">
+        <span><i class="lg lg-y"></i>到年（一個點）</span>
+        <span><i class="lg lg-r"></i>年代區間（年號、朝代或世紀）</span>
+        <span><i class="lg lg-u"></i>年代不確定（「或」、跨朝代）</span>
+        <span><i class="lg lg-c"></i>「傳」為該年代</span>
+      </div>
+      <div id="tlBody" aria-hidden="true"></div>
+      <p class="tl-note">所有列共用同一條時間軸；長條越長，代表故宮只寫到朝代或世紀、年代越不精確。只寫到世紀的依原文換算（例如 11 世紀＝1001–1100 年），換算規則在每件的來源頁。</p>
+      <p class="undrawn" id="undrawn" hidden></p>
+    </section>
+    <section aria-labelledby="list-h"><h2 id="list-h" class="sr">文物清單</h2><div id="items" class="items"></div></section>
+    <div class="tail"><button type="button" id="allSources">查看全部資料來源、筆數圖與限制</button></div>
+  </div>
+</main>
+
+<!-- 畫面三：來源 -->
+<main id="source" tabindex="-1" hidden>
+  <div class="wrap">
+    <div class="crumbs"><button type="button" class="btn-quiet" id="back2"><svg class="i16" viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8H4M7.5 4l-4 4 4 4" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>返回結果</button></div>
+    <h1 id="srcTitle">資料來源</h1>
+    <p class="retain"><span class="label">返回後會回到</span><span id="retained"></span></p>
+    <div id="srcBody"></div>
+    <div class="back-row"><button type="button" class="btn-primary" id="back">返回結果</button></div>
+  </div>
+</main>
+
+<dialog id="palette" aria-labelledby="palH">
+  <h2 id="palH" class="sr">快速找文物</h2>
+  <div class="pal-in">
+    <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M13 13l4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <input id="palQ" type="text" autocomplete="off" role="combobox" aria-expanded="true" aria-controls="palList" aria-autocomplete="list" aria-label="輸入品名" placeholder="輸入品名，例如 白菜、鼎、硯">
+    <kbd>Esc</kbd>
+  </div>
+  <ul id="palList" class="pal-list" role="listbox" aria-label="文物"></ul>
+  <p class="pal-foot" aria-hidden="true"><span><kbd>↑</kbd> <kbd>↓</kbd> 選擇</span><span><kbd>Enter</kbd> 看答案</span><span><kbd>Esc</kbd> 關閉</span></p>
+</dialog>
+
+<footer>
+  <div class="wrap">
+    <span>原型版本 <strong id="ver">v1.0</strong>（2026/11/05）</span>
+    <span>單一 HTML，不連網、不收集資料</span>
+    <span>本頁不是國立故宮博物院的網站；文物資料與縮圖取自故宮典藏資料檢索 Opendata（文字 CC BY 4.0、低階圖像 CC0），使用前請到原頁核對</span>
+    <span>鍵盤：Tab、Enter、<kbd>/</kbd> 搜尋、<kbd class="palKey2">⌘K</kbd> 文物清單</span>
+    <span>字型：Space Grotesk（SIL OFL 1.1）</span>
+  </div>
+</footer>
+
+<script>
+'use strict';
+const VERSION = 'v1.0';
+const CHECK = '2026/11/05';
+const ITEMS = [{"id": "1438", "no": "中銅000651N000000000", "name": "毛公鼎", "en": "Ding cauldron of Duke Mao", "type": "銅器", "cat": "銅器", "era": "西周晚期", "west": "西元前827-782年", "size": "通高53.8公分 腹深27.2公分 口徑47.0公分", "a": -827, "b": -782, "conv": "原文是西元前的年份區間，照原文畫成長條（西元前以負數計）。", "prec": "range", "dyn": ["shangzhou"], "chuan": false, "attr": "毛公鼎。國立故宮博物院，台北，CC BY 4.0 @ www.npm.gov.tw", "url": "https://digitalarchive.npm.gov.tw/opendata/Pub/Detail/1438?dep=U&mode=full", "catCount": 6236}, {"id": "203", "no": "故銅000003N000000000", "name": "亞醜□尊", "en": "Zun wine vessel with inscription \"Ya chou\"", "type": "銅器", "cat": "銅器", "era": "商晚期", "west": "西元前12-11世紀", "size": "高26.5公分 腹深23.3公分 口徑20.3公分 底徑13.5公分 足高5.5公分 腹圍31.5公分", "a": -1200, "b": -1001, "conv": "原文只寫到世紀：西元前12世紀到前11世紀，換算成前1200年到前1001年。", "prec": "range", "dyn": ["shangzhou"], "chuan": false, "attr": "亞醜□尊。國立故宮博物院，台北，CC BY 4.0 @ www.npm.gov.tw", "url": "https://digitalarchive.npm.gov.tw/opendata/Pub/Detail/203?dep=U&mode=full", "catCount": 6236}, {"id": "2601", "no": "購銅000123N000000000", "name": "青銅鎏金觀音菩薩立像", "en": "Gilt bronze Avalokitesvara Bodhisattva", "type": "銅器", "cat": "銅器", "era": "隋至初唐", "west": "西元7世紀初", "size": "高15.2公分", "a": 601, "b": 700, "conv": "原文只寫到世紀：7世紀，換算成 601–700 年。原文另寫「初」，但沒有說明到哪一年，本頁不自行縮小範圍。", "prec": "unsure", "dyn": ["suitang"], "chuan": false, "attr": "青銅鎏金觀音菩薩立像。國立故宮博物院，台北，CC BY 4.0 @ www.npm.gov.tw", "url": "https://digitalarchive.npm.gov.tw/opendata/Pub/Detail/2601?dep=U&mode=full", "catCount": 6236}, {"id": "47", "no": "故瓷016767N000000000", "name": "定窯 白瓷瓜稜罐", "en": "Melon-shaped jar in white glaze, Ding ware", "type": "陶瓷器", "cat": "陶瓷器", "era": "北宋", "west": "西元960-1127年", "size": "全高18.7公分 口徑4.6公分 底徑11.2公分 足徑11.1公分", "a": 960, "b": 1127, "conv": "原文是年份區間，照原文畫成長條。", "prec": "range", "dyn": ["song"], "chuan": false, "attr": "定窯 白瓷瓜稜罐。國立故宮博物院，台北，CC BY 4.0 @ www.npm.gov.tw", "url": "https://digitalarchive.npm.gov.tw/opendata/Pub/Detail/47?dep=U&mode=full", "catCount": 24201}, {"id": "18", "no": "故瓷014021N000000000", "name": "官窯 青瓷尊", "en": "Zun vassel with light bluish-green glaze, Guan ware", "type": "陶瓷器", "cat": "陶瓷器", "era": "南宋", "west": "西元1127-1279年", "size": "高25.9公分 口徑16.5公分 足徑13.0公分", "a": 1127, "b": 1279, "conv": "原文是年份區間，照原文畫成長條。", "prec": "range", "dyn": ["song"], "chuan": false, "attr": "官窯 青瓷尊。國立故宮博物院，台北，CC BY 4.0 @ www.npm.gov.tw", "url": "https://digitalarchive.npm.gov.tw/opendata/Pub/Detail/18?dep=U&mode=full", "catCount": 24201}, {"id": "45", "no": "故瓷017728N000000000", "name": "定窯 白瓷盤口紙槌瓶", "en": "Flat-rimmed mallet-shaped vase in white glaze", "type": "陶瓷器", "cat": "陶瓷器", "era": "北宋-金", "west": "西元12世紀", "size": "高15.9公分 口徑7.2公分 足徑9.2公分", "a": 1101, "b": 1200, "conv": "原文只寫到世紀：12世紀，換算成 1101–1200 年。", "prec": "unsure", "dyn": ["song"], "chuan": false, "attr": "定窯 白瓷盤口紙槌瓶。國立故宮博物院，台北，CC BY 4.0 @ www.npm.gov.tw", "url": "https://digitalarchive.npm.gov.tw/opendata/Pub/Detail/45?dep=U&mode=full", "catCount": 24201}, {"id": "909", "no": "故瓷015132N000000000", "name": "青花纏枝番蓮紋高足杯", "en": "Stem cup with underglaze-blue decoration of Indian lotus scrolls", "type": "陶瓷器", "cat": "陶瓷器", "era": "明 宣德", "west": "西元1426-1435年", "size": "高8.9公分 深3.3公分 口徑9.9公分 足徑4.5公分", "a": 1426, "b": 1435, "conv": "原文是年份區間，照原文畫成長條。", "prec": "range", "dyn": ["ming"], "chuan": false, "attr": "青花纏枝番蓮紋高足杯。國立故宮博物院，台北，CC BY 4.0 @ www.npm.gov.tw", "url": "https://digitalarchive.npm.gov.tw/opendata/Pub/Detail/909?dep=U&mode=full", "catCount": 24201}, {"id": "2", "no": "故瓷017646N000000000", "name": "霽青描金游魚轉心瓶", "en": "Revolving vase decorated with swimming goldfish and gold tracing on cobalt blue glaze", "type": "陶瓷器", "cat": "陶瓷器", "era": "清 乾隆", "west": "西元1736-1795年", "size": "高23.5公分 深19.8公分 口徑5.3公分 足徑8.4公分 腹圍43.2公分", "a": 1736, "b": 1795, "conv": "原文是年份區間，照原文畫成長條。", "prec": "range", "dyn": ["qing"], "chuan": false, "attr": "霽青描金游魚轉心瓶。國立故宮博物院，台北，CC BY 4.0 @ www.npm.gov.tw", "url": "https://digitalarchive.npm.gov.tw/opendata/Pub/Detail/2?dep=U&mode=full", "catCount": 24201}, {"id": "85", "no": "故玉002251N000000000", "name": "玉龍紋盤", "en": "Jade plate with dragon pattern", "type": "玉器", "cat": "玉器", "era": "北宋或遼", "west": "西元11世紀", "size": "高2.2公分 口徑26.2公分 底徑22.2公分", "a": 1001, "b": 1100, "conv": "原文只寫到世紀：11世紀，換算成 1001–1100 年。", "prec": "unsure", "dyn": ["song"], "chuan": false, "attr": "玉龍紋盤。國立故宮博物院，台北，CC BY 4.0 @ www.npm.gov.tw", "url": "https://digitalarchive.npm.gov.tw/opendata/Pub/Detail/85?dep=U&mode=full", "catCount": 12327}, {"id": "3", "no": "故玉002103N000000000", "name": "翠玉白菜", "en": "Jadeite cabbage", "type": "玉器", "cat": "玉器", "era": "清", "west": "西元1644-1911年", "size": "長18.7公分 寬9.1公分 厚5.07公分", "a": 1644, "b": 1911, "conv": "原文是年份區間，照原文畫成長條。", "prec": "range", "dyn": ["qing"], "chuan": false, "attr": "翠玉白菜。國立故宮博物院，台北，CC BY 4.0 @ www.npm.gov.tw", "url": "https://digitalarchive.npm.gov.tw/opendata/Pub/Detail/3?dep=U&mode=full", "catCount": 12327}, {"id": "49961", "no": "故雜000178N000000000", "name": "肉形石", "en": "Meat-shaped stone", "type": "雜項", "cat": "other", "era": "清", "west": "西元1644-1911年", "size": "長7.9公分 通高6.6公分", "a": 1644, "b": 1911, "conv": "原文是年份區間，照原文畫成長條。", "prec": "range", "dyn": ["qing"], "chuan": false, "attr": "肉形石。國立故宮博物院，台北，CC BY 4.0 @ www.npm.gov.tw", "url": "https://digitalarchive.npm.gov.tw/opendata/Pub/Detail/49961?dep=U&mode=full", "catCount": 11974}, {"id": "2502", "no": "故雕000182N000000000", "name": "雕橄欖核舟（底刻「後赤壁賦」全文）", "en": "Carved olive-pit of miniature boat decorated with the Ode to the Red Cliff on the bottom", "type": "雕刻", "cat": "other", "era": "清 乾隆二年", "west": "西元1737年", "size": "長3.4公分 寬1.4公分 高1.6公分", "a": 1737, "b": 1737, "conv": "原文是單一年份，畫成一個點。", "prec": "year", "dyn": ["qing"], "chuan": false, "attr": "雕橄欖核舟（底刻「後赤壁賦」全文）。國立故宮博物院，台北，CC BY 4.0 @ www.npm.gov.tw", "url": "https://digitalarchive.npm.gov.tw/opendata/Pub/Detail/2502?dep=U&mode=full", "catCount": 667}, {"id": "25577", "no": "故琺000001N000000000", "name": "瓷胎掐絲兼畫琺瑯西洋人物圖高足杯", "en": "Stem cup with decoration of Western figures in painted enamels on the porcelain centre and segments in cloisonné enamel", "type": "琺瑯器", "cat": "other", "era": "清", "west": "西元1644-1911年", "size": "長13.3公分 寬11.1公分 高21.0公分 通高24.7公分 深6.36公分 口徑6.5公分 足徑9.3公分", "a": 1644, "b": 1911, "conv": "原文是年份區間，照原文畫成長條。", "prec": "range", "dyn": ["qing"], "chuan": false, "attr": "瓷胎掐絲兼畫琺瑯西洋人物圖高足杯。國立故宮博物院，台北，CC BY 4.0 @ www.npm.gov.tw", "url": "https://digitalarchive.npm.gov.tw/opendata/Pub/Detail/25577?dep=U&mode=full", "catCount": 2521}, {"id": "2383", "no": "故文000001N000000000", "name": "「臨池真賞」墨", "en": "Octagonal inkstick inscribed with \"Linchi zhenshang\"", "type": "文具", "cat": "文具", "era": "清 康熙五十五年", "west": "西元1716年", "size": "高23.0公分 徑長4.6公分 寬4.2公分", "a": 1716, "b": 1716, "conv": "原文是單一年份，畫成一個點。", "prec": "year", "dyn": ["qing"], "chuan": false, "attr": "「臨池真賞」墨。國立故宮博物院，台北，CC BY 4.0 @ www.npm.gov.tw", "url": "https://digitalarchive.npm.gov.tw/opendata/Pub/Detail/2383?dep=U&mode=full", "catCount": 2385}, {"id": "25983", "no": "故文000042N000000001", "name": "剔紅海棠紋硯盒", "en": "Carved-red lacquer inkstone container with crabapple blossom decoration", "type": null, "cat": "other", "era": "清 十七世紀末至十八世紀初", "west": "西元1650-1750年", "size": "長19.9公分 寬22.7公分 高6.4公分", "a": 1650, "b": 1750, "conv": "原文是年份區間，照原文畫成長條。", "prec": "range", "dyn": ["qing"], "chuan": false, "attr": "剔紅海棠紋硯盒。國立故宮博物院，台北，CC BY 4.0 @ www.npm.gov.tw", "url": "https://digitalarchive.npm.gov.tw/opendata/Pub/Detail/25983?dep=U&mode=full", "catCount": null}, {"id": "477", "no": "故雜007128N000000000", "name": "畫琺瑯玫瑰花式懷錶", "en": "Rose-shaped pocket watch with decoration in painted enamels", "type": "雜項", "cat": "other", "era": null, "west": null, "size": "高6.8公分 徑約4.8公分 厚1.4公分", "a": null, "b": null, "conv": "故宮頁面沒有西元年欄位，本頁不畫在時間軸上。", "prec": "none", "dyn": ["none"], "chuan": false, "attr": "畫琺瑯玫瑰花式懷錶。國立故宮博物院，台北，CC BY 4.0 @ www.npm.gov.tw", "url": "https://digitalarchive.npm.gov.tw/opendata/Pub/Detail/477?dep=U&mode=full", "catCount": 11974}, {"id": "43757", "no": "中錢000001N000000000", "name": "銅錢", "en": "Coin", "type": "錢幣", "cat": "other", "era": null, "west": null, "size": null, "a": null, "b": null, "conv": "故宮頁面沒有西元年欄位，本頁不畫在時間軸上。", "prec": "none", "dyn": ["none"], "chuan": false, "attr": "銅錢。國立故宮博物院，台北，CC BY 4.0 @ www.npm.gov.tw", "url": "https://digitalarchive.npm.gov.tw/opendata/Pub/Detail/43757?dep=U&mode=full", "catCount": 6953}, {"id": "97", "no": "故文000152N000000000", "name": "從星硯", "en": "Inkstone with astrological theme and engraved with poem", "type": "文具", "cat": "文具", "era": "傳 北宋", "west": "傳 西元960-1127年", "size": "長15.9公分 寬9.0公分 高5.6公分", "a": 960, "b": 1127, "conv": "原文是年份區間，照原文畫成長條。", "prec": "unsure", "dyn": ["song"], "chuan": true, "attr": "從星硯。國立故宮博物院，台北，CC BY 4.0 @ www.npm.gov.tw", "url": "https://digitalarchive.npm.gov.tw/opendata/Pub/Detail/97?dep=U&mode=full", "catCount": 2385}];
+const DYN = [{"value": "-7000~-2000~新石器時代", "name": "新石器時代", "begin": -7000, "end": -2000, "count": 1093}, {"value": "-2600~-2000~新石器時代晚期", "name": "新石器時代晚期", "begin": -2600, "end": -2000, "count": 244}, {"value": "-1600~-1046~商", "name": "商", "begin": -1600, "end": -1046, "count": 858}, {"value": "-1100~-800~西周", "name": "西周", "begin": -1100, "end": -800, "count": 604}, {"value": "-800~-500~春秋", "name": "春秋", "begin": -800, "end": -500, "count": 447}, {"value": "-500~-300~戰國", "name": "戰國", "begin": -500, "end": -300, "count": 753}, {"value": "-221~-207~秦", "name": "秦", "begin": -221, "end": -207, "count": 18}, {"value": "-206~8~西漢", "name": "西漢", "begin": -206, "end": 8, "count": 2168}, {"value": "9~23~新莽", "name": "新莽", "begin": 9, "end": 23, "count": 19}, {"value": "25~220~東漢", "name": "東漢", "begin": 25, "end": 220, "count": 430}, {"value": "220~589~魏晉南北朝", "name": "魏晉南北朝", "begin": 220, "end": 589, "count": 3401}, {"value": "581~618~隋", "name": "隋", "begin": 581, "end": 618, "count": 857}, {"value": "618~907~唐", "name": "唐", "begin": 618, "end": 907, "count": 1288}, {"value": "907~960~五代", "name": "五代", "begin": 907, "end": 960, "count": 7167}, {"value": "907~1125~遼", "name": "遼", "begin": 907, "end": 1125, "count": 8895}, {"value": "960~1279~宋", "name": "宋", "begin": 960, "end": 1279, "count": 10329}, {"value": "1115~1234~金", "name": "金", "begin": 1115, "end": 1234, "count": 1118}, {"value": "1271~1368~元", "name": "元", "begin": 1271, "end": 1368, "count": 6143}, {"value": "1368~1644~明", "name": "明", "begin": 1368, "end": 1644, "count": 39762}, {"value": "1644~1911~清", "name": "清", "begin": 1644, "end": 1911, "count": 46783}, {"value": "1911~9999~民國", "name": "民國", "begin": 1911, "end": 9999, "count": 1244}, {"value": "0~0~時代不詳", "name": "時代不詳", "begin": 0, "end": 0, "count": 10105}];
+const OD_TOTAL = 108670;
+const CAT_COUNTS = {"銅器": 6236, "陶瓷器": 24201, "玉器": 12327, "琺瑯器": 2521, "雕刻": 667, "漆器": 762, "錢幣": 6953, "文具": 2385, "雜項": 11974, "織品": 1612, "絲繡": 438, "繪畫": 16697, "法書": 5763, "法帖": 7147, "拓片": 1214, "成扇": 2545, "其他": 5228};
+const IMG = {"1438": "img/1438.webp", "203": "img/203.webp", "2601": "img/2601.webp", "47": "img/47.webp", "18": "img/18.webp", "45": "img/45.webp", "909": "img/909.webp", "2": "img/2.webp", "85": "img/85.webp", "3": "img/3.webp", "49961": "img/49961.webp", "2502": "img/2502.webp", "25577": "img/25577.webp", "2383": "img/2383.webp", "25983": "img/25983.webp", "477": "img/477.webp", "43757": "img/43757.webp", "97": "img/97.webp"};
+
+const SOURCES = {
+  od: {publisher:'國立故宮博物院', title:'故宮典藏資料檢索：Opendata 開放資料', url:'https://digitalarchive.npm.gov.tw/opendata/', updated:'頁面未標示更新日；查閱時共 108,670 筆', unit:'筆數；朝代篩選以「起年~迄年~朝代」比對', terms:'網站文字 CC BY 4.0；本頁只引用欄位與筆數並附連結', role:'原始發布單位'},
+  decl: {publisher:'國立故宮博物院', title:'網站資料開放宣告（故宮典藏資料檢索頁尾）', url:'https://digitalarchive.npm.gov.tw/', updated:'未提供', unit:'授權條款原文', terms:'網站文字 CC BY 4.0', role:'原始發布單位'},
+  cc0: {publisher:'Creative Commons', title:'CC0 1.0 公眾領域貢獻宣告', url:'https://creativecommons.org/publicdomain/zero/1.0/deed.zh-hant', updated:'—', unit:'授權條款', terms:'CC BY 4.0（條款頁面本身）', role:'授權條款發布單位'},
+  ccby: {publisher:'Creative Commons', title:'CC BY 4.0 姓名標示 4.0 國際', url:'https://creativecommons.org/licenses/by/4.0/deed.zh-hant', updated:'—', unit:'授權條款', terms:'CC BY 4.0（條款頁面本身）', role:'授權條款發布單位'}
+};
+const CATS = {all:'全部類別', '銅器':'銅器', '陶瓷器':'陶瓷器', '玉器':'玉器', '文具':'文具', other:'其他'};
+const CATSUB = {'銅器':'鼎、尊、佛像', '陶瓷器':'官窯、定窯、青花', '玉器':'翠玉白菜、玉盤', '文具':'墨、硯', other:'雕刻、琺瑯、雜項、錢幣、未分類'};
+const DYNS = {all:'全部朝代', shangzhou:'商周', suitang:'隋唐', song:'宋遼金', ming:'明', qing:'清', none:'時代未提供'};
+const PREC = {all:{label:'全部'}, year:{label:'到年'}, range:{label:'年代區間'}, unsure:{label:'不確定'}, none:{label:'未提供'}};
+const PORDER = ['year','range','unsure','none'];
+const PICON = {
+  year:'<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="10" r="3.6" fill="currentColor"/></svg>',
+  range:'<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="7" width="15" height="6" rx="2" fill="currentColor"/></svg>',
+  unsure:'<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M10 2a8 8 0 0 1 0 16z" fill="currentColor"/></svg>',
+  none:'<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-dasharray="3 2.4"/><text x="10" y="14.5" text-anchor="middle" font-size="11" font-weight="700" fill="currentColor">?</text></svg>'
+};
+const OKICON = '<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="currentColor"/><path d="M6 10.5l2.6 2.6L14.5 7" stroke="var(--color-surface)" stroke-width="2.2" fill="none"/></svg>';
+const COPYICON = '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="5" y="5" width="8.5" height="8.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M3 10.5V3.5A1 1 0 0 1 4 2.5h6.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+const ARROW = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h9M8.5 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const EXT = '<svg class="ext" viewBox="0 0 12 12" aria-hidden="true"><path d="M7 1.5h3.5V5M10.5 1.5 5.5 6.5M9 7.5v2.5a.5.5 0 0 1-.5.5h-6a.5.5 0 0 1-.5-.5v-6a.5.5 0 0 1 .5-.5H5" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="sr">（新分頁開啟）</span>';
+
+// ---------- 狀態 ----------
+const S = {screen:'entry', cat:'all', dyn:'all', prec:'all', q:'', srcId:null, returnFocus:null};
+const $ = id => document.getElementById(id);
+const norm = s => (s||'').toLowerCase().replace(/[\s　「」（）()]+/g,'');
+const total = ITEMS.length;
+function matchQ(it, q){ if (!q) return true; const n = norm(q); return norm(it.name).includes(n) || norm(it.en).includes(n) || norm(it.type).includes(n); }
+const catOK = (it, c=S.cat) => c==='all' || it.cat===c;
+const dynOK = (it, d=S.dyn) => d==='all' || it.dyn.includes(d);
+const precOK = (it, p=S.prec) => p==='all' || it.prec===p;
+function filtered(o={}){ const c=o.cat??S.cat, d=o.dyn??S.dyn, p=o.prec??S.prec, q=o.q??S.q; return ITEMS.filter(it => catOK(it,c) && dynOK(it,d) && precOK(it,p) && matchQ(it,q)); }
+function condText(){ return `${CATS[S.cat]} · ${DYNS[S.dyn]} · ${S.prec==='all'?'全部明確度':PREC[S.prec].label} · 搜尋：${S.q ? '「'+S.q+'」' : '無'}`; }
+function announce(t){ $('live').textContent=''; setTimeout(()=>{ $('live').textContent=t; }, 30); }
+function pbadge(p){ return `<span class="pbadge pr-${p}">${PICON[p]}${PREC[p].label}</span>`; }
+const fmtYear = y => y<0 ? `前${-y}` : `${y}`;
+function eraText(it){
+  if (!it.era) return '<span class="miss">未提供（故宮頁面沒有「時代」欄）</span>';
+  return `${it.era}${it.west ? `（${it.west}）` : '<span class="miss">（頁面沒有西元年）</span>'}`;
+}
+function noteOf(it){
+  if (it.chuan) return '「傳」表示傳為這個年代，故宮並未確定；引用時請保留「傳」字。';
+  if (it.prec==='unsure') return `原文寫「${it.era}」，年代跨朝代或不確定；引用時請照原文，不要只寫其中一個朝代。`;
+  if (it.prec==='none') return '故宮頁面沒有時代欄，本頁不推測年代，也不畫在時間軸上。';
+  if (/□/.test(it.name)) return '品名中的「□」是故宮原文，代表無法以文字呈現或未釋讀的字，本頁照原樣顯示。';
+  return '';
+}
+function counts(rows){ const c={}; for (const k of PORDER) c[k]=rows.filter(it=>it.prec===k).length; return c; }
+function mixBar(rows, cls='mix'){ const c=counts(rows); return `<span class="${cls}" aria-hidden="true">${PORDER.filter(k=>c[k]).map(k=>`<i class="pr-${k}" style="flex:${c[k]};background:var(--pr)"></i>`).join('')}</span>`; }
+function licBlock(it, full=true){
+  return `<div class="lic">
+    ${full?`<p class="ok">${OKICON}可以使用：無須申請、不用付費</p>`:''}
+    <dl><dt>簡報、網頁</dt><dd>100 萬像素圖，CC0，不需標示</dd><dt>海報、印刷</dt><dd>600 萬像素圖，CC BY 4.0，需標示：</dd></dl>
+    <p class="attr" id="attr-${it.id}">${it.attr}</p>
+    <div><button type="button" class="copy" data-copy="${it.id}">${COPYICON}<span>複製標示文字</span><span class="sr">：${it.name}</span></button></div>
+  </div>`;
+}
+
+// ---------- 畫面切換 ----------
+function show(screen, opts={}){
+  S.screen = screen;
+  for (const id of ['entry','summary','source']) $(id).hidden = (id!==screen);
+  if (screen==='summary') renderSummary();
+  if (screen==='source') renderSource();
+  if (!opts.fromHistory) history.pushState(snapshot(), '');
+  const focusEl = opts.focus ? opts.focus() : $(screen).querySelector('h1');
+  if (focusEl){ if (!focusEl.hasAttribute('tabindex') && focusEl.tagName==='H1') focusEl.setAttribute('tabindex','-1'); focusEl.focus({preventScroll:true}); }
+  window.scrollTo(0,0);
+}
+function snapshot(){ return {screen:S.screen, cat:S.cat, dyn:S.dyn, prec:S.prec, q:S.q, srcId:S.srcId}; }
+window.addEventListener('popstate', e => { const st = e.state; if (!st) return; Object.assign(S, st); $('sumQ').value = S.q; show(st.screen, {fromHistory:true}); });
+function openItem(it){ S.cat='all'; S.dyn='all'; S.prec='all'; S.q=it.name; $('sumQ').value=it.name; $('sumMsg').hidden=true; show('summary', {focus: () => $('sumTitle')}); announce(`${it.name}：年代${PREC[it.prec].label}。`); }
+
+// ---------- 入口 ----------
+function renderEntry(){
+  $('catPick').innerHTML = ['銅器','陶瓷器','玉器','文具','other','all'].map(c => {
+    const rows = ITEMS.filter(it => c==='all' || it.cat===c);
+    const od = c==='all' ? OD_TOTAL : c==='other' ? null : CAT_COUNTS[c];
+    return `<button type="button" data-cat="${c}">
+      <span class="cat-top"><span class="cat-name">${c==='all'?'全部 18 件':CATS[c]}</span><span class="fam-arrow" aria-hidden="true">→</span></span>
+      <span class="cat-thumbs" aria-hidden="true">${rows.slice(0,4).map(it=>`<img src="${IMG[it.id]}" alt="">`).join('')}</span>
+      <span class="cat-sub">本頁 ${rows.length} 件${od?` · 故宮開放 ${od.toLocaleString()} 筆`:''}</span>
+      <span class="fam-sub">${c==='all'?'一起比較年代':CATSUB[c]}</span></button>`;
+  }).join('');
+}
+$('catPick').addEventListener('click', e => { const b = e.target.closest('button[data-cat]'); if (!b) return; S.cat=b.dataset.cat; S.dyn='all'; S.prec='all'; S.q=''; $('sumQ').value=''; show('summary'); announce(`已選 ${CATS[S.cat]}，符合 ${filtered().length} 件。`); });
+$('trapBtn').addEventListener('click', () => { S.srcId=null; S.returnFocus='trapBtn'; show('source'); });
+$('entryForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const q = $('entryQ').value.trim();
+  if (!q){ $('entryMsg').innerHTML=PICON.none.replace('<svg','<svg width="16" height="16"')+'<span>請先輸入品名，例如 翠玉白菜、毛公鼎、青瓷；或在下方直接選類別。</span>'; $('entryMsg').hidden=false; $('entryQ').focus(); return; }
+  $('entryMsg').hidden=true; S.cat='all'; S.dyn='all'; S.prec='all'; S.q=q; $('sumQ').value=q;
+  show('summary', {focus: () => $('emptyBox').hidden ? $('sumTitle') : $('emptyH')});
+});
+
+// ---------- 摘要 ----------
+function segHTML(map, key, cur, countFn){ return Object.keys(map).map(k => { const n = countFn(k); const label = typeof map[k]==='string' ? map[k] : map[k].label; return `<button type="button" data-${key}="${k}" aria-pressed="${k===cur}" aria-label="${label}（${n} 件）">${label}<span class="n" aria-hidden="true">${n}</span></button>`; }).join(''); }
+function renderSummary(){
+  const rows = filtered();
+  $('condText').textContent = condText();
+  $('catSeg').innerHTML = segHTML(CATS,'cat',S.cat,k=>filtered({cat:k}).length);
+  $('dynSeg').innerHTML = segHTML(DYNS,'dyn',S.dyn,k=>filtered({dyn:k}).length);
+  $('precSeg').innerHTML = segHTML(PREC,'prec',S.prec,k=>filtered({prec:k}).length);
+  $('sumTitle').textContent = S.q ? `「${S.q}」的查詢結果` : (S.cat==='all' ? '本頁 18 件文物' : `${CATS[S.cat]}`);
+  renderCount(rows); renderEmpty(rows); renderTimeline(rows); renderItems(rows);
+}
+for (const [seg,key] of [['catSeg','cat'],['dynSeg','dyn'],['precSeg','prec']]){
+  $(seg).addEventListener('click', e => {
+    const b = e.target.closest(`button[data-${key}]`); if (!b) return;
+    S[key] = b.dataset[key]; renderSummary(); announce(`條件改為 ${condText()}，符合 ${filtered().length} 件。`);
+    const again = $(seg).querySelector(`[data-${key}="${S[key]}"]`); if (again) again.focus();
+  });
+}
+$('sumForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const q = $('sumQ').value.trim();
+  if (!q){ $('sumMsg').innerHTML=PICON.none.replace('<svg','<svg width="16" height="16"')+'<span>搜尋框是空的。請輸入品名；若要看全部，按「清除所有條件」。</span>'; $('sumMsg').hidden=false; $('sumQ').focus(); return; }
+  $('sumMsg').hidden=true; S.q=q; renderSummary(); announce(`搜尋「${q}」，符合 ${filtered().length} 件。`);
+  if (!$('emptyBox').hidden) $('emptyH').focus();
+});
+$('clearAll').addEventListener('click', () => { S.cat='all'; S.dyn='all'; S.prec='all'; S.q=''; $('sumQ').value=''; $('sumMsg').hidden=true; renderSummary(); announce('已清除所有條件，顯示全部 18 件。'); $('sumQ').focus(); });
+$('toEntry').addEventListener('click', () => show('entry'));
+$('allSources').addEventListener('click', () => { S.srcId=null; S.returnFocus='allSources'; show('source'); });
+
+function renderCount(rows){
+  const el = $('count');
+  if (!rows.length){ el.innerHTML=''; el.hidden=true; return; }
+  el.hidden=false;
+  if (rows.length===1){
+    const it = rows[0], note = noteOf(it);
+    el.innerHTML = `<div class="verdict v3 pr-${it.prec}">
+      <img class="v-img" src="${IMG[it.id]}" alt="${it.name}（故宮 Open Data 縮圖）">
+      <div class="v-id"><span class="label">符合 1 件 · ${it.no}</span><span class="v-name">${it.name}</span>${it.en?`<span class="v-en">${it.en}</span>`:''}
+        <div class="tags">${pbadge(it.prec)}<span class="chip">${it.type||'分類未提供'}</span></div>
+        <p class="v-sent">時代：${eraText(it)}</p>${note?`<p class="hint">${note}</p>`:''}</div>
+      <div class="v-lic">${licBlock(it)}</div>
+      <p class="v-foot">授權依故宮「網站資料開放宣告」（查閱日 ${CHECK}）；不包括商標權與專利權。</p></div>`;
+    return;
+  }
+  const c = counts(rows);
+  el.innerHTML = `<div class="tally"><p class="t-head"><strong>符合 ${rows.length} 件</strong><span>（本頁共 ${total} 件）年代明確度：${PORDER.filter(k=>c[k]).map(k=>`${PREC[k].label} ${c[k]}`).join('、')}</span></p>
+    ${mixBar(rows,'t-bar')}<p class="t-foot">全部 ${rows.length} 件都可以使用：100 萬像素圖 CC0 免標示，600 萬像素圖 CC BY 4.0 需標示（見每張卡片）。</p></div>`;
+}
+
+function renderEmpty(rows){
+  const box = $('emptyBox');
+  if (rows.length){ box.hidden=true; box.innerHTML=''; return; }
+  let why; const btns=[];
+  const qAny = ITEMS.some(it => matchQ(it,S.q));
+  if (S.q && !qAny){
+    why = `本頁收錄的 ${total} 件器物裡找不到「${S.q}」。本頁是課堂原型，只收錄 18 件器物樣本（不含書畫）；故宮開放資料共 108,670 筆，可到故宮網站查。`;
+    btns.push(['clearQ','清除搜尋，保留其他條件']);
+    btns.push(['ext','到故宮 Open Data 查']);
+  } else {
+    const relax = [['prec','all',`改看全部明確度`],['dyn','all',`改看全部朝代`],['cat','all',`改看全部類別`]].filter(([k])=>S[k]!=='all');
+    const ok = relax.filter(([k,v]) => filtered({[k]:v}).length);
+    why = `${condText()} 沒有符合的文物。`;
+    for (const [k,v,t] of ok.slice(0,2)) btns.push([k, `${t}（${filtered({[k]:v}).length}）`]);
+    if (!btns.length) btns.push(['all','清除所有條件']);
+  }
+  box.innerHTML = `<h2 id="emptyH" tabindex="-1">沒有符合的文物</h2><p>${why}</p><p class="hint">目前條件：${condText()}</p><div class="actions">${btns.map(([a,t],i)=> a==='ext' ? `<a class="extlink" href="https://digitalarchive.npm.gov.tw/opendata/" target="_blank" rel="noopener">${t}${EXT}</a>` : `<button type="button" data-fix="${a}"${i===0?' class="btn-primary"':''}>${t}</button>`).join('')}</div>`;
+  box.hidden=false;
+}
+$('emptyBox').addEventListener('click', e => {
+  const b = e.target.closest('button[data-fix]'); if (!b) return;
+  const a = b.dataset.fix;
+  if (a==='clearQ'){ S.q=''; $('sumQ').value=''; }
+  else if (a==='all'){ S.cat='all'; S.dyn='all'; S.prec='all'; S.q=''; $('sumQ').value=''; }
+  else S[a]='all';
+  renderSummary(); announce(`已恢復，符合 ${filtered().length} 件。`);
+  $('count').setAttribute('tabindex','-1'); $('count').focus();
+});
+
+function renderTimeline(rows){
+  const tl = $('tl');
+  const drawn = rows.filter(it => it.a!==null).sort((x,y)=>x.a-y.a || x.b-y.b);
+  const und = rows.filter(it => it.a===null);
+  if (!rows.length){ tl.hidden=true; return; }
+  tl.hidden=false;
+  $('undrawn').hidden = !und.length;
+  $('undrawn').textContent = und.length ? `沒有畫在時間軸上（故宮頁面沒有時代欄）：${und.map(it=>it.name).join('、')}` : '';
+  if (!drawn.length){ $('tlBody').innerHTML=''; $('tlRange').textContent='本次結果都沒有年代資料'; return; }
+  const mn = Math.min(...drawn.map(it=>it.a)), mx = Math.max(...drawn.map(it=>it.b));
+  const span0 = mx - mn;
+  const unit = span0 > 1500 ? 500 : span0 > 600 ? 200 : span0 > 200 ? 100 : 50;
+  const y0 = Math.floor(mn/unit)*unit, y1 = Math.ceil((mx+1)/unit)*unit;
+  const X = y => (y - y0)/(y1 - y0)*100;
+  const lab = getComputedStyle(document.documentElement).getPropertyValue('--lab').trim() || '190px';
+  const narrow = parseInt(lab,10) < 150;
+  const step = unit * (narrow ? 2 : 1);
+  $('tlRange').textContent = `時間軸 ${fmtYear(y0)}–${fmtYear(y1)} 年（依目前結果自動設定，西元前以「前」表示）`;
+  let axis='', grid='';
+  for (let y=Math.ceil(y0/step)*step; y<=y1; y+=step){ if (y===0) continue; axis += `<span data-y="${y}" style="left:${X(y)}%">${fmtYear(y)}</span>`; }
+  for (let y=Math.ceil(y0/unit)*unit; y<=y1; y+=unit){ grid += `<i class="gridl" style="left:calc(${lab} + (100% - ${lab}) * ${X(y)/100})"></i>`; }
+  let html = `<div class="axis">${axis}</div><div class="rows">${grid}`;
+  for (const it of drawn){
+    const nm = narrow ? it.name.replace(/（.*）/,'').slice(0,7) : it.name.replace(/（.*）/,'');
+    let seg;
+    if (it.a===it.b) seg = `<div class="pt" style="left:${X(it.a+0.5)}%"></div><div class="r-lab" style="left:calc(${X(it.a)}% + 12px)">${it.a}</div>`;
+    else {
+      const l = X(it.a), w = X(it.b+1)-X(it.a);
+      seg = `<div class="seg-r${it.chuan?' chuan':''}" style="left:${l}%;width:${w}%"></div>`;
+      const txt = `${fmtYear(it.a)}–${fmtYear(it.b)}`;
+      seg += (l + w > 78) ? `<div class="r-lab" style="right:calc(${100-l}% + 6px)">${txt}</div>` : `<div class="r-lab" style="left:calc(${l+w}% + 6px)">${txt}</div>`;
+    }
+    html += `<div class="row pr-${it.prec}"><div class="name">${nm}</div><div class="track">${seg}</div></div>`;
+  }
+  html += `</div>`;
+  $('tlBody').innerHTML = html;
+}
+
+function renderItems(rows){
+  const one = rows.length===1;
+  $('items').innerHTML = rows.map(it => {
+    const note = noteOf(it);
+    return `<article class="item v3 pr-${it.prec}" id="it-${it.id}">
+      <img class="thumb" src="${IMG[it.id]}" alt="${it.name}（故宮 Open Data 縮圖）" loading="lazy">
+      <div class="item-id"><h3>${it.name}</h3>${it.en?`<p class="sub">${it.en}</p>`:''}${pbadge(it.prec)}</div>
+      <dl class="facts">
+        <dt>分類</dt><dd>${it.type || '<span class="miss">未提供（頁面沒有分類欄）</span>'}</dd>
+        <dt>時代</dt><dd>${eraText(it)}</dd>
+        <dt>尺寸</dt><dd>${it.size || '<span class="miss">未提供</span>'}</dd>
+        <dt>文物統一編號</dt><dd><span class="mono">${it.no}</span></dd>
+      </dl>
+      <button type="button" class="srcbtn" data-src="${it.id}">查看來源<span class="sr">：${it.name}</span>${ARROW}</button>
+      ${one ? '' : `<div class="lic-mini"><span class="label">600 萬像素圖的標示文字（CC BY 4.0）</span><p class="attr" id="attr-${it.id}">${it.attr}</p><button type="button" class="copy" data-copy="${it.id}">${COPYICON}<span>複製標示文字</span><span class="sr">：${it.name}</span></button></div>`}
+      ${note && !one ? `<p class="note">${note}</p>` : ''}
+    </article>`;
+  }).join('');
+}
+$('items').addEventListener('click', e => {
+  const b = e.target.closest('button[data-src]'); if (!b) return;
+  S.srcId = b.dataset.src; S.returnFocus = b.dataset.src; show('source');
+});
+
+// ---------- 複製標示文字 ----------
+document.addEventListener('click', async e => {
+  const b = e.target.closest('button[data-copy]'); if (!b) return;
+  const it = ITEMS.find(x=>x.id===b.dataset.copy); const text = it.attr;
+  let ok = false;
+  try { await navigator.clipboard.writeText(text); ok = true; } catch (_) {
+    const r = document.createRange(); r.selectNodeContents(document.getElementById('attr-'+it.id)); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
+    try { ok = document.execCommand('copy'); } catch (_) {}
+  }
+  const span = b.querySelector('span');
+  span.textContent = ok ? '已複製' : '已選取，請按 Ctrl＋C 複製'; b.setAttribute('data-done','');
+  announce(ok ? `已複製「${it.name}」的標示文字。` : '已選取標示文字，請按 Ctrl＋C 複製。');
+  setTimeout(()=>{ span.textContent='複製標示文字'; b.removeAttribute('data-done'); }, 2500);
+});
+
+// ---------- 來源 ----------
+function srcBlock(key){
+  const s = SOURCES[key];
+  return `<dl class="kv"><dt>發布者</dt><dd>${s.publisher}（${s.role}）</dd><dt>頁面</dt><dd>${s.title}</dd>
+    <dt>網址</dt><dd><a href="${s.url}" target="_blank" rel="noopener">${s.url}${EXT}</a></dd>
+    <dt>版本／更新</dt><dd>${s.updated}</dd><dt>查閱日期</dt><dd>${CHECK}</dd><dt>單位</dt><dd>${s.unit}</dd><dt>使用條件</dt><dd>${s.terms}</dd></dl>`;
+}
+const DECL = '「開放院藏書畫類、器物類、織品類文物低階圖像（100萬畫素）計約41萬幅，以「公眾領域貢獻宣告」（CC0）規範，不須註明出處。」「中階圖檔及本網站文字均以「CC授權條款4.0」之CC BY 姓名標示規範，無須申請、不限用途、不用付費即可公開使用，惟需於適當位置呈現中文或英文姓名標示。」「但不包括專利權及商標權。」';
+function dynChart(){
+  const named = DYN.filter(d=>d.name!=='時代不詳'), unk = DYN.find(d=>d.name==='時代不詳');
+  const mx = Math.max(...DYN.map(d=>d.count));
+  const sum = DYN.reduce((a,d)=>a+d.count,0);
+  const row = (d, cls='') => `<div class="drow ${cls}"><span class="dn">${d.name}<small>${d.name==='時代不詳'?'代碼 0~0':d.end===9999?`${fmtYear(d.begin)}~（代碼 9999）`:`${fmtYear(d.begin)}~${fmtYear(d.end)}`}</small></span><span class="dt"><i class="db" style="width:${d.count/mx*100}%"></i></span><span class="dc">${d.count.toLocaleString()}</span></div>`;
+  return `<section class="block"><h2>故宮開放資料：各朝代篩選的筆數（2026/11/05）</h2>
+    <p class="hint">依故宮網站朝代篩選的順序排列；長條共用 0–${mx.toLocaleString()} 的尺度。年代區間是故宮篩選選項的原始值。</p>
+    <div class="dchart" role="img" aria-label="各朝代篩選筆數長條圖，數值同右側文字">${named.map(d=>row(d)).join('')}${row(unk,'unk')}</div>
+    <div class="sumcheck"><div><b>${sum.toLocaleString()}</b><span>22 個朝代篩選的筆數加總</span></div><div><b>${OD_TOTAL.toLocaleString()}</b><span>開放資料總筆數</span></div><div><b>${(sum-OD_TOTAL).toLocaleString()}</b><span>多出來的筆數：同一件會被算進好幾個朝代</span></div></div>
+    <p class="hint" style="margin-top:var(--space-xs)">原因：篩選是用年份區間重疊比對。例如選「五代」（907~960），前 6 筆的時代欄都是「宋」，因為宋的起年 960 落在五代區間內。所以這些筆數不能相加、也不能畫成占比圓餅圖。17 個類別的筆數加總剛好等於 108,670，類別是互斥的。</p></section>`;
+}
+const CANNOT_ALL = `<li>「可以使用」只針對故宮開放的低階、中階圖像與網站文字；不包括商標權、專利權，做成商品時不能讓人誤會是故宮出品。</li>
+  <li>朝代篩選的筆數會重疊，不能拿來說「哪個朝代的文物比較多」，也不能相加。</li>
+  <li>開放資料的筆數不等於故宮全部館藏，本頁 18 件也只是器物樣本，不代表全部。</li>
+  <li>「傳」「或」與跨朝代的寫法（例如「隋至初唐」「北宋-金」）表示年代不確定，引用時不能省略；故宮沒寫時代的文物，本頁不推測年代。</li>
+  <li>授權條款可能在查閱日（2026/11/05）之後變更，使用前請到故宮網站確認。</li>`;
+function renderSource(){
+  $('retained').textContent = condText();
+  if (!S.srcId){
+    $('srcTitle').textContent = '全部資料來源、筆數圖與限制';
+    $('srcBody').innerHTML = `${dynChart()}<div class="src-layout" style="margin-top:var(--space-md)"><div class="stack">${['od','decl'].map(k=>`<section class="block"><h2>${SOURCES[k].title}</h2>${srcBlock(k)}</section>`).join('')}</div>
+      <div class="stack"><section class="block"><h2>這份資料不能推論的事</h2><ul class="cannot">${CANNOT_ALL}</ul></section>${['cc0','ccby'].map(k=>`<section class="block"><h2>${SOURCES[k].title}</h2>${srcBlock(k)}</section>`).join('')}</div></div>`;
+    return;
+  }
+  const it = ITEMS.find(x => x.id===S.srcId);
+  $('srcTitle').textContent = `資料來源：${it.name}`;
+  const raw = [['文物統一編號',it.no],['品名',it.name+(it.en?'｜'+it.en:'')],['分類',it.type],['時代',it.era],['西元',it.west],['尺寸',it.size],['標示文字',it.attr]];
+  const prRule = {year:'原文是單一年份 → 「到年」。', range:'原文是年號、朝代或世紀的區間 → 「年代區間」。', unsure:'原文有「傳」「或」「至」或跨朝代的「-」 → 「不確定」。', none:'故宮頁面沒有時代欄 → 「未提供」。'}[it.prec];
+  $('srcBody').innerHTML = `<div class="src-layout"><div class="stack">
+      <section class="raw" aria-labelledby="raw-h"><h2 id="raw-h" class="label">原始寫法 · 故宮典藏資料檢索 Opendata 單件頁</h2>${raw.map(([k,v])=>`<code><b>${k}</b>　${v || '（頁面沒有這個欄位）'}</code>`).join('')}</section>
+      <section class="block"><h2>本頁怎麼換算與分類</h2><dl class="kv"><dt>年代換算</dt><dd>${it.conv}</dd><dt>年代明確度</dt><dd>${pbadge(it.prec)} ${prRule}</dd><dt>朝代分組</dt><dd>${it.dyn.map(d=>DYNS[d]).join('、')}${it.dyn.length>1?'（原文跨朝代，兩個篩選都會出現）':''}。本頁把朝代合併成 6 組方便篩選，與故宮網站的分法不同。</dd></dl></section>
+      <section class="block"><h2>授權與標示</h2><dl class="kv"><dt>故宮宣告原文</dt><dd>${DECL}</dd><dt>本件標示文字</dt><dd>${it.attr}</dd><dt>寫法差異</dt><dd>單件頁「複製標示文字」用「台北」並在品名後加句號；宣告寫「臺北」、不加句號。本頁照單件頁原文提供。</dd></dl></section>
+      <section class="block"><h2>不能從這份資料推論</h2><ul class="cannot"><li>不能把「可以使用」延伸到商標權、專利權，或做成讓人誤會是故宮出品的商品。</li>${it.prec==='none'?'<li>不能自行推測這件的年代。</li>':''}${it.prec==='unsure'?'<li>不能把不確定的年代簡化成單一朝代。</li>':''}${it.a!==null&&it.a!==it.b?'<li>長條代表故宮寫的年代範圍，不是製作所花的時間。</li>':''}</ul></section>
+    </div>
+    <div class="stack"><section class="block"><h2>故宮單件頁</h2><dl class="kv"><dt>網址</dt><dd><a href="${it.url}" target="_blank" rel="noopener">${it.url}${EXT}</a></dd><dt>查閱日期</dt><dd>${CHECK}</dd><dt>縮圖</dt><dd>取自該頁的預覽圖（低階圖像，CC0）；本頁仍標示出處。</dd><dt>使用條件</dt><dd>文字 CC BY 4.0；低階圖像 CC0；中階圖像 CC BY 4.0。</dd></dl></section>
+      <section class="block"><h2>${SOURCES.decl.title}</h2>${srcBlock('decl')}</section></div></div>`;
+}
+function goBack(){
+  const rf = S.returnFocus;
+  if (rf==='trapBtn') show('entry', {focus: () => $('trapBtn')});
+  else show('summary', {focus: () => rf==='allSources' ? $('allSources') : (document.querySelector(`#items button[data-src="${rf}"]`) || $('sumTitle'))});
+  const el = document.activeElement; if (el && el.scrollIntoView) el.scrollIntoView({block:'center'});
+  announce(`已返回，條件保留：${condText()}。`);
+}
+$('back').addEventListener('click', goBack);
+$('back2').addEventListener('click', goBack);
+
+// ---------- ⌘K ----------
+const pal = $('palette'); let palIdx = 0, palRows = [];
+function renderPal(){
+  const q = $('palQ').value.trim();
+  palRows = ITEMS.filter(it => matchQ(it, q));
+  palIdx = Math.min(palIdx, Math.max(palRows.length-1,0));
+  if (!palRows.length){ $('palList').innerHTML = `<li class="pal-empty" role="option" aria-disabled="true" aria-selected="false">找不到「${q}」。試試 白菜、鼎、硯。</li>`; $('palQ').removeAttribute('aria-activedescendant'); return; }
+  $('palList').innerHTML = palRows.map((it,i) => `<li role="option" id="po-${it.id}" aria-selected="${i===palIdx}" data-i="${i}"><span><span class="pn">${it.name}</span><span class="pd" style="display:block">${it.type||'分類未提供'} · ${it.era||'時代未提供'}</span></span>${pbadge(it.prec)}</li>`).join('');
+  $('palQ').setAttribute('aria-activedescendant', 'po-'+palRows[palIdx].id);
+  const sel = $('palList').querySelector('[aria-selected=true]'); if (sel) sel.scrollIntoView({block:'nearest'});
+}
+function openPal(){ if (pal.open) return; $('palQ').value=''; palIdx=0; renderPal(); pal.showModal(); $('palQ').focus(); }
+function pickPal(i){ const it = palRows[i]; if (!it) return; pal.close(); openItem(it); }
+$('openPal').addEventListener('click', openPal);
+$('palQ').addEventListener('input', () => { palIdx=0; renderPal(); });
+$('palQ').addEventListener('keydown', e => {
+  if (e.key==='ArrowDown'){ e.preventDefault(); if (palRows.length){ palIdx=(palIdx+1)%palRows.length; renderPal(); } }
+  else if (e.key==='ArrowUp'){ e.preventDefault(); if (palRows.length){ palIdx=(palIdx-1+palRows.length)%palRows.length; renderPal(); } }
+  else if (e.key==='Enter'){ e.preventDefault(); pickPal(palIdx); }
+});
+$('palList').addEventListener('click', e => { const li = e.target.closest('li[data-i]'); if (li) pickPal(+li.dataset.i); });
+pal.addEventListener('click', e => { if (e.target===pal) pal.close(); });
+
+// ---------- 其他 ----------
+$('hc').addEventListener('click', () => { const on = document.documentElement.classList.toggle('hc'); $('hc').setAttribute('aria-pressed', String(on)); $('hcState').textContent = `：${on?'開':'關'}`; });
+const isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+if (!isMac){ for (const k of [$('palKey'), ...document.querySelectorAll('.palKey2')]) k.textContent = 'Ctrl K'; }
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase()==='k'){ e.preventDefault(); openPal(); return; }
+  if (e.key==='/' && !pal.open && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)){
+    const box = S.screen==='summary' ? $('sumQ') : S.screen==='entry' ? $('entryQ') : null;
+    if (box){ e.preventDefault(); if (S.screen==='summary') $('filters').open = true; box.focus(); }
+  }
+});
+let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (S.screen==='summary') renderTimeline(filtered()); }, 120); });
+$('ver').textContent = VERSION;
+if (matchMedia('(max-width:600px)').matches) $('filters').open = false;
+renderEntry();
+history.replaceState(snapshot(), '');
+</script>
+</body>
+</html>
