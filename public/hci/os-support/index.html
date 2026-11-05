@@ -1,0 +1,643 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>我的電腦還有安全更新嗎？｜作業系統支援期限查詢</title>
+<meta name="description" content="依 Microsoft、Apple、Canonical 官方頁面，查 Windows、macOS、Ubuntu 各版本的安全更新期限。課堂原型，資料查閱日 2026/11/05。">
+<style>
+:root{
+  --bg:#f5f6f8;--paper:#fff;--ink:#14202b;--muted:#4a5866;--line:#d4dae0;--soft:#eef1f4;
+  --accent:#0a5c8a;--accent-ink:#fff;--ext:#0a5c8a;
+  --ok:#0b6b3a;--warn:#8a5300;--bad:#b3261e;--unk:#4b5563;
+  --focus:#c2410c;--today:#b3261e;
+  --r:10px;
+}
+.hc{
+  --bg:#000;--paper:#000;--ink:#fff;--muted:#e5e5e5;--line:#fff;--soft:#1a1a1a;
+  --accent:#ffd400;--accent-ink:#000;--ext:#ffd400;
+  --ok:#7dff9b;--warn:#ffd400;--bad:#ff8a80;--unk:#e5e5e5;--focus:#00e5ff;--today:#ff8a80;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.65 -apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif}
+a{color:var(--accent)}
+.wrap{max-width:960px;margin:0 auto;padding:20px 20px 40px}
+.top{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:12px}
+.brand{font-weight:700;letter-spacing:.02em}
+.brand small{display:block;font-weight:400;color:var(--muted);font-size:14px;letter-spacing:0}
+h1{font-size:32px;line-height:1.3;margin:24px 0 8px}
+h2{font-size:24px;line-height:1.35;margin:0 0 12px}
+h3{font-size:20px;margin:0 0 6px}
+p{margin:0 0 12px}
+.lead{font-size:20px;color:var(--muted)}
+.notice{background:var(--soft);border-left:4px solid var(--accent);padding:10px 14px;border-radius:0 var(--r) var(--r) 0;font-size:16px}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;border:1px solid var(--muted);background:var(--paper);color:var(--ink);border-radius:8px;padding:10px 16px;min-height:44px}
+button:hover{background:var(--soft)}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+button.link{border:0;background:none;padding:6px 2px;min-height:0;text-decoration:underline;color:var(--accent)}
+input[type=search]{border:1px solid var(--muted);border-radius:8px;padding:10px 12px;min-height:44px;background:var(--paper);width:100%}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+[hidden]{display:none!important}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;margin:16px 0}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+legend{font-weight:700;margin-bottom:8px;padding:0}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+.families{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.families button{text-align:left;padding:14px 16px;font-size:20px;font-weight:700}
+.families button span{display:block;font-size:15px;font-weight:400;color:var(--muted)}
+.families button:hover span{color:var(--ink)}
+.searchrow{display:flex;gap:8px;align-items:stretch}
+.searchrow input{flex:1;min-width:0}
+.hint{font-size:15px;color:var(--muted);margin-top:6px}
+.msg{font-weight:700;color:var(--bad);margin-top:8px}
+details{border-top:1px solid var(--line);padding-top:10px;margin-top:16px}
+.filters{border-top:1px solid var(--line);padding-top:6px}
+.filters>summary{margin-bottom:4px}
+.filters[open]>summary{margin-bottom:10px}
+.filters:not([open]){padding-top:4px;padding-bottom:4px}
+summary{cursor:pointer;font-weight:700;min-height:44px;display:flex;align-items:center}
+.cond{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:12px 16px;margin:16px 0}
+.cond strong{font-size:17px}
+.chip{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:15px;background:var(--soft)}
+.status{font-weight:700;margin:12px 0}
+.badge{display:inline-flex;gap:6px;align-items:center;font-weight:700;font-size:16px;white-space:nowrap}
+.badge svg{width:18px;height:18px;flex:none}
+.s-active{color:var(--ok)}.s-extended{color:var(--warn)}.s-ended{color:var(--bad)}.s-unknown{color:var(--unk)}
+/* timeline */
+.tl{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:16px 16px 10px;margin:16px 0}
+.tl-head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline}
+.legend{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:14px;color:var(--muted);margin:6px 0 10px}
+.legend i{display:inline-block;width:22px;height:10px;vertical-align:middle;margin-right:5px;border-radius:2px}
+.k-std{background:var(--accent)}
+.k-ext{background:repeating-linear-gradient(135deg,var(--ext) 0 3px,transparent 3px 6px);border:1px solid var(--ext)}
+.k-dia{width:10px!important;height:10px!important;transform:rotate(45deg);background:var(--unk);border-radius:1px!important}
+.k-today{width:2px!important;height:14px!important;background:var(--today)}
+.axis,.row .track{position:relative}
+.axis{height:22px;font-size:13px;color:var(--muted);margin-left:var(--lab)}
+.axis span{position:absolute;top:0;transform:translateX(-50%);white-space:nowrap}
+.rows{position:relative}
+.row{display:grid;grid-template-columns:var(--lab) 1fr;align-items:center;min-height:30px;border-top:1px solid var(--soft)}
+.row .name{font-size:15px;padding-right:8px;line-height:1.3}
+.row .track{height:30px}
+.seg-std,.seg-ext{position:absolute;top:9px;height:12px;border-radius:2px}
+.seg-std{background:var(--accent)}
+.seg-ext{background:repeating-linear-gradient(135deg,var(--ext) 0 3px,transparent 3px 6px);border:1px solid var(--ext)}
+.dot{position:absolute;top:11px;width:8px;height:8px;border-radius:50%;background:var(--unk);transform:translateX(-50%)}
+.dia{position:absolute;top:10px;width:10px;height:10px;background:var(--unk);transform:translateX(-50%) rotate(45deg)}
+.unk-label{position:absolute;top:4px;font-size:13px;color:var(--muted);white-space:nowrap;background:var(--paper);padding:0 4px;border-radius:3px;z-index:1}
+.today{position:absolute;top:0;bottom:0;width:2px;background:var(--today);pointer-events:none}
+.today-label{position:absolute;top:-2px;font-size:13px;color:var(--today);font-weight:700;white-space:nowrap;transform:translateX(-50%)}
+.tl-note{font-size:14px;color:var(--muted);margin:8px 0 0}
+/* result cards */
+.items{display:grid;gap:12px}
+.item{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px}
+.item-head{display:flex;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;align-items:baseline}
+.item h3{font-size:21px}
+.item .sub{color:var(--muted);font-size:15px;margin:0 0 8px}
+.facts{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;margin:8px 0 10px;font-size:17px}
+.facts dt{color:var(--muted)}
+.facts dd{margin:0}
+.item .also{font-size:16px;background:var(--soft);border-radius:8px;padding:8px 12px;margin:8px 0}
+.empty{background:var(--paper);border:2px dashed var(--muted);border-radius:var(--r);padding:18px 20px}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+/* source */
+.srcgrid{display:grid;grid-template-columns:max-content 1fr;gap:8px 16px;margin:0}
+.srcgrid dt{color:var(--muted);font-size:16px}
+.srcgrid dd{margin:0;overflow-wrap:anywhere}
+.raw{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:15px;background:var(--soft);padding:2px 6px;border-radius:4px}
+.cannot li{margin-bottom:4px}
+.retained{font-weight:700}
+footer{margin-top:28px;border-top:1px solid var(--line);padding-top:12px;font-size:15px;color:var(--muted)}
+footer p{margin:0 0 6px}
+@media (max-width:600px){
+  .wrap{padding:14px 14px 32px}
+  .top{flex-wrap:nowrap;align-items:flex-start;padding-bottom:8px}
+  .brand{font-size:16px}
+  .brand small{font-size:12px}
+  #hc{padding:6px 10px;font-size:15px;min-height:44px;flex:none}
+  .cond{padding:10px 12px;margin:10px 0}
+  h1{margin:14px 0 6px}
+  h1{font-size:26px}
+  h2{font-size:21px}
+  .lead{font-size:18px}
+  .families{grid-template-columns:1fr 1fr}
+  .families button{font-size:18px;padding:12px}
+  .facts,.srcgrid{grid-template-columns:1fr;gap:0}
+  .facts dd,.srcgrid dd{margin-bottom:8px}
+  .row .name{font-size:14px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">作業系統支援期限查詢<small>課堂原型 · 非 Microsoft／Apple／Canonical 官方網站</small></div>
+    <button id="hc" type="button" aria-pressed="false">高對比：關</button>
+  </header>
+
+  <p id="live" class="sr" role="status" aria-live="polite"></p>
+
+  <!-- 畫面一：入口 -->
+  <main id="entry" tabindex="-1">
+    <h1>我的電腦還有安全更新嗎？</h1>
+    <p class="lead">選你的作業系統，看官方還會不會提供安全更新、到哪一天為止。</p>
+    <p class="notice">資料查閱日 <strong>2026/11/05</strong>，「支援中／已結束」都以這一天判斷。日期取自 Microsoft、Apple、Canonical 的官方頁面，每一筆都能點「查看來源」核對。</p>
+
+    <section class="card" aria-labelledby="pick-h">
+      <h2 id="pick-h">1　選作業系統</h2>
+      <div class="families" id="familyPick">
+        <button type="button" data-family="windows">Windows<span>Windows 10、11 家用版／專業版</span></button>
+        <button type="button" data-family="macos">macOS<span>macOS 13 到 27</span></button>
+        <button type="button" data-family="ubuntu">Ubuntu<span>20.04 LTS 到 26.10</span></button>
+        <button type="button" data-family="all">全部 15 個版本<span>一起比較</span></button>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="search-h">
+      <h2 id="search-h">或直接輸入版本</h2>
+      <form id="entryForm" novalidate>
+        <label for="entryQ" class="sr">版本名稱</label>
+        <div class="searchrow">
+          <input id="entryQ" type="search" autocomplete="off" placeholder="例如：24H2、Sonoma、22.04">
+          <button class="primary" type="submit">查詢</button>
+        </div>
+        <p class="hint">可輸入版本號或代號。按 <kbd>/</kbd> 可直接跳到搜尋框。</p>
+        <p id="entryMsg" class="msg" hidden></p>
+      </form>
+      <details>
+        <summary>不知道自己的版本？</summary>
+        <ul>
+          <li><strong>Windows：</strong>按 <kbd>Win</kbd>＋<kbd>R</kbd>，輸入 <code>winver</code> 後按 Enter，視窗第二行會寫「版本 24H2」之類的字。</li>
+          <li><strong>macOS：</strong>點左上角蘋果選單 →「關於這台 Mac」，會看到名稱（例如 Sonoma）與版本號。</li>
+          <li><strong>Ubuntu：</strong>開終端機輸入 <code>lsb_release -a</code>，看「Release」那一行。</li>
+        </ul>
+      </details>
+    </section>
+  </main>
+
+  <!-- 畫面二：摘要 -->
+  <main id="summary" tabindex="-1" hidden>
+    <h1 id="sumTitle">查詢結果</h1>
+    <div class="cond" aria-label="目前條件">
+      <strong>目前條件</strong>
+      <span id="condText"></span>
+      <button type="button" class="link" id="clearAll">清除所有條件</button>
+      <button type="button" class="link" id="toEntry">回到入口</button>
+    </div>
+
+    <details id="filters" class="card filters" open>
+      <summary>修改條件（作業系統、狀態、搜尋）</summary>
+    <fieldset>
+      <legend>作業系統</legend>
+      <div class="seg" id="famSeg">
+        <button type="button" data-family="all" aria-pressed="false">全部</button>
+        <button type="button" data-family="windows" aria-pressed="false">Windows</button>
+        <button type="button" data-family="macos" aria-pressed="false">macOS</button>
+        <button type="button" data-family="ubuntu" aria-pressed="false">Ubuntu</button>
+      </div>
+      <legend style="margin-top:14px">狀態（以 2026/11/05 判斷）</legend>
+      <div class="seg" id="statSeg"></div>
+      <form id="sumForm" novalidate style="margin-top:14px">
+        <label for="sumQ"><strong>搜尋版本</strong></label>
+        <div class="searchrow">
+          <input id="sumQ" type="search" autocomplete="off" placeholder="例如：24H2、Sonoma、22.04">
+          <button type="submit">查詢</button>
+        </div>
+        <p id="sumMsg" class="msg" hidden></p>
+      </form>
+    </fieldset>
+    </details>
+
+    <p id="count" class="status"></p>
+
+    <div id="emptyBox" class="empty" hidden></div>
+
+    <section id="tl" class="tl" aria-labelledby="tl-h">
+      <div class="tl-head">
+        <h2 id="tl-h">支援期間時間軸</h2>
+        <span id="tlRange" class="hint"></span>
+      </div>
+      <div class="legend" aria-hidden="true">
+        <span><i class="k-std"></i>官方標準支援</span>
+        <span><i class="k-ext"></i>需登記的延伸計畫</span>
+        <span><i class="k-dia"></i>最近一次安全更新（不是結束日）</span>
+        <span><i class="k-today"></i>查閱日</span>
+      </div>
+      <div id="tlBody" aria-hidden="true"></div>
+      <p class="tl-note">所有列共用同一條時間軸。macOS 沒有官方結束日，所以不畫長條；Ubuntu 只公布到月份，終點畫在該月 1 日。精確數值看下方清單。</p>
+    </section>
+
+    <section aria-labelledby="list-h">
+      <h2 id="list-h" class="sr">版本清單</h2>
+      <div id="items" class="items"></div>
+    </section>
+
+    <p style="margin-top:16px"><button type="button" id="allSources">查看全部資料來源與限制</button></p>
+  </main>
+
+  <!-- 畫面三：來源 -->
+  <main id="source" tabindex="-1" hidden>
+    <h1 id="srcTitle">資料來源</h1>
+    <p class="notice">返回後會回到：<span id="retained" class="retained"></span></p>
+    <div id="srcBody"></div>
+    <p><button type="button" class="primary" id="back">返回結果</button></p>
+  </main>
+
+  <footer>
+    <p>原型版本 <strong id="ver">v1.2</strong>（2026/11/05）· 單一 HTML，不連網、不收集資料。</p>
+    <p>本頁不是 Microsoft、Apple 或 Canonical 的網站。做決定前請點「查看來源」到官方頁面核對；官方日期可能在查閱日之後變更。</p>
+    <p>鍵盤：Tab 移動、Enter 啟動、<kbd>/</kbd> 跳到搜尋。</p>
+  </footer>
+</div>
+
+<script>
+'use strict';
+const VERSION = 'v1.2';
+const CHECK = '2026-11-05'; // 資料查閱日：狀態一律以這天判斷
+
+// ---------- 來源 ----------
+const SOURCES = {
+  'ms-w11': {publisher:'Microsoft', title:'Windows 11 Home and Pro – Microsoft Lifecycle', url:'https://learn.microsoft.com/en-us/lifecycle/products/windows-11-home-and-pro', updated:'頁面中繼資料 updated_at 2026-09-29', unit:'日期時間（頁面寫「以太平洋時間顯示」）', terms:'Microsoft 使用條款。本頁只引用日期事實並附連結，未轉載內文。', role:'原始發布單位'},
+  'ms-w10': {publisher:'Microsoft', title:'Windows 10 Home and Pro – Microsoft Lifecycle', url:'https://learn.microsoft.com/en-us/lifecycle/products/windows-10-home-and-pro', updated:'頁面中繼資料 updated_at 2024-09-17', unit:'日期時間（同上）', terms:'Microsoft 使用條款。只引用日期事實。', role:'原始發布單位'},
+  'ms-esu': {publisher:'Microsoft', title:'Windows 10 Consumer Extended Security Updates (ESU) program', url:'https://www.microsoft.com/en-us/windows/extended-security-updates', updated:'未提供（頁面沒有標示更新日）', unit:'日期（英文寫法，例如 October 12, 2027）', terms:'Microsoft 使用條款。只引用日期與登記方式。', role:'原始發布單位'},
+  'apple': {publisher:'Apple', title:'Apple security releases', url:'https://support.apple.com/en-us/100100', updated:'未提供整頁更新日；查閱時最新一筆為 2026/10/29', unit:'發布日期（日）', terms:'Apple 網站使用條款。只引用版本名稱與日期。', role:'原始發布單位'},
+  'canonical': {publisher:'Canonical', title:'Ubuntu release cycle', url:'https://ubuntu.com/about/release-cycle', updated:'未提供', unit:'月份（例如 May 2027），沒有到日', terms:'Canonical 網站條款。只引用月份。', role:'原始發布單位'},
+  'eol': {publisher:'endoflife.date（社群維護）', title:'endoflife.date：Windows、macOS、Ubuntu', url:'https://endoflife.date/', updated:'以 API 取得（/api/windows.json 等），2026/11/05', unit:'日期（YYYY-MM-DD）', terms:'MIT 授權（GitHub endoflife-date/endoflife.date）。', role:'第三方，僅作對照，不作為主張依據'}
+};
+
+// ---------- 資料 ----------
+// std/ext：最後一天仍有支援的日期；prec:'day' 到日、'month' 只到月（YYYY-MM）
+// last：macOS 在 Apple 頁面上最近一次「系統」安全更新
+const DATA = [
+  {id:'win10-22h2', family:'windows', name:'Windows 10 22H2', edition:'家用版／專業版', keys:'win10 windows10 22h2 windows 10',
+   start:'2022-10-18', std:{d:'2025-10-14',p:'day'},
+   ext:{d:'2027-10-12',p:'day',name:'消費者延伸安全更新（ESU）',how:'在「Windows Update」登記：同步 PC 設定（免費）、1,000 Microsoft Rewards 點，或一次付費 30 美元。'},
+   src:['ms-w10','ms-esu'], raw:['Windows 10 Home and Pro | 7/29/2015 8:00:00 AM | 10/15/2025 6:59:59 AM','“…until the program ends on October 12, 2027.”'],
+   third:'endoflife.date：一般支援 2025-10-14（相同）；延伸欄位列 2028-10-10（那是企業版 ESU 最長三年，不適用個人）。'},
+  {id:'win11-23h2', family:'windows', name:'Windows 11 23H2', edition:'家用版／專業版', keys:'win11 windows11 23h2 windows 11',
+   start:'2023-10-31', std:{d:'2025-11-11',p:'day'}, src:['ms-w11'], raw:['Version 23H2 | 10/31/2023 8:00:00 AM | 11/12/2025 6:59:59 AM'],
+   third:'endoflife.date：2025-11-11（相同）。'},
+  {id:'win11-24h2', family:'windows', name:'Windows 11 24H2', edition:'家用版／專業版', keys:'win11 windows11 24h2 windows 11',
+   start:'2024-10-01', std:{d:'2026-10-13',p:'day'}, src:['ms-w11'], raw:['Version 24H2 | 10/1/2024 8:00:00 AM | 10/14/2026 6:59:59 AM'],
+   third:'endoflife.date：2026-10-13（相同）。'},
+  {id:'win11-25h2', family:'windows', name:'Windows 11 25H2', edition:'家用版／專業版', keys:'win11 windows11 25h2 windows 11',
+   start:'2025-09-30', std:{d:'2027-10-12',p:'day'}, src:['ms-w11'], raw:['Version 25H2 | 9/30/2025 8:00:00 AM | 10/13/2027 6:59:59 AM'],
+   third:'endoflife.date：2027-10-12（相同）。'},
+  {id:'win11-26h2', family:'windows', name:'Windows 11 26H2', edition:'家用版／專業版', keys:'win11 windows11 26h2 windows 11',
+   start:'2026-09-29', std:{d:'2028-10-09',p:'day'}, src:['ms-w11'], raw:['Version 26H2 | 9/29/2026 8:00:00 AM | 10/10/2028 6:59:59 AM'],
+   third:'endoflife.date：2028-10-10，與本頁換算差 1 天。以 Microsoft 原始表格為準，差異保留給使用者判斷。'},
+
+  {id:'mac-27', family:'macos', name:'macOS 27 Golden Gate', edition:'', keys:'macos27 macos 27 golden gate goldengate',
+   start:'2026-09-14', last:{d:'2026-10-26',v:'27.2'}, src:['apple'], raw:['macOS Golden Gate 27 | 14 Sep 2026','macOS Golden Gate 27.2 | macOS Golden Gate | 26 Oct 2026'],
+   third:'endoflife.date：仍列為支援中（eol: false），沒有結束日。'},
+  {id:'mac-26', family:'macos', name:'macOS 26 Tahoe', edition:'', keys:'macos26 macos 26 tahoe',
+   start:'2025-09-15', last:{d:'2026-10-26',v:'26.7.2'}, src:['apple'], raw:['macOS Tahoe 26 | 15 Sep 2025','macOS Tahoe 26.7.2 | macOS Tahoe | 26 Oct 2026'],
+   third:'endoflife.date：仍列為支援中（eol: false）。'},
+  {id:'mac-15', family:'macos', name:'macOS 15 Sequoia', edition:'', keys:'macos15 macos 15 sequoia',
+   start:'2024-09-16', last:{d:'2026-10-26',v:'15.8.2'}, src:['apple'], raw:['macOS Sequoia 15 | 16 Sep 2024','macOS Sequoia 15.8.2 | macOS Sequoia | 26 Oct 2026'],
+   third:'endoflife.date：仍列為支援中（eol: false）。'},
+  {id:'mac-14', family:'macos', name:'macOS 14 Sonoma', edition:'', keys:'macos14 macos 14 sonoma',
+   start:'2023-09-26', startSrc:'eol', last:{d:'2026-08-06',v:'14.8.9'}, src:['apple','eol'], raw:['macOS Sonoma 14.8.9 | macOS Sonoma | 06 Aug 2026','（之後 2026/9/14、9/28、10/26 三批 macOS 更新都沒有 Sonoma）'],
+   third:'endoflife.date 推估 2026-09-14 結束（= macOS 27 推出日）。這是第三方推估，Apple 沒有這樣公告。',
+   note:'macOS 27 推出（2026/9/14）後，Apple 頁面上的三批 macOS 安全更新都沒有 Sonoma。'},
+  {id:'mac-13', family:'macos', name:'macOS 13 Ventura', edition:'', keys:'macos13 macos 13 ventura',
+   start:'2022-10-24', startSrc:'eol', last:{d:'2025-08-20',v:'13.7.8'}, src:['apple','eol'], raw:['macOS Ventura 13.7.8 | macOS Ventura | 20 Aug 2025'],
+   third:'endoflife.date 推估 2025-09-15 結束（= macOS 26 推出日）。第三方推估。',
+   note:'Apple 頁面上最近一次 Ventura 安全更新是 2025/8/20，之後一年多沒有新的。'},
+
+  {id:'ubu-2004', family:'ubuntu', name:'Ubuntu 20.04 LTS', edition:'', keys:'ubuntu 20.04 2004 focal lts',
+   start:'2020-04', std:{d:'2025-05',p:'month'},
+   ext:{d:'2030-05',p:'month',name:'Ubuntu Pro（ESM）',how:'個人用途最多 5 台免費，需註冊 Ubuntu Pro 並在電腦上啟用。'},
+   src:['canonical'], raw:['Ubuntu 20.04 LTS | Released: Apr 2020 | May 2025 With Ubuntu Pro | May 2030'],
+   third:'endoflife.date：標準支援 2025-05-31，延伸 2030-04-02（它把月份補成日期；Canonical 只寫到月份）。'},
+  {id:'ubu-2204', family:'ubuntu', name:'Ubuntu 22.04 LTS', edition:'', keys:'ubuntu 22.04 2204 jammy lts',
+   start:'2022-04', std:{d:'2027-05',p:'month'}, ext:{d:'2032-05',p:'month',name:'Ubuntu Pro（ESM）',how:'個人用途最多 5 台免費。'},
+   src:['canonical'], raw:['Ubuntu 22.04 LTS | Released: Apr 2022 | May 2027 | May 2032'],
+   third:'endoflife.date：補成具體日期，Canonical 只寫到月份。'},
+  {id:'ubu-2404', family:'ubuntu', name:'Ubuntu 24.04 LTS', edition:'', keys:'ubuntu 24.04 2404 noble lts',
+   start:'2024-04', std:{d:'2029-05',p:'month'}, ext:{d:'2034-05',p:'month',name:'Ubuntu Pro（ESM）',how:'個人用途最多 5 台免費。'},
+   src:['canonical'], raw:['Ubuntu 24.04 LTS | Released: Apr 2024 | May 2029 | May 2034'],
+   third:'endoflife.date：2029-05-31（補成日期）。'},
+  {id:'ubu-2604', family:'ubuntu', name:'Ubuntu 26.04 LTS', edition:'', keys:'ubuntu 26.04 2604 resolute lts',
+   start:'2026-04', std:{d:'2031-05',p:'month'}, ext:{d:'2036-05',p:'month',name:'Ubuntu Pro（ESM）',how:'個人用途最多 5 台免費。'},
+   src:['canonical'], raw:['Ubuntu 26.04 LTS | Released: Apr 2026 | May 2031 | May 2036'],
+   third:'endoflife.date：2031-05-29（補成日期）。'},
+  {id:'ubu-2610', family:'ubuntu', name:'Ubuntu 26.10', edition:'', keys:'ubuntu 26.10 2610',
+   start:'2026-10', std:{d:'2027-07',p:'month'}, src:['canonical'], raw:['Ubuntu 26.10 | Released: Oct 2026 | Jul 2027 | Not applicable'],
+   third:'endoflife.date：2027-07-01（補成日期）。非 LTS 版只有 9 個月更新。'}
+];
+
+const FAM = {all:'全部系統', windows:'Windows', macos:'macOS', ubuntu:'Ubuntu'};
+const STAT = {
+  all:{label:'全部狀態'},
+  active:{label:'支援中', cls:'s-active'},
+  extended:{label:'需登記延伸計畫', cls:'s-extended'},
+  ended:{label:'已結束', cls:'s-ended'},
+  unknown:{label:'官方未公告', cls:'s-unknown'}
+};
+const ICON = {
+  active:'<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="currentColor"/><path d="M6 10.5l2.6 2.6L14.5 7" stroke="#fff" stroke-width="2.2" fill="none"/></svg>',
+  extended:'<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M10 2a8 8 0 0 1 0 16z" fill="currentColor"/></svg>',
+  ended:'<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2" y="2" width="16" height="16" rx="3" fill="currentColor"/><path d="M6.5 6.5l7 7M13.5 6.5l-7 7" stroke="#fff" stroke-width="2.2"/></svg>',
+  unknown:'<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-dasharray="3 2.4"/><text x="10" y="14.5" text-anchor="middle" font-size="11" font-weight="700" fill="currentColor">?</text></svg>'
+};
+
+// ---------- 日期工具（全部用 UTC，避免時區誤差） ----------
+const toUTC = s => { const [y,m,d] = s.split('-').map(Number); return Date.UTC(y, (m||1)-1, d||1); };
+const dayDiff = (a,b) => Math.round((toUTC(b)-toUTC(a))/864e5);
+const monDiff = (a,b) => { const [ay,am]=a.split('-').map(Number), [by,bm]=b.split('-').map(Number); return (by-ay)*12+(bm-am); };
+const fmt = (s,p) => { const [y,m,d]=s.split('-'); return p==='month' ? `${y} 年 ${+m} 月` : `${y}/${m}/${d}`; };
+const after = (x) => x.p==='month' ? monDiff(CHECK.slice(0,7), x.d) >= 0 : dayDiff(CHECK, x.d) >= 0;
+
+function statusOf(it){
+  if (it.family==='macos') return 'unknown';
+  if (after(it.std)) return 'active';
+  if (it.ext && after(it.ext)) return 'extended';
+  return 'ended';
+}
+function remain(x){
+  if (x.p==='month'){
+    const m = monDiff(CHECK.slice(0,7), x.d);
+    return m>0 ? `約還有 ${m} 個月` : m===0 ? '就在本月' : `約已過 ${-m} 個月`;
+  }
+  const d = dayDiff(CHECK, x.d);
+  return d>0 ? `還有 ${d} 天` : d===0 ? '今天是最後一天' : `已過 ${-d} 天`;
+}
+
+// ---------- 狀態 ----------
+const S = {screen:'entry', family:'all', status:'all', q:'', srcId:null, returnFocus:null};
+const $ = id => document.getElementById(id);
+const norm = s => s.toLowerCase().replace(/[\s　]+/g,'').replace(/^macos/,'macos');
+
+function matchQ(it, q){
+  if (!q) return true;
+  const n = norm(q);
+  return norm(it.name).includes(n) || norm(it.keys).includes(n) || it.keys.split(' ').some(k => norm(k)===n);
+}
+function filtered(st = S.status){
+  return DATA.filter(it => (S.family==='all' || it.family===S.family) && matchQ(it, S.q) && (st==='all' || statusOf(it)===st));
+}
+function condText(){
+  return `${FAM[S.family]} · ${STAT[S.status].label} · 搜尋：${S.q ? '「'+S.q+'」' : '無'}`;
+}
+function announce(t){ $('live').textContent=''; setTimeout(()=>{ $('live').textContent=t; }, 30); }
+
+// ---------- 畫面切換 ----------
+function show(screen, opts={}){
+  S.screen = screen;
+  for (const id of ['entry','summary','source']) $(id).hidden = (id!==screen);
+  if (screen==='summary') renderSummary();
+  if (screen==='source') renderSource();
+  if (!opts.fromHistory) history.pushState(snapshot(), '');
+  const focusEl = opts.focus ? opts.focus() : $(screen).querySelector('h1');
+  if (focusEl){ if (!focusEl.hasAttribute('tabindex') && focusEl.tagName==='H1') focusEl.setAttribute('tabindex','-1'); focusEl.focus(); }
+  window.scrollTo(0,0);
+}
+function snapshot(){ return {screen:S.screen, family:S.family, status:S.status, q:S.q, srcId:S.srcId}; }
+window.addEventListener('popstate', e => {
+  const st = e.state; if (!st) return;
+  Object.assign(S, st); show(st.screen, {fromHistory:true});
+});
+
+// ---------- 入口 ----------
+$('familyPick').addEventListener('click', e => {
+  const b = e.target.closest('button[data-family]'); if (!b) return;
+  S.family = b.dataset.family; S.status='all'; S.q=''; $('sumQ').value='';
+  show('summary');
+  announce(`已選 ${FAM[S.family]}，符合 ${filtered().length} 項。`);
+});
+$('entryForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const q = $('entryQ').value.trim();
+  if (!q){ $('entryMsg').textContent='請先輸入版本名稱，例如 24H2、Sonoma、22.04；或在上方直接選作業系統。'; $('entryMsg').hidden=false; $('entryQ').focus(); return; }
+  $('entryMsg').hidden=true;
+  S.family='all'; S.status='all'; S.q=q; $('sumQ').value=q;
+  show('summary');
+});
+
+// ---------- 摘要 ----------
+$('famSeg').addEventListener('click', e => {
+  const b = e.target.closest('button[data-family]'); if (!b) return;
+  S.family = b.dataset.family; renderSummary(); announce(`作業系統改為 ${FAM[S.family]}，符合 ${filtered().length} 項。`);
+});
+$('statSeg').addEventListener('click', e => {
+  const b = e.target.closest('button[data-status]'); if (!b) return;
+  S.status = b.dataset.status; renderSummary(); announce(`狀態改為 ${STAT[S.status].label}，符合 ${filtered().length} 項。`);
+});
+$('sumForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const q = $('sumQ').value.trim();
+  if (!q){ $('sumMsg').textContent='搜尋框是空的。請輸入版本名稱；若要看全部，按「清除所有條件」。'; $('sumMsg').hidden=false; $('sumQ').focus(); return; }
+  $('sumMsg').hidden=true; S.q=q; renderSummary(); announce(`搜尋「${q}」，符合 ${filtered().length} 項。`);
+});
+$('clearAll').addEventListener('click', () => { S.family='all'; S.status='all'; S.q=''; $('sumQ').value=''; $('sumMsg').hidden=true; renderSummary(); announce('已清除所有條件，顯示全部 15 項。'); $('sumQ').focus(); });
+$('toEntry').addEventListener('click', () => show('entry'));
+$('allSources').addEventListener('click', e => { S.srcId=null; S.returnFocus='allSources'; show('source'); });
+
+function renderSummary(){
+  const rows = filtered();
+  $('condText').textContent = condText();
+  for (const b of $('famSeg').querySelectorAll('button')) b.setAttribute('aria-pressed', String(b.dataset.family===S.family));
+  // 狀態按鈕帶數量（依家族與搜尋計算）
+  $('statSeg').innerHTML = Object.keys(STAT).map(k => {
+    const n = filtered(k).length;
+    return `<button type="button" data-status="${k}" aria-pressed="${k===S.status}">${STAT[k].label}（${n}）</button>`;
+  }).join('');
+  $('sumTitle').textContent = S.q ? `「${S.q}」的查詢結果` : (S.family==='all' ? '全部版本的支援狀態' : `${FAM[S.family]} 各版本的支援狀態`);
+  $('count').innerHTML = summaryLine(rows) + '<span class="hint" style="display:block;font-weight:400">狀態以資料查閱日 2026/11/05 判斷。</span>';
+  renderEmpty(rows);
+  renderTimeline(rows);
+  renderItems(rows);
+}
+
+function keyDate(it){
+  const st = statusOf(it);
+  if (st==='unknown') return `官方未公告結束日，最近一次安全更新 ${fmt(it.last.d)}`;
+  if (st==='extended') return `標準支援 ${fmt(it.std.d,it.std.p)} 已結束，登記${it.ext.name.replace(/（.*）/,'')}可到 ${fmt(it.ext.d,it.ext.p)}`;
+  return `${st==='active'?'支援至':'已於'} ${fmt(it.std.d,it.std.p)}${st==='ended'?' 結束':''}（${remain(it.std)}）`;
+}
+function summaryLine(rows){
+  if (!rows.length) return '符合 0 項。';
+  if (rows.length===1){ const it=rows[0]; return `符合 1 項：${it.name} — ${badge(statusOf(it))}<br>${keyDate(it)}`; }
+  const parts = ['active','extended','ended','unknown'].map(k=>[k,rows.filter(it=>statusOf(it)===k).length]).filter(x=>x[1]).map(([k,n])=>`${STAT[k].label} ${n}`);
+  return `符合 ${rows.length} 項（共 15 項）：${parts.join('、')}`;
+}
+function renderEmpty(rows){
+  const box = $('emptyBox');
+  if (rows.length){ box.hidden=true; box.innerHTML=''; return; }
+  // 找出是哪個條件造成沒有結果，給對應的恢復方式
+  const btns = [];
+  let why;
+  const famOK = it => S.family==='all' || it.family===S.family;
+  const statOK = it => S.status==='all' || statusOf(it)===S.status;
+  const qAny = DATA.some(it => matchQ(it,S.q));
+  const famQ = DATA.filter(it => famOK(it) && matchQ(it,S.q));
+  const otherFam = DATA.filter(it => matchQ(it,S.q) && statOK(it));
+  if (S.q && !qAny){
+    why = `本頁收錄的 15 個版本裡找不到「${S.q}」。可能打錯字，或這個版本還不存在、沒有收錄。`;
+    btns.push(['clearQ','清除搜尋，保留其他條件']);
+  } else if (!famQ.length){
+    why = `${FAM[S.family]} 裡沒有「${S.q}」，其他作業系統有 ${otherFam.length} 項。`;
+    btns.push(['famAll','改看全部作業系統']);
+    btns.push(['clearQ','清除搜尋']);
+  } else {
+    why = `${FAM[S.family]}${S.q?`（搜尋「${S.q}」）`:''}沒有「${STAT[S.status].label}」的版本。`;
+    btns.push(['statAll', S.family==='all' ? '改看全部狀態' : `改看 ${FAM[S.family]} 的全部狀態`]);
+    if (S.family!=='all' && otherFam.length) btns.push(['famAll',`改看其他作業系統的「${STAT[S.status].label}」（${otherFam.length}）`]);
+  }
+  box.innerHTML = `<h2>沒有符合的版本</h2><p>${why}</p><p class="hint">目前條件：${condText()}</p><div class="actions">${btns.map(([a,t],i)=>`<button type="button" data-fix="${a}"${i===0?' class="primary"':''}>${t}</button>`).join('')}</div>`;
+  box.hidden=false;
+}
+$('emptyBox').addEventListener('click', e => {
+  const b = e.target.closest('button[data-fix]'); if (!b) return;
+  const a = b.dataset.fix;
+  if (a==='clearQ'){ S.q=''; $('sumQ').value=''; }
+  if (a==='famAll') S.family='all';
+  if (a==='statAll') S.status='all';
+  renderSummary(); announce(`已恢復，符合 ${filtered().length} 項。`);
+  $('count').setAttribute('tabindex','-1'); $('count').focus();
+});
+
+function renderTimeline(rows){
+  const tl = $('tl');
+  if (!rows.length){ tl.hidden=true; return; }
+  tl.hidden=false;
+  // 共同尺度：依目前結果的最早開始與最晚結束決定，所有列共用
+  const ends = rows.map(it => (it.ext||it.std||{d:it.last.d}).d);
+  const starts = rows.map(it => it.start);
+  let y0 = Math.min(...starts.map(s=>+s.slice(0,4)));
+  let y1 = Math.max(...ends.map(s=>+s.slice(0,4)), +CHECK.slice(0,4)) + 1;
+  const t0 = Date.UTC(y0,0,1), t1 = Date.UTC(y1,0,1);
+  const X = s => ((toUTC(s)-t0)/(t1-t0)*100);
+  const w = tl.clientWidth || 800;
+  const narrow = w < 560;
+  const lab = narrow ? '112px' : '190px';
+  const span = y1-y0;
+  const step = narrow ? (span>8 ? 3 : 2) : (span>12 ? 2 : 1);
+  $('tlRange').textContent = `時間軸 ${y0}–${y1}（依目前結果自動設定）`;
+  let axis = '';
+  for (let y=y0; y<=y1; y+=step) axis += `<span style="left:${X(y+'-01-01')}%">${y}</span>`;
+  let html = `<div class="axis" style="--lab:${lab}">${axis}</div><div class="rows" style="--lab:${lab}">`;
+  for (const it of rows){
+    const nm = narrow ? it.name.replace('Windows ','Win ').replace(/ (LTS)$/,'') : it.name;
+    let segs = '';
+    if (it.std){
+      segs += `<div class="seg-std" style="left:${X(it.start)}%;width:${X(it.std.d)-X(it.start)}%"></div>`;
+      if (it.ext) segs += `<div class="seg-ext" style="left:${X(it.std.d)}%;width:${X(it.ext.d)-X(it.std.d)}%"></div>`;
+    } else {
+      segs += `<div class="dot" style="left:${X(it.start)}%"></div><div class="dia" style="left:${X(it.last.d)}%"></div>`;
+      segs += `<div class="unk-label" style="left:calc(${X(it.last.d)}% + 10px)">結束日未公告</div>`;
+    }
+    html += `<div class="row"><div class="name">${nm}</div><div class="track">${segs}</div></div>`;
+  }
+  html += `<div class="today" style="left:calc(${lab} + (100% - ${lab}) * ${X(CHECK)/100})"></div></div>`;
+  html += `<div style="position:relative;height:18px;margin-left:${lab}"><span class="today-label" style="left:${X(CHECK)}%">查閱日</span></div>`;
+  $('tlBody').innerHTML = html;
+}
+
+function badge(st){ return `<span class="badge ${STAT[st].cls}">${ICON[st]}${STAT[st].label}</span>`; }
+
+function renderItems(rows){
+  $('items').innerHTML = rows.map(it => {
+    const st = statusOf(it);
+    let facts = '';
+    if (it.std){
+      facts += `<dt>官方標準支援至</dt><dd>${fmt(it.std.d,it.std.p)}（${remain(it.std)}）${it.std.p==='month'?'<br><span class="hint">官方只公布到月份</span>':''}</dd>`;
+      if (it.ext) facts += `<dt>${it.ext.name}</dt><dd>至 ${fmt(it.ext.d,it.ext.p)}（${remain(it.ext)}）<br><span class="hint">${it.ext.how}</span></dd>`;
+    } else {
+      facts += `<dt>官方結束日</dt><dd><strong>未公告</strong>（Apple 不公布 macOS 的支援結束日）</dd>`;
+      facts += `<dt>最近一次安全更新</dt><dd>${it.name.split(' ').slice(0,2).join(' ')} ${it.last.v}，${fmt(it.last.d)}（距查閱日 ${dayDiff(it.last.d,CHECK)} 天）</dd>`;
+    }
+    facts += `<dt>推出</dt><dd>${fmt(it.start, it.start.length===7?'month':'day')}</dd>`;
+    let also = '';
+    if (st==='ended' || st==='extended'){
+      const alive = DATA.filter(o => o.family===it.family && statusOf(o)==='active');
+      if (alive.length) also = `<p class="also">同系列仍在標準支援的版本：${alive.map(o=>`${o.name}（至 ${fmt(o.std.d,o.std.p)}）`).join('、')}</p>`;
+    }
+    if (it.note) also += `<p class="also">${it.note}這只是觀察，不能當成官方結束日。</p>`;
+    return `<article class="item" id="it-${it.id}">
+      <div class="item-head"><h3>${it.name}</h3>${badge(st)}</div>
+      ${it.edition?`<p class="sub">${it.edition}</p>`:''}
+      <dl class="facts">${facts}</dl>${also}
+      <button type="button" data-src="${it.id}">查看來源：${it.name}</button>
+    </article>`;
+  }).join('');
+}
+$('items').addEventListener('click', e => {
+  const b = e.target.closest('button[data-src]'); if (!b) return;
+  S.srcId = b.dataset.src; S.returnFocus = b.dataset.src; show('source');
+});
+
+// ---------- 來源 ----------
+function srcBlock(key){
+  const s = SOURCES[key];
+  return `<dl class="srcgrid">
+    <dt>發布者</dt><dd>${s.publisher}（${s.role}）</dd>
+    <dt>頁面</dt><dd>${s.title}</dd>
+    <dt>網址</dt><dd><a href="${s.url}" target="_blank" rel="noopener">${s.url}</a></dd>
+    <dt>版本／更新</dt><dd>${s.updated}</dd>
+    <dt>查閱日期</dt><dd>2026/11/05</dd>
+    <dt>單位與精度</dt><dd>${s.unit}</dd>
+    <dt>使用條件</dt><dd>${s.terms}</dd></dl>`;
+}
+function renderSource(){
+  $('retained').textContent = condText();
+  if (!S.srcId){
+    $('srcTitle').textContent = '全部資料來源與限制';
+    $('srcBody').innerHTML = Object.keys(SOURCES).map(k => `<section class="card"><h2>${SOURCES[k].publisher}</h2>${srcBlock(k)}</section>`).join('') +
+      `<section class="card"><h2>這份資料不能推論的事</h2><ul class="cannot">
+        <li>「已結束」不代表電腦馬上不能用，也不代表一定會被入侵；是官方不再提供安全修補。</li>
+        <li>macOS 沒有官方結束日。Apple 頁面上「多久沒有新更新」只是觀察，不能當成官方停止支援。</li>
+        <li>Windows 的日期只適用家用版／專業版；企業版、教育版、LTSC 的期限不同，本頁沒有收錄。</li>
+        <li>Ubuntu 官方只公布到月份，本頁不自行補到哪一天。</li>
+        <li>官方日期可能在查閱日（2026/11/05）之後變更，例如 Windows 10 個人 ESU 延長到 2027/10/12 就是後來公告的。</li></ul></section>`;
+    return;
+  }
+  const it = DATA.find(x => x.id===S.srcId);
+  $('srcTitle').textContent = `資料來源：${it.name}`;
+  let conv = '';
+  if (it.family==='windows') conv = 'Microsoft 表格的結束時間寫成「隔天 6:59:59 AM」。對照 Microsoft 公告 Windows 10「October 14, 2025」結束、表格卻寫 10/15/2025 6:59:59 AM，本頁把表格日期減一天，當成最後一天有支援的日子。';
+  if (it.family==='ubuntu') conv = 'Canonical 只寫到月份。本頁顯示「某年某月」，剩餘時間以月計算，時間軸終點畫在該月 1 日；不自行補日期。';
+  if (it.family==='macos') conv = 'Apple 沒有公布結束日，所以本頁狀態寫「官方未公告」，不畫結束點、不計算剩餘天數。只列 Apple 頁面上最近一次系統安全更新。' + (it.startSrc ? '這個版本的推出日不在 Apple 這一頁（較舊的在封存頁），推出日暫用 endoflife.date 的資料。' : '');
+  $('srcBody').innerHTML =
+    `<section class="card"><h2>原始寫法與本頁顯示</h2><dl class="srcgrid">
+      <dt>原始寫法</dt><dd>${it.raw.map(r=>`<span class="raw">${r}</span>`).join('<br>')}</dd>
+      <dt>本頁換算</dt><dd>${conv}</dd>
+      <dt>本頁狀態</dt><dd>${badge(statusOf(it))}</dd>
+      <dt>第三方對照</dt><dd>${it.third}</dd></dl></section>` +
+    it.src.filter(k=>k!=='eol').map(k => `<section class="card"><h2>${SOURCES[k].publisher}：${SOURCES[k].title}</h2>${srcBlock(k)}</section>`).join('') +
+    `<section class="card"><h2>不能從這份資料推論</h2><ul class="cannot">${
+      it.family==='macos' ? '<li>不能說 Apple「已停止」或「還會繼續」支援這個版本，Apple 沒有公告。</li><li>最近一次更新的日期不是結束日。</li>'
+      : it.family==='windows' ? '<li>日期只適用家用版／專業版，不適用企業版、教育版或 LTSC。</li><li>「已結束」是指不再有安全更新，電腦仍可開機使用，但風險會增加。</li>'
+      : '<li>官方只到月份，不能說是該月哪一天結束。</li><li>延伸期間需要註冊 Ubuntu Pro，沒啟用就只到標準支援結束。</li>'}</ul></section>`;
+}
+$('back').addEventListener('click', () => {
+  const rf = S.returnFocus;
+  show('summary', {focus: () => rf==='allSources' ? $('allSources') : (document.querySelector(`#items button[data-src="${rf}"]`) || $('sumTitle'))});
+  const el = document.activeElement; if (el && el.scrollIntoView) el.scrollIntoView({block:'center'});
+  announce(`已返回結果，條件保留：${condText()}。`);
+});
+
+// ---------- 其他 ----------
+$('hc').addEventListener('click', () => {
+  const on = document.documentElement.classList.toggle('hc');
+  $('hc').setAttribute('aria-pressed', String(on)); $('hc').textContent = `高對比：${on?'開':'關'}`;
+});
+document.addEventListener('keydown', e => {
+  if (e.key==='/' && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)){
+    const box = S.screen==='summary' ? $('sumQ') : S.screen==='entry' ? $('entryQ') : null;
+    if (box){ e.preventDefault(); box.focus(); }
+  }
+});
+let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (S.screen==='summary') renderTimeline(filtered()); }, 120); });
+$('ver').textContent = VERSION;
+if (matchMedia('(max-width:600px)').matches) $('filters').open = false;
+history.replaceState(snapshot(), '');
+</script>
+</body>
+</html>
